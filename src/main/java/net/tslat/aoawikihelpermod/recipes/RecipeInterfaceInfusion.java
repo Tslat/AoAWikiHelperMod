@@ -178,10 +178,12 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
 		ItemStack output = recipe.getRecipeOutput();
 
 		for (int i = 0; i < ingredientNameBySlot.size(); i++) {
-			lines.add("|" + slotPrefixes[i] + "=" + ingredientNameBySlot.get(i));
+			String slotName = ingredientNameBySlot.get(i);
 
-			if (printImageLines)
-				lines.add("|" + slotPrefixes[i] + "image=" + ingredientNameBySlot.get(i) + ".png");
+			lines.add("|" + slotPrefixes[i] + "=" + slotName);
+
+			if (printImageLines && !slotName.equals(""))
+				lines.add("|" + slotPrefixes[i] + "image=" + slotName + ".png");
 		}
 
 		lines.add("|input=" + inputItem.getIngredientName().replaceAll("mcw:", ""));
