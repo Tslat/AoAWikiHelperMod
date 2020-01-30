@@ -1,0 +1,16 @@
+[
+{
+  "modid": "aoawikihelpermod",
+  "name": "AoA-Wiki Helper Mod",
+  "description": "Does helper stuff for the AoA wiki",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Tslat"],
+  "credits": "That guy who made this thing.",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
