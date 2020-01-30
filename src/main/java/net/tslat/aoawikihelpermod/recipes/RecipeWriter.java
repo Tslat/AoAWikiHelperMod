@@ -100,6 +100,7 @@ public class RecipeWriter {
 		enableWriter(recipeItem.getItemStackDisplayName(targetStack) + " Usages.txt");
 
 		String lastKey = "";
+		boolean printImageLines = matchedRecipes.values().size() > 20;
 		int count = 0;
 
 		for (String key : matchedRecipes.keySet().stream().sorted(Comparator.<String>naturalOrder().reversed()).collect(Collectors.toList())) {
@@ -126,7 +127,7 @@ public class RecipeWriter {
 				write("|-");
 				write("| '''[[" + recipe.getRecipeOutput().getDisplayName() + "]]''' || " + recipeInterface.buildIngredientSummaryLine(targetStack) + " || {{" + recipeInterface.getWikiTemplateName());
 
-				for (String string : recipeInterface.buildAdditionalTemplateLines(targetStack)) {
+				for (String string : recipeInterface.buildAdditionalTemplateLines(targetStack, printImageLines)) {
 					write(string);
 				}
 
@@ -163,6 +164,7 @@ public class RecipeWriter {
 		enableWriter(recipeItem.getItemStackDisplayName(targetStack) + " Recipes.txt");
 
 		String lastKey = "";
+		boolean printImageLines = matchedRecipes.values().size() > 20;
 		int count = 0;
 
 		for (String key : matchedRecipes.keySet().stream().sorted(Comparator.<String>naturalOrder().reversed()).collect(Collectors.toList())) {
@@ -189,7 +191,7 @@ public class RecipeWriter {
 				write("|-");
 				write("| '''" + recipe.getRecipeOutput().getDisplayName() + "''' || " + recipeInterface.buildIngredientSummaryLine(targetStack) + " || {{" + recipeInterface.getWikiTemplateName());
 
-				for (String string : recipeInterface.buildAdditionalTemplateLines(targetStack)) {
+				for (String string : recipeInterface.buildAdditionalTemplateLines(targetStack, printImageLines)) {
 					write(string);
 				}
 

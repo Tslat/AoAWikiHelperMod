@@ -27,7 +27,7 @@ public abstract class IRecipeInterface {
 	protected abstract String buildWikiTableHeadingsLine(ArrayListMultimap<String, IRecipe> matchedRecipes);
 	protected abstract String buildIngredientSummaryLine(ItemStack targetStack);
 	protected abstract String getWikiTemplateName();
-	protected abstract ArrayList<String> buildAdditionalTemplateLines(ItemStack targetStack);
+	protected abstract ArrayList<String> buildAdditionalTemplateLines(ItemStack targetStack, boolean printImageLines);
 
 	protected void addIngredient(String ingredientName, @Nullable String oreDictName) {
 		ingredientNameBySlot.add(ingredientName.replace("mcw:", ""));

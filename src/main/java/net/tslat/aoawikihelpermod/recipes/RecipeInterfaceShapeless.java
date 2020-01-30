@@ -102,15 +102,21 @@ public class RecipeInterfaceShapeless extends IRecipeInterface {
 	}
 
 	@Override
-	protected ArrayList<String> buildAdditionalTemplateLines(ItemStack targetStack) {
+	protected ArrayList<String> buildAdditionalTemplateLines(ItemStack targetStack, boolean printImageLines) {
 		ArrayList<String> lines = new ArrayList<String>();
 		ItemStack output = recipe.getRecipeOutput();
 
 		for (int i = 0; i < ingredientNameBySlot.size(); i++) {
 			lines.add("|" + slotPrefixes[i] + "=" + ingredientNameBySlot.get(i));
+
+			if (printImageLines)
+				lines.add("|" + slotPrefixes[i] + "image=" + ingredientNameBySlot.get(i) + ".png");
 		}
 
 		lines.add("|output=" + output.getDisplayName());
+
+		if (printImageLines)
+			lines.add("|outputimage=" + output.getDisplayName() + ".png");
 
 		if (output.getCount() > 1)
 			lines.add("|amount=" + output.getCount());
