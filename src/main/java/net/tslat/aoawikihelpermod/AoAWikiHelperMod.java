@@ -35,8 +35,6 @@ public class AoAWikiHelperMod {
 		if (event.getSide() == Side.CLIENT)
 			KeyBindings.init();
 
-
-
 		prepRecipeWriter(event.getModConfigurationDirectory());
 	}
 
@@ -47,46 +45,4 @@ public class AoAWikiHelperMod {
 		RecipeWriter.registerRecipeInterface("InfusionTableRecipe", RecipeInterfaceInfusion.class);
 		RecipeWriter.registerRecipeInterface("ShapedRecipes", RecipeInterfaceShaped.class);
 	}
-
-	/*private static ArrayList<Tuple<Integer, Tuple<String, String>>> buildIngredientsArrayFromList(NonNullList<Ingredient> ingredientsList) {
-		ArrayList<Tuple<Integer, Tuple<String, String>>> ingredients = new ArrayList<Tuple<Integer, Tuple<String, String>>>();
-		int indexMarker = 0;
-
-		for (Ingredient ing : ingredientsList) {
-			ItemStack[] matchingStacks = ing.getMatchingStacks();
-			String ingredientName = "";
-			String oreDictName = null;
-
-			if (matchingStacks.length > 1)
-				oreDictName = getOreDict(matchingStacks);
-
-			ingredientName = matchingStacks[0].getDisplayName();
-
-			if (ingredients.isEmpty()) {
-				ingredients.add(new Tuple<Integer, Tuple<String, String>>(1, new Tuple<String, String>(ingredientName, oreDictName)));
-			}
-			else {
-				ListIterator<Tuple<Integer, Tuple<String, String>>> iterator = ingredients.listIterator();
-
-				while (iterator.hasNext()) {
-					Tuple<Integer, Tuple<String, String>> entry = iterator.next();
-
-					if (entry.getSecond().getFirst().equals(ingredientName) && entry.getSecond().getSecond().equals(oreDictName)) {
-						iterator.set(new Tuple<Integer, Tuple<String, String>>(entry.getFirst() + 1, new Tuple<String, String>(ingredientName, oreDictName)));
-						break;
-					}
-				}
-			}
-		}
-
-		return ingredients;
-	}
-
-	private static String buildIngredientsLineFromArray(ArrayList<Tuple<Integer, Tuple<String, String>>> ingredients) {
-		StringBuilder builder = new StringBuilder("|| ");
-
-		for (Tuple<Integer, Tuple<String, String>> ing : ingredients) {
-
-		}
-	}*/
 }

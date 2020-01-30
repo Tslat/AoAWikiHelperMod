@@ -4,11 +4,9 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.gson.JsonObject;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Objects;
 
 public abstract class IRecipeInterface {
@@ -23,46 +21,6 @@ public abstract class IRecipeInterface {
 		this.json = json;
 
 		populateIngredientArrays();
-	}
-
-	@Nullable
-	protected static String getOreDict(ItemStack[] commonStacks) {
-		HashSet<String> matchingIds = null;
-
-		for (ItemStack stack : commonStacks) {
-			int[] oreIds = OreDictionary.getOreIDs(stack);
-
-			if (oreIds.length == 0)
-				return null;
-
-			if (matchingIds == null) {
-				matchingIds = new HashSet<String>(oreIds.length);
-
-				for (int i : oreIds) {
-					matchingIds.add(OreDictionary.getOreName(i));
-				}
-			}
-			else {
-				HashSet<String> commonIds = new HashSet<String>(oreIds.length);
-
-				for (int i : oreIds) {
-					String ore = OreDictionary.getOreName(i);
-
-					if (matchingIds.contains(ore))
-						commonIds.add(ore);
-				}
-
-				if (commonIds.isEmpty())
-					return null;
-
-				matchingIds = commonIds;
-			}
-		}
-
-		if (matchingIds == null || matchingIds.size() != 1)
-			return null;
-
-		return matchingIds.iterator().next();
 	}
 
 	protected abstract void populateIngredientArrays();
