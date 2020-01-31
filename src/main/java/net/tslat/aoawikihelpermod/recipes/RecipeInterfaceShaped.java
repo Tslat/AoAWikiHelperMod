@@ -169,6 +169,11 @@ public class RecipeInterfaceShaped extends IRecipeInterface {
 	}
 
 	@Override
+	protected boolean matchAdditionalIngredients(ItemStack targetStack) {
+		return false;
+	}
+
+	@Override
 	protected ArrayList<String> buildAdditionalTemplateLines(ItemStack targetStack, boolean printImageLines) {
 		ArrayList<String> lines = new ArrayList<String>();
 		ItemStack output = recipe.getRecipeOutput();

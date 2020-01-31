@@ -173,6 +173,11 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
 	}
 
 	@Override
+	protected boolean matchAdditionalIngredients(ItemStack targetStack) {
+		return targetStack.getDisplayName().equals(inputItem.getIngredientName());
+	}
+
+	@Override
 	protected ArrayList<String> buildAdditionalTemplateLines(ItemStack targetStack, boolean printImageLines) {
 		ArrayList<String> lines = new ArrayList<String>();
 		ItemStack output = recipe.getRecipeOutput();
