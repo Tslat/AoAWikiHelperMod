@@ -75,11 +75,11 @@ public class RecipeWriter {
 
 	private static boolean checkStackValidity(ItemStack itemStack) {
 		ResourceLocation registryName;
-		if(itemStack == null || itemStack.isEmpty()) {
+		if (itemStack == null || itemStack.isEmpty()) {
 			Minecraft.getMinecraft().player.sendMessage(new TextComponentString("You must be holding an AoA item for this to work!"));
 			return false;
 		}
-		else if(!(registryName = itemStack.getItem().getRegistryName()).getResourceDomain().equals("aoa3")) {
+		else if (!(registryName = itemStack.getItem().getRegistryName()).getResourceDomain().equals("aoa3")) {
 			Minecraft.getMinecraft().player.sendMessage(new TextComponentString("The item you are holding is not from AoA! You are holding " + itemStack.getDisplayName() + " (" + registryName.toString() + ")"));
 			return false;
 		}
@@ -157,7 +157,7 @@ public class RecipeWriter {
 		disableWriter();
 		Minecraft.getMinecraft().player.sendMessage(new TextComponentString("Printed out " + count + " recipes containing " + TextFormatting.DARK_BLUE + targetStack.getDisplayName()));
 	}
-	
+
 	public static void printItemRecipes(ItemStack targetStack) {
 		if (!checkStackValidity(targetStack))
 			return;
