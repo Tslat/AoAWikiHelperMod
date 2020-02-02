@@ -180,6 +180,13 @@ public class AccessibleLootTable {
 
 								if (smeltedStack != ItemStack.EMPTY) {
 									notesBuilder.append("Converts to [[");
+
+									if (smeltedStack.getItem().getRegistryName().getResourceDomain().equals("minecraft")) {
+										notesBuilder.append("mcw:");
+										notesBuilder.append(smeltedStack.getDisplayName());
+										notesBuilder.append("|");
+									}
+
 									notesBuilder.append(smeltedStack.getDisplayName());
 									notesBuilder.append("]] if killed while the entity is on fire. ");
 								}
