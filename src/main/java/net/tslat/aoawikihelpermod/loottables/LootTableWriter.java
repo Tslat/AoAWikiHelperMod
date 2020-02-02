@@ -54,8 +54,6 @@ public class LootTableWriter {
 						builder.append("-");
 						builder.append((int)entry.bonusRange.getMax());
 					}
-
-					builder.append(" per level");
 				}
 
 				builder.append("; group:");
