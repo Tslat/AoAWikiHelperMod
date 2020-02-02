@@ -77,6 +77,9 @@ public class AccessibleLootTable {
 						notesBuilder.append(((int)(lootingMod * 10000)) / 100d);
 						notesBuilder.append("% chance per level of looting. ");
 					}
+					else if (condition instanceof KilledByPlayer) {
+						notesBuilder.append("Will only roll if the entity is killed directly by a player. ");
+					}
 				}
 			}
 		}
@@ -186,9 +189,7 @@ public class AccessibleLootTable {
 				}
 
 				if (conditions != null) {
-					for (int i = 0; i < conditions.length; i++) {
-						LootCondition condition = conditions[i];
-
+					for (LootCondition condition : conditions) {
 						if (condition instanceof KilledByPlayer)
 							notesBuilder.append("Only drops if the entity is killed directly by a player. ");
 					}
