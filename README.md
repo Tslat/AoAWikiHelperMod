@@ -12,9 +12,11 @@ Currently supported functionality:
 1. Print out all recipes used to create an item.
 
   How: While ingame, hold the item you want to target in your main hand. Press the appropriate key (defaults to pageup). A text file for that item will be generated in your configs folder for this mod
+  
 2. Print out all recipes this item is used in.
 
     How: while ingame, hold the item you want to target in your main hand. Press the appropriate key (defaults to pagedown). A text file for that item will be generated in your configs folder for this mod.
+    
 3. Print out a given loot table.
 
   How: While ingame or in console, run the command /printloottable <pathtoloottable>. A text file for that loot table will be generated in the configs folder for this mod. Example: /printloottable aoa3:entities/mobs/overworld/charger
