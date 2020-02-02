@@ -15,7 +15,7 @@ Currently supported functionality:
   
 2. Print out all recipes this item is used in.
 
-    How: while ingame, hold the item you want to target in your main hand. Press the appropriate key (defaults to pagedown). A text file for that item will be generated in your configs folder for this mod.
+  How: while ingame, hold the item you want to target in your main hand. Press the appropriate key (defaults to pagedown). A text file for that item will be generated in your configs folder for this mod.
     
 3. Print out a given loot table.
 
