@@ -40,15 +40,6 @@ public class RecipeWriter {
 	public static File configDir = null;
 	private static PrintWriter writer = null;
 
-	public static void setConfigDir(File file) {
-		if (configDir == null) {
-			configDir = file;
-
-			if (!configDir.exists())
-				configDir.mkdirs();
-		}
-	}
-
 	public static void registerRecipeInterface(String recipeClassSimpleName, Class<? extends IRecipeInterface> handler) {
 		recipeInterfaces.put(recipeClassSimpleName, handler);
 	}
@@ -208,8 +199,7 @@ public class RecipeWriter {
 	}
 
 	private static void enableWriter(final String fileName) {
-		if (!configDir.exists())
-			configDir.mkdirs();
+		configDir = AoAWikiHelperMod.prepConfigDir("Recipes");
 
 		File streamFile = new File(configDir, fileName);
 

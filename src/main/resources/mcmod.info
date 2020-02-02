@@ -11,6 +11,6 @@
   "credits": "That guy who made this thing.",
   "logoFile": "",
   "screenshots": [],
-  "dependencies": []
+  "dependencies": ["aoa3"]
 }
 ]
