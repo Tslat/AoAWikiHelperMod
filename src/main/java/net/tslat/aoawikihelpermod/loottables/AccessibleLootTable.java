@@ -150,7 +150,7 @@ public class AccessibleLootTable {
 
 				String tableName = table.getResourcePath().substring(Math.max(0, table.getResourcePath().indexOf(":")));
 				String[] splitName = tableName.split("/");
-				tableName = StringUtils.capitalise(splitName[splitName.length - 1].replace("_", " ").replace(" table", ""));
+				tableName = StringUtils.capitaliseAllWords(splitName[splitName.length - 1].replace("_", " ").replace(" table", ""));
 
 				if (!tableName.contains("table"))
 					tableName = tableName + " Table";
