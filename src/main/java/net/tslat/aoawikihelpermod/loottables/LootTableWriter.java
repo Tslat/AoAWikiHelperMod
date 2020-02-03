@@ -70,7 +70,7 @@ public class LootTableWriter {
 			write("|rolls" + poolNum + "=" + (int)pool.rolls.getMin() + (pool.rolls.getMin() == pool.rolls.getMax() ? "" : "-" + (int)pool.rolls.getMax()));
 
 			if (pool.bonusRolls != null && (pool.bonusRolls.getMin() != 0 || pool.bonusRolls.getMax() != 0))
-				write("|bonusrolls" + poolNum + "=" + (int)pool.bonusRolls.getMin() + (pool.bonusRolls.getMin() == pool.bonusRolls.getMin() ? "" : "-" + (int)pool.bonusRolls.getMax()));
+				write("|bonusrolls" + poolNum + "=" + (int)pool.bonusRolls.getMin() + (pool.bonusRolls.getMin() == pool.bonusRolls.getMax() ? "" : "-" + (int)pool.bonusRolls.getMax()));
 
 			String poolNotes = pool.getNotes();
 
