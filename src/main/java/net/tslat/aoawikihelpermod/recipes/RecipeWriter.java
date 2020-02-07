@@ -79,6 +79,9 @@ public class RecipeWriter {
 
 		recipeSearch:
 		for (IRecipe recipe : ForgeRegistries.RECIPES.getValuesCollection()) {
+			if (recipe.getRegistryName() == null || !recipe.getRegistryName().getResourceDomain().equals("aoa3"))
+				continue;
+
 			for (Ingredient ingredient : recipe.getIngredients()) {
 				if (ingredient.apply(targetStack)) {
 					matchedRecipes.put(recipe.getClass().getSimpleName(), recipe);
@@ -99,7 +102,7 @@ public class RecipeWriter {
 				IRecipeInterface recipeInterface = findRecipeInterface(recipe);
 
 				if (recipeInterface == null)
-					return;
+					continue;
 
 				if (!recipeInterface.getWikiTemplateName().equals(lastKey)) {
 					if (!lastKey.equals("")) {

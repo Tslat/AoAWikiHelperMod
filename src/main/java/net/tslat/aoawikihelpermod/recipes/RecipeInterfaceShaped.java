@@ -24,7 +24,6 @@ public class RecipeInterfaceShaped extends IRecipeInterface {
 		JsonContext context = new JsonContext("aoa3");
 
 		HashMap<String, IRecipeInterfaceIngredient> interfaceIngredientMap = new HashMap<String, IRecipeInterfaceIngredient>();
-
 		for (Map.Entry<String, JsonElement> keyEntry : JsonUtils.getJsonObject(json, "key").entrySet()) {
 			JsonObject value;
 
