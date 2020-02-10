@@ -44,6 +44,10 @@ public class RecipeWriter {
 		recipeInterfaces.put(recipeClassSimpleName, handler);
 	}
 
+	private static boolean haveRecipeInterface(IRecipe recipe) {
+		return recipeInterfaces.containsKey(recipe.getClass().getSimpleName());
+	}
+
 	private static IRecipeInterface findRecipeInterface(IRecipe recipe) {
 		String recipeClassName = recipe.getClass().getSimpleName();
 
@@ -82,13 +86,26 @@ public class RecipeWriter {
 			if (recipe.getRegistryName() == null || !recipe.getRegistryName().getResourceDomain().equals("aoa3"))
 				continue;
 
+			if (!haveRecipeInterface(recipe))
+				continue;
+
+			IRecipeInterface recipeInterface = findRecipeInterface(recipe);
+
+			if (recipeInterface == null)
+				continue;
+
+			String recipeGroup = recipeInterface.recipeGroup();
+
 			for (Ingredient ingredient : recipe.getIngredients()) {
 				if (ingredient.apply(targetStack)) {
-					matchedRecipes.put(recipe.getClass().getSimpleName(), recipe);
+					matchedRecipes.put(recipeGroup, recipe);
 
 					continue recipeSearch;
 				}
 			}
+
+			if (recipeInterface.matchAdditionalIngredients(targetStack))
+				matchedRecipes.put(recipeGroup, recipe);
 		}
 
 		enableWriter(recipeItem.getItemStackDisplayName(targetStack) + " Usages.txt");
@@ -97,7 +114,7 @@ public class RecipeWriter {
 		boolean printImageLines = matchedRecipes.values().size() > 20;
 		int count = 0;
 
-		for (String key : matchedRecipes.keySet().stream().sorted(Comparator.<String>naturalOrder().reversed()).collect(Collectors.toList())) {
+		for (String key : matchedRecipes.keySet().stream().sorted(Comparator.<String>naturalOrder()).collect(Collectors.toList())) {
 			for (IRecipe recipe : matchedRecipes.get(key).stream().sorted(new RecipeOutputComparator()).collect(Collectors.toList())) {
 				IRecipeInterface recipeInterface = findRecipeInterface(recipe);
 
@@ -115,11 +132,12 @@ public class RecipeWriter {
 					write("{|class=\"wikitable\"");
 					write("|-");
 					write(recipeInterface.buildWikiTableHeadingsLine(matchedRecipes));
+
 					lastKey = recipeInterface.getWikiTemplateName();
 				}
 
 				write("|-");
-				write("| '''[[" + recipe.getRecipeOutput().getDisplayName() + "]]''' || " + recipeInterface.buildIngredientSummaryLine(targetStack) + " || {{" + recipeInterface.getWikiTemplateName());
+				write("| " + recipeInterface.buildSummaryLine(targetStack));
 
 				for (String string : recipeInterface.buildAdditionalTemplateLines(targetStack, printImageLines)) {
 					write(string);
@@ -151,8 +169,21 @@ public class RecipeWriter {
 		Item recipeItem = targetStack.getItem();
 
 		for (IRecipe recipe : ForgeRegistries.RECIPES.getValuesCollection()) {
+			if (recipe.getRegistryName() == null || !recipe.getRegistryName().getResourceDomain().equals("aoa3"))
+				continue;
+
+			if (!haveRecipeInterface(recipe))
+				continue;
+
+			IRecipeInterface recipeInterface = findRecipeInterface(recipe);
+
+			if (recipeInterface == null)
+				continue;
+
+			String recipeGroup = recipeInterface.recipeGroup();
+
 			if (recipe.getRecipeOutput().getItem() == recipeItem)
-				matchedRecipes.put(recipe.getClass().getSimpleName(), recipe);
+				matchedRecipes.put(recipeGroup, recipe);
 		}
 
 		enableWriter(recipeItem.getItemStackDisplayName(targetStack) + " Recipes.txt");
@@ -161,7 +192,7 @@ public class RecipeWriter {
 		boolean printImageLines = matchedRecipes.values().size() > 20;
 		int count = 0;
 
-		for (String key : matchedRecipes.keySet().stream().sorted(Comparator.<String>naturalOrder().reversed()).collect(Collectors.toList())) {
+		for (String key : matchedRecipes.keySet().stream().sorted(Comparator.<String>naturalOrder()).collect(Collectors.toList())) {
 			for (IRecipe recipe : matchedRecipes.get(key).stream().sorted(new RecipeOutputComparator()).collect(Collectors.toList())) {
 				IRecipeInterface recipeInterface = findRecipeInterface(recipe);
 
@@ -302,6 +333,15 @@ public class RecipeWriter {
 					if (setName.equals(setName2))
 						return Integer.compare(output1Weight, output2Weight);
 				}
+			}
+
+			try {
+				IRecipeInterface recipeInterface = findRecipeInterface(recipe1);
+
+				return (int)recipeInterface.getClass().getMethod("sortingCompare", IRecipeInterface.class).invoke(recipeInterface, findRecipeInterface(recipe2));
+			}
+			catch (Exception e) {
+				System.out.println("dog");
 			}
 
 			return outputName.compareTo(outputName2);

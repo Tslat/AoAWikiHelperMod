@@ -20,6 +20,11 @@ public class RecipeInterfaceShaped extends IRecipeInterface {
 	}
 
 	@Override
+	protected String recipeGroup() {
+		return "CraftingShaped";
+	}
+
+	@Override
 	protected void populateIngredientArrays() {
 		JsonContext context = new JsonContext("aoa3");
 

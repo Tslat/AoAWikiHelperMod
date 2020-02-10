@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
-@Mod(modid = "aoawikihelpermod", name = "AoA-Wiki Helper Mod", version = "1.2")
+@Mod(modid = "aoawikihelpermod", name = "AoA-Wiki Helper Mod", version = "1.3")
 public class AoAWikiHelperMod {
 	public static Logger logger;
 	private static ModContainer aoaModContainer;

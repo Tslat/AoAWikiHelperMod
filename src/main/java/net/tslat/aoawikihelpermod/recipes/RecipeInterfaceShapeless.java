@@ -17,6 +17,11 @@ public class RecipeInterfaceShapeless extends IRecipeInterface {
 	}
 
 	@Override
+	protected String recipeGroup() {
+		return "CraftingShapeless";
+	}
+
+	@Override
 	protected void populateIngredientArrays() {
 		JsonContext context = new JsonContext("aoa3");
 
