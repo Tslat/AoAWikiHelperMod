@@ -328,7 +328,7 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
 			case "minecraft:vanishing_curse":
 				return "Any item";
 			default:
-				return "";
+				return "?";
 		}
 	}
 }

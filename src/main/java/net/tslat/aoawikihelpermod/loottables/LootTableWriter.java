@@ -14,11 +14,12 @@ public class LootTableWriter {
 	public static File configDir = null;
 	private static PrintWriter writer = null;
 
-	public static void writeTable(String name, List<LootPool> pools, ICommandSender sender) {
+	public static void writeTable(String name, List<LootPool> pools, ICommandSender sender, boolean copyToClipboard) {
 		AccessibleLootTable table = new AccessibleLootTable(pools);
 		EntityPlayer pl = sender instanceof EntityPlayer ? (EntityPlayer)sender : null;
+		String fileName = name + " Loot Table.txt";
 
-		enableWriter(name + " loot table.txt");
+		enableWriter(fileName);
 		write("{{LootTable");
 
 		for (int i = 0; i < table.pools.size(); i++) {
@@ -81,6 +82,7 @@ public class LootTableWriter {
 
 		write("}}");
 		disableWriter();
+		sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Generated loot table: ", new File(configDir, fileName), name, copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
 	}
 
 	private static void enableWriter(final String fileName) {

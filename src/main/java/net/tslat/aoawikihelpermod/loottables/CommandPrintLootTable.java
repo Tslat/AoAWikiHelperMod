@@ -1,7 +1,6 @@
 package net.tslat.aoawikihelpermod.loottables;
 
 import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
@@ -11,6 +10,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootPool;
 import net.minecraft.world.storage.loot.LootTable;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class CommandPrintLootTable extends CommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/PrintLootTable <Loot Table Path>";
+		return "/printLootTable <Loot Table Path>";
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class CommandPrintLootTable extends CommandBase {
 	}
 
 	@Override
-	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+	public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
 		World world = sender.getEntityWorld();
 
 		if (!world.isRemote) {
@@ -52,7 +52,8 @@ public class CommandPrintLootTable extends CommandBase {
 
 			String[] pathSplit = args[0].substring(Math.max(0, args[0].indexOf(":"))).split("/");
 			List<LootPool> pools = ObfuscationReflectionHelper.getPrivateValue(LootTable.class, table, "field_186466_c");
-			String poolName = pathSplit[pathSplit.length - 1];
+			String tableName = AoAWikiHelperMod.capitaliseAllWords(pathSplit[pathSplit.length - 1].replace("_", " "));
+			boolean copyToClipboard = args.length > 1 && args[1].equalsIgnoreCase("clipboard");
 
 			if (pools.isEmpty()) {
 				sender.sendMessage(new TextComponentString("Loot table " + args[0] + " is empty. Nothing to print."));
@@ -60,8 +61,12 @@ public class CommandPrintLootTable extends CommandBase {
 				return;
 			}
 
-			LootTableWriter.writeTable(poolName, pools, sender);
-			sender.sendMessage(new TextComponentString("Generated loot table: " + TextFormatting.DARK_BLUE + poolName + TextFormatting.WHITE + " to config folder"));
+			if (copyToClipboard && server.isDedicatedServer()) {
+				sender.sendMessage(new TextComponentString("Can't copy contents of file to clipboard on dedicated servers, skipping."));
+				copyToClipboard = false;
+			}
+
+			LootTableWriter.writeTable(tableName, pools, sender, copyToClipboard);
 		}
 	}
 }

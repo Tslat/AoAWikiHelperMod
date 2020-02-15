@@ -1,5 +1,8 @@
 package net.tslat.aoawikihelpermod;
 
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -8,16 +11,20 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.tslat.aoawikihelpermod.loottables.CommandPrintLootTable;
-import net.tslat.aoawikihelpermod.recipes.RecipeInterfaceInfusion;
-import net.tslat.aoawikihelpermod.recipes.RecipeInterfaceShaped;
-import net.tslat.aoawikihelpermod.recipes.RecipeInterfaceShapeless;
-import net.tslat.aoawikihelpermod.recipes.RecipeWriter;
+import net.tslat.aoawikihelpermod.recipes.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nonnull;
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
-@Mod(modid = "aoawikihelpermod", name = "AoA-Wiki Helper Mod", version = "1.3")
+@Mod(modid = "aoawikihelpermod", name = "AoA-Wiki Helper Mod", version = "1.4")
 public class AoAWikiHelperMod {
 	public static Logger logger;
 	private static ModContainer aoaModContainer;
@@ -36,16 +43,23 @@ public class AoAWikiHelperMod {
 			return;
 		}
 
-		if (event.getSide() == Side.CLIENT)
-			KeyBindings.init();
-
-
 		prepRecipeWriter(event.getModConfigurationDirectory());
+
+		if (event.getSide() == Side.CLIENT) {
+			try {
+				EnumHelper.setFailsafeFieldValue(ClickEvent.Action.class.getDeclaredField("allowedInChat"), ClickEvent.Action.OPEN_FILE, true);
+			}
+			catch (Exception e) {
+				logger.log(Level.WARN, "Oops, got caught doing some naughty stuff. Let's pretend that didn't happen.");
+			}
+		}
 	}
 
 	@EventHandler
 	public void serverStart(FMLServerStartingEvent event) {
 		event.registerServerCommand(new CommandPrintLootTable());
+		event.registerServerCommand(new CommandPrintItemRecipes());
+		event.registerServerCommand(new CommandPrintItemUsageRecipes());
 	}
 
 	public static File prepConfigDir(String subdirectory) {
@@ -65,5 +79,57 @@ public class AoAWikiHelperMod {
 		RecipeWriter.registerRecipeInterface("ShapelessRecipes", RecipeInterfaceShapeless.class);
 		RecipeWriter.registerRecipeInterface("InfusionTableRecipe", RecipeInterfaceInfusion.class);
 		RecipeWriter.registerRecipeInterface("ShapedRecipes", RecipeInterfaceShaped.class);
+	}
+
+	public static String capitaliseAllWords(@Nonnull String input) {
+		if (input.isEmpty())
+			return input;
+
+		StringBuilder buffer = new StringBuilder(input.length()).append(Character.toTitleCase(input.charAt(0)));
+
+		for (int i = 1; i < input.length(); i++) {
+			char ch = input.charAt(i);
+
+			if (Character.isWhitespace(ch)) {
+				buffer.append(ch);
+				buffer.append(Character.toTitleCase(input.charAt(i + 1)));
+				i++;
+			}
+			else {
+				buffer.append(ch);
+			}
+		}
+
+		return buffer.toString();
+	}
+
+	public static ITextComponent generateInteractiveMessagePrintout(String prefix, File file, String linkName, String suffix) {
+		String fileUrl = file.getAbsolutePath().replace("\\", "/");
+
+		return ITextComponent.Serializer.jsonToComponent("{\"translate\":\"" + prefix + "%s" + "\",\"with\":[{\"text\":\"" + linkName + "\",\"color\":\"blue\",\"underlined\":true,\"clickEvent\":{\"action\":\"open_file\",\"value\":\"" + fileUrl + "\"}}]}").appendText(suffix);
+	}
+
+	public static boolean copyFileToClipboard(File streamFile) {
+		final StringBuilder content = new StringBuilder();
+
+		try (InputStreamReader streamReader = new InputStreamReader(new FileInputStream(streamFile), StandardCharsets.UTF_8); BufferedReader reader = new BufferedReader(streamReader)) {
+			reader.lines().forEach(line -> {
+				content.append(line);
+				content.append("\n");
+			});
+
+			Toolkit toolkit = Toolkit.getDefaultToolkit();
+
+			if (toolkit == null)
+				return false;
+
+			toolkit.getSystemClipboard().setContents(new StringSelection(content.toString()), null);
+			return true;
+		}
+		catch (Exception e) {
+			AoAWikiHelperMod.logger.log(Level.ERROR, "Unable to copy contents of file to clipboard, skipping");
+		}
+
+		return false;
 	}
 }

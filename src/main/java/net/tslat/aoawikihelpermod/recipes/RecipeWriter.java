@@ -4,7 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import net.minecraft.client.Minecraft;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
@@ -12,7 +12,6 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
@@ -68,12 +67,9 @@ public class RecipeWriter {
 		return recipeMap.get(recipe.getRegistryName());
 	}
 
-	public static void printItemRecipeUsages(@Nonnull ItemStack targetStack) {
-		if (!checkStackValidity(targetStack))
-			return;
-
+	public static void printItemRecipeUsages(@Nonnull ItemStack targetStack, ICommandSender sender, boolean copyToClipboard) {
 		if (writer != null) {
-			Minecraft.getMinecraft().player.sendMessage(new TextComponentString("You're already outputting data! Wait a moment and try again"));
+			sender.sendMessage(new TextComponentString("You're already outputting data! Wait a moment and try again"));
 
 			return;
 		}
@@ -108,11 +104,12 @@ public class RecipeWriter {
 				matchedRecipes.put(recipeGroup, recipe);
 		}
 
-		enableWriter(recipeItem.getItemStackDisplayName(targetStack) + " Usages.txt");
-
+		String fileName = recipeItem.getItemStackDisplayName(targetStack) + " Usages.txt";
 		String lastKey = "";
 		boolean printImageLines = matchedRecipes.values().size() > 20;
 		int count = 0;
+
+		enableWriter(fileName);
 
 		for (String key : matchedRecipes.keySet().stream().sorted(Comparator.<String>naturalOrder()).collect(Collectors.toList())) {
 			for (IRecipe recipe : matchedRecipes.get(key).stream().sorted(new RecipeOutputComparator()).collect(Collectors.toList())) {
@@ -150,17 +147,13 @@ public class RecipeWriter {
 
 		write("|-");
 		write("|}");
-
 		disableWriter();
-		Minecraft.getMinecraft().player.sendMessage(new TextComponentString("Printed out " + count + " recipes containing " + TextFormatting.DARK_BLUE + targetStack.getDisplayName()));
+		sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Printed out " + count + " recipes containing ", new File(configDir, fileName), targetStack.getDisplayName(), copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
 	}
 
-	public static void printItemRecipes(ItemStack targetStack) {
-		if (!checkStackValidity(targetStack))
-			return;
-
+	public static void printItemRecipes(ItemStack targetStack, ICommandSender sender, boolean copyToClipboard) {
 		if (writer != null) {
-			Minecraft.getMinecraft().player.sendMessage(new TextComponentString("You're already outputting data! Wait a moment and try again"));
+			sender.sendMessage(new TextComponentString("You're already outputting data! Wait a moment and try again"));
 
 			return;
 		}
@@ -186,11 +179,12 @@ public class RecipeWriter {
 				matchedRecipes.put(recipeGroup, recipe);
 		}
 
-		enableWriter(recipeItem.getItemStackDisplayName(targetStack) + " Recipes.txt");
-
+		String fileName = recipeItem.getItemStackDisplayName(targetStack) + " Recipes.txt";
 		String lastKey = "";
 		boolean printImageLines = matchedRecipes.values().size() > 20;
 		int count = 0;
+
+		enableWriter(fileName);
 
 		for (String key : matchedRecipes.keySet().stream().sorted(Comparator.<String>naturalOrder()).collect(Collectors.toList())) {
 			for (IRecipe recipe : matchedRecipes.get(key).stream().sorted(new RecipeOutputComparator()).collect(Collectors.toList())) {
@@ -229,7 +223,7 @@ public class RecipeWriter {
 		write("|}");
 
 		disableWriter();
-		Minecraft.getMinecraft().player.sendMessage(new TextComponentString("Printed out " + count + " recipes for " + TextFormatting.DARK_BLUE + targetStack.getDisplayName()));
+		sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Printed out " + count + " recipes for ", new File(configDir, fileName), targetStack.getDisplayName(), copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
 	}
 
 	private static void enableWriter(final String fileName) {
@@ -258,24 +252,6 @@ public class RecipeWriter {
 			IOUtils.closeQuietly(writer);
 
 		writer = null;
-	}
-
-	private static boolean checkStackValidity(@Nonnull ItemStack targetStack) {
-		if (targetStack.isEmpty()) {
-			Minecraft.getMinecraft().player.sendMessage(new TextComponentString("You must be holding an AoA item for this to work!"));
-
-			return false;
-		}
-
-		ResourceLocation itemId = targetStack.getItem().getRegistryName();
-
-		if (!itemId.getResourceDomain().equals("aoa3")) {
-			Minecraft.getMinecraft().player.sendMessage(new TextComponentString("The item you are holding is not from AoA! You are holding: " + targetStack.getDisplayName() + " (" + itemId.toString() + ")"));
-
-			return false;
-		}
-
-		return true;
 	}
 
 	public static void scrapeForRecipes(@Nonnull ModContainer aoaModContainer) {
@@ -341,7 +317,7 @@ public class RecipeWriter {
 				return (int)recipeInterface.getClass().getMethod("sortingCompare", IRecipeInterface.class).invoke(recipeInterface, findRecipeInterface(recipe2));
 			}
 			catch (Exception e) {
-				System.out.println("dog");
+				System.out.println("Can't find the recipe interface's class.. somehow. I don't even know, really.");
 			}
 
 			return outputName.compareTo(outputName2);

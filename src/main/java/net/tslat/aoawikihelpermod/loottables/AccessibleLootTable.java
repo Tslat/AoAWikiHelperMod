@@ -17,6 +17,7 @@ import net.minecraft.world.storage.loot.functions.SetCount;
 import net.minecraft.world.storage.loot.functions.Smelt;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -149,7 +150,7 @@ public class AccessibleLootTable {
 
 				String tableName = table.getResourcePath().substring(Math.max(0, table.getResourcePath().indexOf(":")));
 				String[] splitName = tableName.split("/");
-				tableName = capitaliseAllWords(splitName[splitName.length - 1].replace("_", " ").replace(" table", ""));
+				tableName = AoAWikiHelperMod.capitaliseAllWords(splitName[splitName.length - 1].replace("_", " ").replace(" table", ""));
 
 				if (!tableName.contains("table"))
 					tableName = tableName + " Table";
@@ -216,27 +217,5 @@ public class AccessibleLootTable {
 		public String getNotes() {
 			return notesBuilder.toString();
 		}
-	}
-
-	private static String capitaliseAllWords(@Nonnull String input) {
-		if (input.isEmpty())
-			return input;
-
-		StringBuilder buffer = new StringBuilder(input.length()).append(Character.toTitleCase(input.charAt(0)));
-
-		for (int i = 1; i < input.length(); i++) {
-			char ch = input.charAt(i);
-
-			if (Character.isWhitespace(ch)) {
-				buffer.append(ch);
-				buffer.append(Character.toTitleCase(input.charAt(i + 1)));
-				i++;
-			}
-			else {
-				buffer.append(ch);
-			}
-		}
-
-		return buffer.toString();
 	}
 }
