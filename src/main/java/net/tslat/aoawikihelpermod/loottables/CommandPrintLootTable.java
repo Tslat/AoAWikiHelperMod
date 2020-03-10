@@ -22,7 +22,7 @@ public class CommandPrintLootTable extends CommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/printLootTable <Loot Table Path>";
+		return "/printloottable <Loot Table Path>";
 	}
 
 	@Override

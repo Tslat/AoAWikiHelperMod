@@ -16,8 +16,8 @@ public class CommandPrintItemUsageRecipes extends CommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/printUsageRecipes [clipboard] - Prints out all known and supported recipes containing the held item. Optionally copy contents to clipboard.";
-	}
+		return "/printusagerecipes [clipboard] - Prints out all known and supported recipes containing the held item. Optionally copy contents to clipboard.";
+}
 
 	@Override
 	public int getRequiredPermissionLevel() {
