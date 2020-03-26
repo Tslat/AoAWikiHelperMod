@@ -5,7 +5,9 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.storage.loot.*;
 import net.minecraft.world.storage.loot.conditions.KilledByPlayer;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
@@ -17,6 +19,10 @@ import net.minecraft.world.storage.loot.functions.SetCount;
 import net.minecraft.world.storage.loot.functions.Smelt;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.tslat.aoa3.library.loot.conditions.PlayerHasLevel;
+import net.tslat.aoa3.library.loot.conditions.PlayerHoldingItem;
+import net.tslat.aoa3.library.loot.functions.GrantXp;
+import net.tslat.aoa3.library.loot.functions.SetRandomMetadata;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 
 import javax.annotation.Nonnull;
@@ -59,11 +65,16 @@ public class AccessibleLootTable {
 			lootEntries.sort(new LootEntryComparator());
 
 			if (conditions != null) {
+				boolean firstConditionPrinted = false;
+
 				for (LootCondition condition : conditions) {
 					if (condition instanceof RandomChance) {
 						float chance = ObfuscationReflectionHelper.getPrivateValue(RandomChance.class, (RandomChance)condition, "field_186630_a");
 
-						notesBuilder.append("The above pool has a fixed ");
+						if (firstConditionPrinted)
+							notesBuilder.append("<br/>");
+
+						notesBuilder.append("This pool has a fixed ");
 						notesBuilder.append(((int)(chance * 10000)) / 100d);
 						notesBuilder.append("% chance to roll for drops. ");
 					}
@@ -71,15 +82,49 @@ public class AccessibleLootTable {
 						float chance = ObfuscationReflectionHelper.getPrivateValue(RandomChanceWithLooting.class, (RandomChanceWithLooting)condition, "field_186627_a");
 						float lootingMod = ObfuscationReflectionHelper.getPrivateValue(RandomChanceWithLooting.class, (RandomChanceWithLooting)condition, "field_186628_b");
 
-						notesBuilder.append("The above pool has a fixed ");
+						if (firstConditionPrinted)
+							notesBuilder.append("<br/>");
+
+						notesBuilder.append("This pool has a fixed ");
 						notesBuilder.append(((int)(chance * 10000)) / 100d);
 						notesBuilder.append("% chance to roll for drops, with an additional ");
 						notesBuilder.append(((int)(lootingMod * 10000)) / 100d);
 						notesBuilder.append("% chance per level of looting. ");
 					}
 					else if (condition instanceof KilledByPlayer) {
-						notesBuilder.append("Will only roll if the entity is killed directly by a player. ");
+						if (firstConditionPrinted)
+							notesBuilder.append("<br/>");
+
+						notesBuilder.append("This pool will only roll if the entity is killed directly by a player. ");
 					}
+					else if (condition instanceof PlayerHasLevel) {
+						String skill = I18n.translateToLocal("skills." + ObfuscationReflectionHelper.getPrivateValue(PlayerHasLevel.class, (PlayerHasLevel)condition, "skill").toString().toLowerCase() + ".name");
+						int level = ObfuscationReflectionHelper.getPrivateValue(PlayerHasLevel.class, (PlayerHasLevel)condition, "level");
+
+						if (firstConditionPrinted)
+							notesBuilder.append("<br/>");
+
+						notesBuilder.append("This pool will only roll if the player has at least level ").append(level).append(" ").append(skill).append(". ");
+					}
+					else if (condition instanceof PlayerHoldingItem) {
+						Item item = ObfuscationReflectionHelper.getPrivateValue(PlayerHoldingItem.class, (PlayerHoldingItem)condition, "tool");
+						EnumHand hand = ObfuscationReflectionHelper.getPrivateValue(PlayerHoldingItem.class, (PlayerHoldingItem)condition, "hand");
+
+						if (firstConditionPrinted)
+							notesBuilder.append("<br/>");
+
+						notesBuilder.append("This pool will only roll if the player is holding ").append(item.getItemStackDisplayName(new ItemStack(item)));
+
+						if (hand != null)
+							notesBuilder.append(" in the ").append(hand.toString().toLowerCase().replace("_", ""));
+
+						notesBuilder.append(". ");
+					}
+					else {
+						continue;
+					}
+
+					firstConditionPrinted = true;
 				}
 			}
 		}
@@ -191,14 +236,30 @@ public class AccessibleLootTable {
 									notesBuilder.append("]] if killed while the entity is on fire. ");
 								}
 							}
+							else if (function instanceof GrantXp) {
+								String skill = I18n.translateToLocal("skills." + ObfuscationReflectionHelper.getPrivateValue(GrantXp.class, (GrantXp)function, "skill").toString().toLowerCase() + ".name");
+								float xp = ObfuscationReflectionHelper.getPrivateValue(GrantXp.class, (GrantXp)function, "xp");
+
+								notesBuilder.append("Gives ").append(xp).append("xp").append(" in ").append(skill);
+							}
+							else if (function instanceof SetRandomMetadata) {
+								notesBuilder.append("Chooses a random variant from all possible variants of the item. ");
+							}
 						} catch (Exception e) {}
 					}
 				}
 
 				if (conditions != null) {
 					for (LootCondition condition : conditions) {
-						if (condition instanceof KilledByPlayer)
+						if (condition instanceof KilledByPlayer) {
 							notesBuilder.append("Only drops if the entity is killed directly by a player. ");
+						}
+						else if (condition instanceof PlayerHasLevel) {
+							String skill = I18n.translateToLocal("skills." + ObfuscationReflectionHelper.getPrivateValue(PlayerHasLevel.class, (PlayerHasLevel)condition, "skill").toString().toLowerCase() + ".name");
+							int level = ObfuscationReflectionHelper.getPrivateValue(PlayerHasLevel.class, (PlayerHasLevel)condition, "level");
+
+							notesBuilder.append("Excluded from loot roll if the player does not have at least level ").append(level).append(" ").append(skill).append(". ");
+						}
 					}
 				}
 
