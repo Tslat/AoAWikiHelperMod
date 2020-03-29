@@ -14,13 +14,16 @@ public class LootTableWriter {
 	public static File configDir = null;
 	private static PrintWriter writer = null;
 
-	public static void writeTable(String name, List<LootPool> pools, ICommandSender sender, boolean copyToClipboard) {
-		AccessibleLootTable table = new AccessibleLootTable(pools);
+	public static void writeTable(String name, List<LootPool> pools, ICommandSender sender, boolean copyToClipboard, String type) {
+		AccessibleLootTable table = new AccessibleLootTable(pools, type);
 		EntityPlayer pl = sender instanceof EntityPlayer ? (EntityPlayer)sender : null;
 		String fileName = name + " Loot Table.txt";
 
 		enableWriter(fileName);
 		write("{{LootTable");
+
+		if (!type.equals(""))
+			write("|type=" + type);
 
 		for (int i = 0; i < table.pools.size(); i++) {
 			AccessibleLootTable.AccessibleLootPool pool = table.pools.get(i);

@@ -22,7 +22,7 @@ public class CommandPrintLootTable extends CommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/printloottable <Loot Table Path>";
+		return "/printloottable <Loot Table Path> Optionals:[clipboard|chest OR generic]";
 	}
 
 	@Override
@@ -53,7 +53,23 @@ public class CommandPrintLootTable extends CommandBase {
 			String[] pathSplit = args[0].substring(Math.max(0, args[0].indexOf(":"))).split("/");
 			List<LootPool> pools = ObfuscationReflectionHelper.getPrivateValue(LootTable.class, table, "field_186466_c");
 			String tableName = AoAWikiHelperMod.capitaliseAllWords(pathSplit[pathSplit.length - 1].replace("_", " "));
-			boolean copyToClipboard = args.length > 1 && args[1].equalsIgnoreCase("clipboard");
+			boolean copyToClipboard = false;
+			String type = "";
+
+			for (int i = 1; i < args.length; i++) {
+				switch (args[i].toLowerCase()) {
+					case "clipboard":
+						copyToClipboard = true;
+						break;
+					case "chest":
+						type = "chest";
+						break;
+					case "generic":
+						type = "generic";
+					default:
+						break;
+				}
+			}
 
 			if (pools.isEmpty()) {
 				sender.sendMessage(new TextComponentString("Loot table " + args[0] + " is empty. Nothing to print."));
@@ -66,7 +82,7 @@ public class CommandPrintLootTable extends CommandBase {
 				copyToClipboard = false;
 			}
 
-			LootTableWriter.writeTable(tableName, pools, sender, copyToClipboard);
+			LootTableWriter.writeTable(tableName, pools, sender, copyToClipboard, type);
 		}
 	}
 }

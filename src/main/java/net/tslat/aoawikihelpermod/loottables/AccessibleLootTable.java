@@ -34,12 +34,14 @@ import java.util.Random;
 
 public class AccessibleLootTable {
 	protected final List<AccessibleLootPool> pools;
+	protected final String type;
 
-	public AccessibleLootTable(List<LootPool> pools) {
+	public AccessibleLootTable(List<LootPool> pools, String type) {
 		this.pools = new ArrayList<AccessibleLootPool>(pools.size());
+		this.type = type;
 
 		for (LootPool pool : pools) {
-			this.pools.add(new AccessibleLootPool(pool));
+			this.pools.add(new AccessibleLootPool(pool, this));
 		}
 	}
 
@@ -49,17 +51,19 @@ public class AccessibleLootTable {
 		protected final RandomValueRange bonusRolls;
 		protected final List<LootCondition> conditions;
 		protected final StringBuilder notesBuilder = new StringBuilder();
+		protected final AccessibleLootTable parentTable;
 
-		public AccessibleLootPool(LootPool pool) {
+		public AccessibleLootPool(LootPool pool, AccessibleLootTable parentTable) {
 			this.rolls = pool.getRolls();
 			this.bonusRolls = pool.getBonusRolls();
+			this.parentTable = parentTable;
 
 			conditions = ObfuscationReflectionHelper.getPrivateValue(LootPool.class, pool, "field_186454_b");
 			List<LootEntry> entries = ObfuscationReflectionHelper.getPrivateValue(LootPool.class, pool, "field_186453_a");
 			lootEntries = new ArrayList<AccessibleLootEntry>(entries.size());
 
 			for (LootEntry entry : entries) {
-				lootEntries.add(new AccessibleLootEntry(entry));
+				lootEntries.add(new AccessibleLootEntry(entry, parentTable));
 			}
 
 			lootEntries.sort(new LootEntryComparator());
@@ -156,12 +160,14 @@ public class AccessibleLootTable {
 
 		protected final boolean isTable;
 		protected final ResourceLocation table;
+		protected final AccessibleLootTable parentTable;
 
-		public AccessibleLootEntry(LootEntry entry) {
+		public AccessibleLootEntry(LootEntry entry, AccessibleLootTable parentTable) {
 			this.isTable = entry instanceof LootEntryTable;
 			this.weight = ObfuscationReflectionHelper.getPrivateValue(LootEntry.class, entry, "field_186364_c");
 			this.quality = ObfuscationReflectionHelper.getPrivateValue(LootEntry.class, entry, "field_186365_d");
 			this.conditions = ObfuscationReflectionHelper.getPrivateValue(LootEntry.class, entry, "field_186366_e");
+			this.parentTable = parentTable;
 
 			if (entry instanceof LootEntryItem) {
 				this.item = ObfuscationReflectionHelper.getPrivateValue(LootEntryItem.class, (LootEntryItem)entry, "field_186368_a");
@@ -180,12 +186,21 @@ public class AccessibleLootTable {
 			}
 
 			if (quality > 0) {
-				notesBuilder.append("Chance is increased with each level of luck and/or looting. ");
+				notesBuilder.append("Chance is increased with each level of luck");
+
+				if (parentTable.type.equals(""))
+					notesBuilder.append(" and/or looting");
+
+				notesBuilder.append(".");
 			}
 			else if (quality < 0) {
-				notesBuilder.append("Chance is decreased with each level of luck and/or looting. ");
-			}
+				notesBuilder.append("Chance is decreased with each level of luck");
 
+				if (parentTable.type.equals(""))
+					notesBuilder.append(" and/or looting");
+
+				notesBuilder.append(".");
+			}
 		}
 
 		public String getEntryName(@Nullable EntityPlayer pl) {
