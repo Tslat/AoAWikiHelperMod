@@ -39,7 +39,7 @@ public class RecipeInterfaceShapeless extends IRecipeInterface {
 	}
 
 	@Override
-	protected String buildIngredientSummaryLine(ItemStack targetStack) {
+	protected String buildIngredientSummaryLine(ItemStack targetStack, ArrayListMultimap<String, IRecipe> matchedRecipes) {
 		StringBuilder builder = new StringBuilder();
 
 		for (IRecipeInterfaceIngredient ing : ingredientArray) {

@@ -25,7 +25,7 @@ public abstract class IRecipeInterface {
 
 	protected abstract void populateIngredientArrays();
 	protected abstract String buildWikiTableHeadingsLine(ArrayListMultimap<String, IRecipe> matchedRecipes);
-	protected abstract String buildIngredientSummaryLine(ItemStack targetStack);
+	protected abstract String buildIngredientSummaryLine(ItemStack targetStack, ArrayListMultimap<String, IRecipe> matchedRecipes);
 	protected abstract String getWikiTemplateName();
 	protected abstract String recipeGroup();
 	protected abstract boolean matchAdditionalIngredients(ItemStack targetStack);
@@ -47,8 +47,8 @@ public abstract class IRecipeInterface {
 		ingredientArray.add(ing);
 	}
 
-	protected String buildSummaryLine(ItemStack targetStack) {
-		return "'''[[" + recipe.getRecipeOutput().getDisplayName() + "]]''' || " + buildIngredientSummaryLine(targetStack) + " || {{" + getWikiTemplateName();
+	protected String buildSummaryLine(ItemStack targetStack, ArrayListMultimap<String, IRecipe> matchedRecipes) {
+		return "'''[[" + recipe.getRecipeOutput().getDisplayName() + "]]''' || " + buildIngredientSummaryLine(targetStack, matchedRecipes) + " || {{" + getWikiTemplateName();
 	}
 
 	public int sortingCompare(IRecipeInterface comparingInterface) {

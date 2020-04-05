@@ -13,23 +13,26 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.JsonContext;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.tslat.aoa3.crafting.recipes.InfusionTableRecipe;
 
 import java.util.ArrayList;
 
 public class RecipeInterfaceInfusion extends IRecipeInterface {
-	private final int infusionReq;
-	private final int infusionXpMin;
-	private final int infusionXpMax;
+	protected int infusionReq;
+	protected int infusionXpMin;
+	protected int infusionXpMax;
 
 	private final IRecipeInterfaceIngredient inputItem;
 
 	protected final Enchantment enchant;
 	private final int enchantLevel;
 
+	protected boolean forceLevelPrintout = false;
+
 	public RecipeInterfaceInfusion(IRecipe recipe, JsonObject json) {
 		super(recipe, json);
 
-		infusionReq = json.has("infusion_level") ? JsonUtils.getInt(json, "infusion_level") : 1;
+		infusionReq = JsonUtils.getInt(json, "infusion_level", 0);
 
 		if (json.has("infusion_xp")) {
 			JsonObject xpJson = JsonUtils.getJsonObject(json, "infusion_xp");
@@ -43,8 +46,8 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
 			}
 		}
 		else {
-			infusionXpMin = 0;
-			infusionXpMax = 0;
+			infusionXpMin = -1;
+			infusionXpMax = -1;
 		}
 
 		JsonContext context = new JsonContext("aoa3");
@@ -97,7 +100,7 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
 	}
 
 	@Override
-	protected String buildIngredientSummaryLine(ItemStack targetStack) {
+	protected String buildIngredientSummaryLine(ItemStack targetStack, ArrayListMultimap<String, IRecipe> matchedRecipes) {
 		StringBuilder builder = new StringBuilder();
 		ArrayList<IRecipeInterfaceIngredient> extendedIngArray = (ArrayList<IRecipeInterfaceIngredient>)ingredientArray.clone();
 
@@ -155,12 +158,37 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
 			}
 		}
 
-		if (infusionReq > 1) {
+		if (infusionReq == 0 || infusionXpMax == 0) {
+			boolean patchedLvl = false;
+			boolean patchedXp = false;
+
+			for (IRecipe recipe : matchedRecipes.get(recipeGroup())) {
+				if (recipe instanceof InfusionTableRecipe) {
+					InfusionTableRecipe infusionRecipe = (InfusionTableRecipe)recipe;
+
+					if (infusionReq == 0 && infusionRecipe.getInfusionReq() > 1) {
+						infusionReq = 1;
+						patchedLvl = true;
+					}
+
+					if (infusionXpMax == 0 && infusionRecipe.getMaxXp() > 0) {
+						infusionXpMin = 0;
+						infusionXpMax = 0;
+						patchedXp = true;
+					}
+				}
+
+				if (patchedLvl && patchedXp)
+					break;
+			}
+		}
+
+		if (infusionReq > 0) {
 			builder.append(" || ");
 			builder.append(infusionReq);
 		}
 
-		if (infusionXpMin > 0) {
+		if (infusionXpMax > -1) {
 			builder.append(" || ");
 			builder.append(infusionXpMin);
 
@@ -178,14 +206,14 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
 		boolean hasLevels = false;
 		boolean hasXp = false;
 
-		for (IRecipe recipe : matchedRecipes.get("InfusionTableRecipe")) {
-			JsonObject recipeJson = RecipeWriter.getRecipeJson(recipe);
+		for (IRecipe recipe : matchedRecipes.get(recipeGroup())) {
+			if (recipe instanceof InfusionTableRecipe) {
+				InfusionTableRecipe infusionRecipe = (InfusionTableRecipe)recipe;
 
-			if (recipeJson != null) {
-				if (recipeJson.has("infusion_level"))
+				if (infusionRecipe.getInfusionReq() > 1)
 					hasLevels = true;
 
-				if (recipeJson.has("infusion_xp"))
+				if (infusionRecipe.getMaxXp() > 0)
 					hasXp = true;
 			}
 
@@ -247,11 +275,11 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
 	}
 
 	@Override
-	protected String buildSummaryLine(ItemStack targetStack) {
+	protected String buildSummaryLine(ItemStack targetStack, ArrayListMultimap<String, IRecipe> matchedRecipes) {
 		if (enchant == null)
-			return super.buildSummaryLine(targetStack);
+			return super.buildSummaryLine(targetStack, matchedRecipes);
 
-		return "[[" + (enchant.getRegistryName().getResourceDomain().equals("minecraft") ? "mcw:" : "") + I18n.translateToLocal(enchant.getName()) + "|" + enchant.getTranslatedName(enchantLevel) + "]] || " + getImbuingApplicableTo() + " || " + buildIngredientSummaryLine(targetStack) + " || {{Infusion";
+		return "[[" + (enchant.getRegistryName().getResourceDomain().equals("minecraft") ? "mcw:" : "") + I18n.translateToLocal(enchant.getName()) + "|" + enchant.getTranslatedName(enchantLevel) + "]] || " + getImbuingApplicableTo() + " || " + buildIngredientSummaryLine(targetStack, matchedRecipes) + " || {{Infusion";
 	}
 
 	@Override

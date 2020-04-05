@@ -134,7 +134,7 @@ public class RecipeWriter {
 				}
 
 				write("|-");
-				write("| " + recipeInterface.buildSummaryLine(targetStack));
+				write("| " + recipeInterface.buildSummaryLine(targetStack, matchedRecipes));
 
 				for (String string : recipeInterface.buildAdditionalTemplateLines(targetStack, printImageLines)) {
 					write(string);
@@ -208,7 +208,7 @@ public class RecipeWriter {
 				}
 
 				write("|-");
-				write("| '''" + recipe.getRecipeOutput().getDisplayName() + "''' || " + recipeInterface.buildIngredientSummaryLine(targetStack) + " || {{" + recipeInterface.getWikiTemplateName());
+				write("| '''" + recipe.getRecipeOutput().getDisplayName() + "''' || " + recipeInterface.buildIngredientSummaryLine(targetStack, matchedRecipes) + " || {{" + recipeInterface.getWikiTemplateName());
 
 				for (String string : recipeInterface.buildAdditionalTemplateLines(targetStack, printImageLines)) {
 					write(string);
