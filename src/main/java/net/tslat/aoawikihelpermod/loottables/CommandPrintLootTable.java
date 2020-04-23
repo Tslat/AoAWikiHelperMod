@@ -22,7 +22,7 @@ public class CommandPrintLootTable extends CommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/printloottable <Loot Table Path> Optionals:[clipboard|chest OR generic]";
+		return "/printloottable <Loot Table Path> Optionals:[clipboard|chest OR generic] - Prints out the contents of a given loot table. Optionally copy contents to clipboard. Can also optionally be marked as chest loot or generic (non-entity) loot.";
 	}
 
 	@Override

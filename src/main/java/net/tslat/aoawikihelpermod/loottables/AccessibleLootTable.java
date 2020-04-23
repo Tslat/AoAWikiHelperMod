@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Random;
 
 public class AccessibleLootTable {
-	protected final List<AccessibleLootPool> pools;
-	protected final String type;
+	public final List<AccessibleLootPool> pools;
+	public final String type;
 
 	public AccessibleLootTable(List<LootPool> pools, String type) {
 		this.pools = new ArrayList<AccessibleLootPool>(pools.size());
@@ -46,12 +46,12 @@ public class AccessibleLootTable {
 	}
 
 	public static class AccessibleLootPool {
-		protected final List<AccessibleLootEntry> lootEntries;
-		protected final RandomValueRange rolls;
-		protected final RandomValueRange bonusRolls;
-		protected final List<LootCondition> conditions;
-		protected final StringBuilder notesBuilder = new StringBuilder();
-		protected final AccessibleLootTable parentTable;
+		public final List<AccessibleLootEntry> lootEntries;
+		public final RandomValueRange rolls;
+		public final RandomValueRange bonusRolls;
+		public final List<LootCondition> conditions;
+		public final StringBuilder notesBuilder = new StringBuilder();
+		public final AccessibleLootTable parentTable;
 
 		public AccessibleLootPool(LootPool pool, AccessibleLootTable parentTable) {
 			this.rolls = pool.getRolls();
@@ -147,20 +147,20 @@ public class AccessibleLootTable {
 	}
 
 	public static class AccessibleLootEntry {
-		protected final int weight;
-		protected final int quality;
-		protected final Item item;
-		protected final LootFunction[] functions;
-		protected final LootCondition[] conditions;
+		public final int weight;
+		public final int quality;
+		public final Item item;
+		public final LootFunction[] functions;
+		public final LootCondition[] conditions;
 
-		protected ItemStack generatedStack = null;
-		protected RandomValueRange amountRange = null;
-		protected RandomValueRange bonusRange = null;
-		protected StringBuilder notesBuilder = new StringBuilder();
+		public ItemStack generatedStack = null;
+		public RandomValueRange amountRange = null;
+		public RandomValueRange bonusRange = null;
+		public StringBuilder notesBuilder = new StringBuilder();
 
-		protected final boolean isTable;
-		protected final ResourceLocation table;
-		protected final AccessibleLootTable parentTable;
+		public final boolean isTable;
+		public final ResourceLocation table;
+		public final AccessibleLootTable parentTable;
 
 		public AccessibleLootEntry(LootEntry entry, AccessibleLootTable parentTable) {
 			this.isTable = entry instanceof LootEntryTable;

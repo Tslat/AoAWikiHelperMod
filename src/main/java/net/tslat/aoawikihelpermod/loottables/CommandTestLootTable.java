@@ -27,7 +27,7 @@ public class CommandTestLootTable extends CommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/testloottable <Loot Table Path> optionals:[luck:|times:|printtoconsole|pool:]";
+		return "/testloottable <Loot Table Path> optionals:[luck:|times:|printtoconsole|pool:] - Prints out a test roll of a given loot table to chat and console. Optionally disable chat portion of printout. Can optionally specify modifiers for luck, number of rolls, or just a specific pool to roll (I.E. luck:5 rolls:20)";
 	}
 
 	@Override

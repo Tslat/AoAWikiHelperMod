@@ -10,11 +10,15 @@ import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.relauncher.Side;
+import net.tslat.aoawikihelpermod.dataprintouts.CommandPrintEntitiesDropList;
 import net.tslat.aoawikihelpermod.dataprintouts.CommandPrintEntityData;
 import net.tslat.aoawikihelpermod.dataprintouts.CommandPrintWeaponsData;
 import net.tslat.aoawikihelpermod.loottables.CommandPrintLootTable;
 import net.tslat.aoawikihelpermod.loottables.CommandTestLootTable;
 import net.tslat.aoawikihelpermod.recipes.*;
+import net.tslat.aoawikihelpermod.trades.CommandPrintTradeOutputs;
+import net.tslat.aoawikihelpermod.trades.CommandPrintTradeUsages;
+import net.tslat.aoawikihelpermod.trades.CommandPrintTraderTrades;
 import net.tslat.aoawikihelpermod.weaponcategories.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
@@ -28,7 +32,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-@Mod(modid = "aoawikihelpermod", name = "AoA-Wiki Helper Mod", version = "1.6")
+@Mod(modid = "aoawikihelpermod", name = "AoA-Wiki Helper Mod", version = "1.7")
 public class AoAWikiHelperMod {
 	public static Logger logger;
 	private static ModContainer aoaModContainer;
@@ -66,9 +70,11 @@ public class AoAWikiHelperMod {
 		event.registerServerCommand(new CommandPrintBlastersOverview());
 		event.registerServerCommand(new CommandPrintBowsOverview());
 		event.registerServerCommand(new CommandPrintCannonsOverview());
+		event.registerServerCommand(new CommandPrintEntitiesDropList());
 		event.registerServerCommand(new CommandPrintEntityData());
 		event.registerServerCommand(new CommandPrintGreatbladesOverview());
 		event.registerServerCommand(new CommandPrintGunsOverview());
+		event.registerServerCommand(new CommandPrintInfusionEnchants());
 		event.registerServerCommand(new CommandPrintItemRecipes());
 		event.registerServerCommand(new CommandPrintItemUsageRecipes());
 		event.registerServerCommand(new CommandPrintLootTable());
@@ -80,6 +86,9 @@ public class AoAWikiHelperMod {
 		event.registerServerCommand(new CommandPrintStavesOverview());
 		event.registerServerCommand(new CommandPrintSwordsOverview());
 		event.registerServerCommand(new CommandPrintThrownWeaponsOverview());
+		event.registerServerCommand(new CommandPrintTradeOutputs());
+		event.registerServerCommand(new CommandPrintTradeUsages());
+		event.registerServerCommand(new CommandPrintTraderTrades());
 		event.registerServerCommand(new CommandPrintWeaponsData());
 		event.registerServerCommand(new CommandTestLootTable());
 	}

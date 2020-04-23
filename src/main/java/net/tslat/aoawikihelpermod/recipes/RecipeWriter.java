@@ -43,11 +43,11 @@ public class RecipeWriter {
 		recipeInterfaces.put(recipeClassSimpleName, handler);
 	}
 
-	private static boolean haveRecipeInterface(IRecipe recipe) {
+	public static boolean haveRecipeInterface(IRecipe recipe) {
 		return recipeInterfaces.containsKey(recipe.getClass().getSimpleName());
 	}
 
-	private static IRecipeInterface findRecipeInterface(IRecipe recipe) {
+	public static IRecipeInterface findRecipeInterface(IRecipe recipe) {
 		String recipeClassName = recipe.getClass().getSimpleName();
 
 		try {

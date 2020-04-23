@@ -27,8 +27,6 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
 	protected final Enchantment enchant;
 	private final int enchantLevel;
 
-	protected boolean forceLevelPrintout = false;
-
 	public RecipeInterfaceInfusion(IRecipe recipe, JsonObject json) {
 		super(recipe, json);
 
@@ -279,7 +277,7 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
 		if (enchant == null)
 			return super.buildSummaryLine(targetStack, matchedRecipes);
 
-		return "[[" + (enchant.getRegistryName().getResourceDomain().equals("minecraft") ? "mcw:" : "") + I18n.translateToLocal(enchant.getName()) + "|" + enchant.getTranslatedName(enchantLevel) + "]] || " + getImbuingApplicableTo() + " || " + buildIngredientSummaryLine(targetStack, matchedRecipes) + " || {{Infusion";
+		return "[[" + (enchant.getRegistryName().getResourceDomain().equals("minecraft") ? "mcw:" : "") + I18n.translateToLocal(enchant.getName()) + "|" + enchant.getTranslatedName(enchantLevel) + "]] || " + getImbuingApplicableTo(enchant) + " || " + buildIngredientSummaryLine(targetStack, matchedRecipes) + " || {{Infusion";
 	}
 
 	@Override
@@ -292,7 +290,7 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
 		return (I18n.translateToLocal(enchant.getName()) + enchantLevel).compareTo(I18n.translateToLocal(otherInterface.enchant.getName()) + otherInterface.enchantLevel);
 	}
 
-	private String getImbuingApplicableTo() {
+	public static String getImbuingApplicableTo(Enchantment enchant) {
 		switch (enchant.getRegistryName().toString()) {
 			case "aoa3:archmage":
 				return "Staves";
