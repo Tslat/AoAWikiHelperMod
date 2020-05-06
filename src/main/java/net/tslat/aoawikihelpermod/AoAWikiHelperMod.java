@@ -10,9 +10,7 @@ import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.relauncher.Side;
-import net.tslat.aoawikihelpermod.dataprintouts.CommandPrintEntitiesDropList;
-import net.tslat.aoawikihelpermod.dataprintouts.CommandPrintEntityData;
-import net.tslat.aoawikihelpermod.dataprintouts.CommandPrintWeaponsData;
+import net.tslat.aoawikihelpermod.dataprintouts.*;
 import net.tslat.aoawikihelpermod.loottables.CommandPrintLootTable;
 import net.tslat.aoawikihelpermod.loottables.CommandTestLootTable;
 import net.tslat.aoawikihelpermod.recipes.*;
@@ -32,7 +30,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-@Mod(modid = "aoawikihelpermod", name = "AoA-Wiki Helper Mod", version = "1.7")
+@Mod(modid = "aoawikihelpermod", name = "AoA-Wiki Helper Mod", version = "1.8")
 public class AoAWikiHelperMod {
 	public static Logger logger;
 	private static ModContainer aoaModContainer;
@@ -74,16 +72,19 @@ public class AoAWikiHelperMod {
 		event.registerServerCommand(new CommandPrintEntityData());
 		event.registerServerCommand(new CommandPrintGreatbladesOverview());
 		event.registerServerCommand(new CommandPrintGunsOverview());
+		event.registerServerCommand(new CommandPrintHunterCreatureData());
 		event.registerServerCommand(new CommandPrintInfusionEnchants());
 		event.registerServerCommand(new CommandPrintItemRecipes());
 		event.registerServerCommand(new CommandPrintItemUsageRecipes());
 		event.registerServerCommand(new CommandPrintLootTable());
 		event.registerServerCommand(new CommandPrintMaulsOverview());
+		event.registerServerCommand(new CommandPrintOresData());
 		event.registerServerCommand(new CommandPrintPickaxesOverview());
 		event.registerServerCommand(new CommandPrintShotgunsOverview());
 		event.registerServerCommand(new CommandPrintShovelsOverview());
 		event.registerServerCommand(new CommandPrintSnipersOverview());
 		event.registerServerCommand(new CommandPrintStavesOverview());
+		event.registerServerCommand(new CommandPrintStructuresData());
 		event.registerServerCommand(new CommandPrintSwordsOverview());
 		event.registerServerCommand(new CommandPrintThrownWeaponsOverview());
 		event.registerServerCommand(new CommandPrintTradeOutputs());
