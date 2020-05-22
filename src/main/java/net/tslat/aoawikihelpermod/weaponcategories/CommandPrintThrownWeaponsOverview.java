@@ -63,8 +63,8 @@ public class CommandPrintThrownWeaponsOverview extends CommandBase {
 			thrownWeapons = thrownWeapons.stream().sorted(Comparator.comparing(thrownWeapon -> thrownWeapon.getItemStackDisplayName(new ItemStack(thrownWeapon)))).collect(Collectors.toList());
 
 			data.add("{| cellpadding=\"5\" class=\"sortable\" width=\"100%\" cellspacing=\"0\" border=\"1\" style=\"text-align:center\"");
-			data.add("|- style=\"background-color:#eee\" | data-sort-type=number |");
-			data.add("! Name !! Damage !! Throw rate !! Effects");
+			data.add("|- style=\"background-color:#eee\"");
+			data.add("! Name !! data-sort-type=number | Damage !! Throw rate !! Effects");
 			data.add("|-");
 
 			for (BaseThrownWeapon thrownWeapon : thrownWeapons) {

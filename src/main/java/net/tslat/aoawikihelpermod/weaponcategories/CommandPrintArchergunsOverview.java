@@ -66,8 +66,8 @@ public class CommandPrintArchergunsOverview extends CommandBase {
 			archerguns = archerguns.stream().sorted(Comparator.comparing(archergun -> archergun.getItemStackDisplayName(new ItemStack(archergun)))).collect(Collectors.toList());
 
 			data.add("{| cellpadding=\"5\" class=\"sortable\" width=\"100%\" cellspacing=\"0\" border=\"1\" style=\"text-align:center\"");
-			data.add("|- style=\"background-color:#eee\" | data-sort-type=number |");
-			data.add("! Name !! Damage !! Unholster time !! Fire rate !! Durability !! Effects");
+			data.add("|- style=\"background-color:#eee\"");
+			data.add("! Name !! data-sort-type=number | Damage !! Unholster time !! Fire rate !! Durability !! Effects");
 			data.add("|-");
 
 			for (BaseArchergun archergun : archerguns) {
