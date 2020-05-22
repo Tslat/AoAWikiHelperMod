@@ -64,8 +64,8 @@ public class CommandPrintShovelsOverview extends CommandBase {
 			shovels = shovels.stream().sorted(Comparator.comparing(shovel -> shovel.getItemStackDisplayName(new ItemStack(shovel)))).collect(Collectors.toList());
 
 			data.add("{| cellpadding=\"5\" class=\"sortable\" width=\"100%\" cellspacing=\"0\" border=\"1\" style=\"text-align:center\"");
-			data.add("|- style=\"background-color:#eee\" | data-sort-type=number |");
-			data.add("! Name !! Damage !! Efficiency !! Durability !! Effects");
+			data.add("|- style=\"background-color:#eee\"");
+			data.add("! Name !! data-sort-type=number | Damage !! Efficiency !! Durability !! Effects");
 			data.add("|-");
 
 			for (BaseShovel shovel : shovels) {

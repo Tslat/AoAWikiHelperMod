@@ -66,8 +66,8 @@ public class CommandPrintShotgunsOverview extends CommandBase {
 			shotguns = shotguns.stream().sorted(Comparator.comparing(shotgun -> shotgun.getItemStackDisplayName(new ItemStack(shotgun)))).collect(Collectors.toList());
 
 			data.add("{| cellpadding=\"5\" class=\"sortable\" width=\"100%\" cellspacing=\"0\" border=\"1\" style=\"text-align:center\"");
-			data.add("|- style=\"background-color:#eee\" | data-sort-type=number |");
-			data.add("! Name !! Damage !! Unholster time !! Fire rate !! Pellets !! Recoil !! Durability !! Effects");
+			data.add("|- style=\"background-color:#eee\"");
+			data.add("! Name !! data-sort-type=number | Damage !! Unholster time !! Fire rate !! Pellets !! Recoil !! Durability !! Effects");
 			data.add("|-");
 
 			for (BaseShotgun shotgun : shotguns) {

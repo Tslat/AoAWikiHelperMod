@@ -66,8 +66,8 @@ public class CommandPrintSnipersOverview extends CommandBase {
 			snipers = snipers.stream().sorted(Comparator.comparing(sniper -> sniper.getItemStackDisplayName(new ItemStack(sniper)))).collect(Collectors.toList());
 
 			data.add("{| cellpadding=\"5\" class=\"sortable\" width=\"100%\" cellspacing=\"0\" border=\"1\" style=\"text-align:center\"");
-			data.add("|- style=\"background-color:#eee\" | data-sort-type=number |");
-			data.add("! Name !! Damage !! Unholster time !! Fire rate !! Recoil !! Durability !! Effects");
+			data.add("|- style=\"background-color:#eee\"");
+			data.add("! Name !! data-sort-type=number | Damage !! Unholster time !! Fire rate !! Recoil !! Durability !! Effects");
 			data.add("|-");
 
 			for (BaseSniper sniper : snipers) {

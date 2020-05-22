@@ -62,8 +62,8 @@ public class CommandPrintBowsOverview extends CommandBase {
 			bows = bows.stream().sorted(Comparator.comparing(bow -> bow.getItemStackDisplayName(new ItemStack(bow)))).collect(Collectors.toList());
 
 			data.add("{| cellpadding=\"5\" class=\"sortable\" width=\"100%\" cellspacing=\"0\" border=\"1\" style=\"text-align:center\"");
-			data.add("|- style=\"background-color:#eee\" | data-sort-type=number |");
-			data.add("! Name !! Damage !! Draw time !! Durability !! Effects");
+			data.add("|- style=\"background-color:#eee\"");
+			data.add("! Name !! data-sort-type=number | Damage !! Draw time !! Durability !! Effects");
 			data.add("|-");
 
 			for (BaseBow bow : bows) {

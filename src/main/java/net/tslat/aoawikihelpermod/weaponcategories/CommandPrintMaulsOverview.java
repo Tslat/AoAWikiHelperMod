@@ -66,8 +66,8 @@ public class CommandPrintMaulsOverview extends CommandBase {
 			mauls = mauls.stream().sorted(Comparator.comparing(maul -> maul.getItemStackDisplayName(new ItemStack(maul)))).collect(Collectors.toList());
 
 			data.add("{| cellpadding=\"5\" class=\"sortable\" width=\"100%\" cellspacing=\"0\" border=\"1\" style=\"text-align:center\"");
-			data.add("|- style=\"background-color:#eee\" | data-sort-type=number |");
-			data.add("! Name !! Damage !! Attack speed !! Knockback !! Durability !! Effects");
+			data.add("|- style=\"background-color:#eee\"");
+			data.add("! Name !! data-sort-type=number | Damage !! Attack speed !! Knockback !! Durability !! Effects");
 			data.add("|-");
 
 			for (BaseMaul maul : mauls) {

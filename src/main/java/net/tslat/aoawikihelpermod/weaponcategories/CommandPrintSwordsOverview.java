@@ -66,8 +66,8 @@ public class CommandPrintSwordsOverview extends CommandBase {
 			swords = swords.stream().sorted(Comparator.comparing(sword -> sword.getItemStackDisplayName(new ItemStack(sword)))).collect(Collectors.toList());
 
 			data.add("{| cellpadding=\"5\" class=\"sortable\" width=\"100%\" cellspacing=\"0\" border=\"1\" style=\"text-align:center\"");
-			data.add("|- style=\"background-color:#eee\" | data-sort-type=number |");
-			data.add("! Name !! Damage !! Attack speed !! Durability !! Effects");
+			data.add("|- style=\"background-color:#eee\"");
+			data.add("! Name !! data-sort-type=number | Damage !! Attack speed !! Durability !! Effects");
 			data.add("|-");
 
 			for (BaseSword sword : swords) {

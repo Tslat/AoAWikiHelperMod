@@ -66,8 +66,8 @@ public class CommandPrintBlastersOverview extends CommandBase {
 			blasters = blasters.stream().sorted(Comparator.comparing(blaster -> blaster.getItemStackDisplayName(new ItemStack(blaster)))).collect(Collectors.toList());
 
 			data.add("{| cellpadding=\"5\" class=\"sortable\" width=\"100%\" cellspacing=\"0\" border=\"1\" style=\"text-align:center\"");
-			data.add("|- style=\"background-color:#eee\" | data-sort-type=number |");
-			data.add("! Name !! Damage !! Unholster time !! Fire rate !! Energy cost !! Durability !! Effects");
+			data.add("|- style=\"background-color:#eee\"");
+			data.add("! Name !! data-sort-type=number | Damage !! Unholster time !! Fire rate !! Energy cost !! Durability !! Effects");
 			data.add("|-");
 
 			for (BaseBlaster blaster : blasters) {
