@@ -8,6 +8,8 @@ Download a working build here: http://tslat.net/Hosting/Tslat-AoA/AoAWikiHelperM
 This mod was made to make some automated functions to help with editing and updating the AoA wiki.
 The idea being that if we can have this tool automatically print out information for the wiki in an already-formatted layout, it will be much quicker updating individual pages.
 
+When generating output to file (as most of the commands below do), you'll find the file in the AoAWikiHelper folder inside your configs folder for the current Minecraft folder you're running from.
+
 Check the list of commands ingame to see what each command does.
 Available commands:
 - /printarchergunsoverview [clipboard] - Prints out all AoA archerguns data to file. Optionally copy contents to clipboard.
