@@ -20,7 +20,7 @@ public class CommandPrintStructuresData extends CommandBase {
 
 	@Override
 	public String getUsage(ICommandSender sender) {
-		return "/printstructuresdata [clipboard] - Prints out all AoA structures defaults to file. Must be done with a new config. Optionally copy contents to clipboard.";
+		return "/printstructuresdata Optionals:[clipboard] - Prints out all AoA structures data to file. Must be done with a new config. Optionally copy contents to clipboard.";
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class CommandPrintStructuresData extends CommandBase {
 
 			data.add("{|class=\"wikitable\"");
 			data.add("|-");
-			data.add("! Structure !! Default Value !! Description");
+			data.add("! Image !! Name !! {{tooltip|ID|The ID used to spawn the structure with commands.}} !! Default Spawn Chance !! Description");
 			data.add("|-");
 
 			try {
@@ -60,8 +60,9 @@ public class CommandPrintStructuresData extends CommandBase {
 
 				for (Map.Entry<Field, Object> configField : structureFields.entrySet().stream().sorted(Comparator.comparing(e -> e.getKey().getName())).collect(Collectors.toList())) {
 					int configValue = configField.getKey().getInt(configField.getValue());
+					String structureName = nameToCapitals(configField.getKey().getName());
 
-					data.add("| [[" + nameToCapitals(configField.getKey().getName()) + "]] || " + configValue + " || ");
+					data.add("| [[File:" + structureName + ".png|]] || [[" + structureName + "]] || '''" + structureName.replaceAll(" ", "") + "''' || 1/" + configValue + " || ");
 					data.add("|-");
 				}
 			}
@@ -87,7 +88,8 @@ public class CommandPrintStructuresData extends CommandBase {
 			if (Character.isUpperCase(c))
 				builder.append(" ");
 
-			builder.append(c);
+			if (Character.isAlphabetic(c))
+				builder.append(c);
 		}
 
 		return builder.toString();
