@@ -18,10 +18,6 @@ build
 .gradle
 
 # other
-eclipse
-logs
 libs
+eclipse
 run
-
-# Files from Forge MDK
-forge*changelog.txt

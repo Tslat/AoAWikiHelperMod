@@ -1,7 +1,9 @@
 # AoAWikiHelperMod
-Helper mod for the Advent of Ascension Wiki. This is a WIP port to 1.15.2, not everything below is implemented!
+Helper mod for the Advent of Ascension Wiki
 
 Feel free to contribute via pull-requests to the project. Open to community contributions.
+
+Download a working build here: http://tslat.net/Hosting/Tslat-AoA/AoAWikiHelperMod-1.8.jar
 
 This mod was made to make some automated functions to help with editing and updating the AoA wiki.
 The idea being that if we can have this tool automatically print out information for the wiki in an already-formatted layout, it will be much quicker updating individual pages.
