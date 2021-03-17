@@ -44,17 +44,21 @@ public class TradesWriter {
         enableWriter(fileName);
 
         World world = ServerLifecycleHooks.getCurrentServer().getWorld(DimensionType.OVERWORLD);
-        Method tradesMethod = ObfuscationReflectionHelper.findMethod(AoATrader.class, "getTradesList", Void.class, NonNullList.class);
+        Method tradesMethod = ObfuscationReflectionHelper.findMethod(AoATrader.class, "getTradesList", NonNullList.class);
         HashMap<AoATrader, ArrayList<AoATraderRecipe>> matchedTraderTrades = new HashMap<AoATrader, ArrayList<AoATraderRecipe>>();
 
         for (EntityType entry: ForgeRegistries.ENTITIES.getValues()) {
+
+            if(!entry.getRegistryName().getNamespace().equals("aoa3")) {
+                continue;
+            }
+
             Entity traderCandidate = entry.create(world);
 
             if (AoATrader.class.isAssignableFrom(traderCandidate.getClass())) {
                 AoATrader trader = (AoATrader)traderCandidate;
                 NonNullList<AoATraderRecipe> trades = NonNullList.<AoATraderRecipe>create();
                 ArrayList<AoATraderRecipe> matchedTrades = new ArrayList<AoATraderRecipe>();
-
 
                 try {
                     tradesMethod.invoke(trader, trades);
@@ -115,10 +119,15 @@ public class TradesWriter {
         enableWriter(fileName);
 
         World world = ServerLifecycleHooks.getCurrentServer().getWorld(DimensionType.OVERWORLD);
-        Method tradesMethod = ObfuscationReflectionHelper.findMethod(AoATrader.class, "getTradesList", Void.class, NonNullList.class);
+        Method tradesMethod = ObfuscationReflectionHelper.findMethod(AoATrader.class, "getTradesList", NonNullList.class);
         HashMap<AoATrader, ArrayList<AoATraderRecipe>> matchedTraderTrades = new HashMap<AoATrader, ArrayList<AoATraderRecipe>>();
 
         for (EntityType entry : ForgeRegistries.ENTITIES.getValues()) {
+
+            if(!entry.getRegistryName().getNamespace().equals("aoa3")) {
+                continue;
+            }
+
             Entity traderCandidate = entry.create(world);
 
             if (AoATrader.class.isAssignableFrom(traderCandidate.getClass())) {
@@ -130,6 +139,7 @@ public class TradesWriter {
                     tradesMethod.invoke(trader, trades);
                 }
                 catch (Exception e) {
+                    e.printStackTrace();
                     continue;
                 }
 
@@ -143,6 +153,7 @@ public class TradesWriter {
 
                 if (!matchedTrades.isEmpty())
                     matchedTraderTrades.put(trader, matchedTrades);
+
             }
         }
 
@@ -168,6 +179,7 @@ public class TradesWriter {
         write("|}");
 
         disableWriter();
+
         sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Printed out " + count + " trades from " + traderCount + " traders using ", new File(configDir, fileName), targetStack.getDisplayName().getString(), copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
     }
 

@@ -9,10 +9,10 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.tslat.aoawikihelpermod.trades.PrintTradeOutputsCommand;
 import net.tslat.aoawikihelpermod.trades.PrintTradeUsagesCommand;
+import net.tslat.aoawikihelpermod.trades.PrintTraderTradesCommand;
 import net.tslat.aoawikihelpermod.weaponcategories.*;
-import net.tslat.aoawikihelpermod.trades.PrintAxesOverviewCopy;
-import net.tslat.aoawikihelpermod.weaponcategories.PrintAxesOverviewCopyNew;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,6 +44,10 @@ public class AoAWikiHelperMod
     @SubscribeEvent
     public void serverStarting(FMLServerStartingEvent evt)
     {
+        PrintTraderTradesCommand.register(evt.getCommandDispatcher());
+        PrintTradeUsagesCommand.register(evt.getCommandDispatcher());
+        PrintTradeOutputsCommand.register(evt.getCommandDispatcher());
+
         PrintAxesOverviewCommand.register(evt.getCommandDispatcher());
         PrintBowsOverviewCommand.register(evt.getCommandDispatcher());
         PrintBlastersOverviewCommand.register(evt.getCommandDispatcher());
@@ -59,7 +63,6 @@ public class AoAWikiHelperMod
         PrintStavesOverviewCommand.register(evt.getCommandDispatcher());
         PrintSwordsOverviewCommand.register(evt.getCommandDispatcher());
         PrintThrownWeaponsOverviewCommand.register(evt.getCommandDispatcher());
-        PrintTradeUsagesCommand.register(evt.getCommandDispatcher());
     }
 
     public static File prepConfigDir(String subdirectory) {
