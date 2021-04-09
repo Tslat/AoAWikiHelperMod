@@ -1,17 +1,19 @@
 package net.tslat.aoawikihelpermod.trades;
 
-import net.minecraft.command.ICommandSender;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.common.registry.EntityEntry;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.entity.base.AoATrader;
-import net.tslat.aoa3.entity.base.AoATraderRecipe;
+import net.tslat.aoa3.entity.npc.AoATraderRecipe;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import org.apache.commons.io.IOUtils;
 
@@ -25,248 +27,265 @@ import java.util.HashMap;
 import java.util.stream.Collectors;
 
 public class TradesWriter {
-	public static File configDir = null;
-	private static PrintWriter writer = null;
+    public static File configDir = null;
+    private static PrintWriter writer = null;
 
-	protected static void printTradeOutputs(ICommandSender sender, ItemStack targetStack, boolean copyToClipboard) {
-		if (writer != null) {
-			sender.sendMessage(new TextComponentString("You're already outputting data! Wait a moment and try again"));
+    protected static void printTradeOutputs(ICommandSource sender, ItemStack targetStack, boolean copyToClipboard) {
+        if (writer != null) {
+            sender.sendMessage(new StringTextComponent("You're already outputting data! Wait a moment and try again"));
 
-			return;
-		}
+            return;
+        }
 
-		String fileName = targetStack.getItem().getItemStackDisplayName(targetStack) + " Output Trades.txt";
-		int count = 0;
-		int traderCount = 0;
+        String fileName = targetStack.getItem().getDisplayName(targetStack).getString() + " Output Trades.txt";
+        int count = 0;
+        int traderCount = 0;
 
-		enableWriter(fileName);
+        enableWriter(fileName);
 
-		World world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
-		Method tradesMethod = ObfuscationReflectionHelper.findMethod(AoATrader.class, "getTradesList", Void.class, NonNullList.class);
-		HashMap<AoATrader, ArrayList<AoATraderRecipe>> matchedTraderTrades = new HashMap<AoATrader, ArrayList<AoATraderRecipe>>();
+        World world = ServerLifecycleHooks.getCurrentServer().getWorld(DimensionType.OVERWORLD);
+        Method tradesMethod = ObfuscationReflectionHelper.findMethod(AoATrader.class, "getTradesList", NonNullList.class);
+        HashMap<AoATrader, ArrayList<AoATraderRecipe>> matchedTraderTrades = new HashMap<AoATrader, ArrayList<AoATraderRecipe>>();
 
-		for (EntityEntry entry : ForgeRegistries.ENTITIES.getValuesCollection()) {
-			if (AoATrader.class.isAssignableFrom(entry.getEntityClass())) {
-				AoATrader trader = (AoATrader)entry.newInstance(world);
-				NonNullList<AoATraderRecipe> trades = NonNullList.<AoATraderRecipe>create();
-				ArrayList<AoATraderRecipe> matchedTrades = new ArrayList<AoATraderRecipe>();
+        for (EntityType entry: ForgeRegistries.ENTITIES.getValues()) {
 
-				try {
-					tradesMethod.invoke(trader, trades);
-				}
-				catch (Exception e) {
-					continue;
-				}
+            if(!entry.getRegistryName().getNamespace().equals("aoa3")) {
+                continue;
+            }
 
-				if (trades.isEmpty())
-					continue;
+            Entity traderCandidate = entry.create(world);
 
-				for (AoATraderRecipe recipe : trades) {
-					if (quickCompareStacks(targetStack, recipe.getItemToSell()))
-						matchedTrades.add(recipe);
-				}
+            if (AoATrader.class.isAssignableFrom(traderCandidate.getClass())) {
+                AoATrader trader = (AoATrader)traderCandidate;
+                NonNullList<AoATraderRecipe> trades = NonNullList.<AoATraderRecipe>create();
+                ArrayList<AoATraderRecipe> matchedTrades = new ArrayList<AoATraderRecipe>();
 
-				if (!matchedTrades.isEmpty())
-					matchedTraderTrades.put(trader, matchedTrades);
-			}
-		}
+                try {
+                    tradesMethod.invoke(trader, trades);
+                }
+                catch (Exception e) {
+                    continue;
+                }
 
-		write("{|class=\"wikitable\"");
-		write("|-");
-		write("! Item !! Cost !! Trader");
+                if (trades.isEmpty())
+                    continue;
 
-		for (AoATrader trader : matchedTraderTrades.keySet().stream().sorted(new TraderComparator()).collect(Collectors.toList())) {
-			traderCount++;
+                for (AoATraderRecipe recipe : trades) {
+                    if (quickCompareStacks(targetStack, recipe.getSellingStack()))
+                        matchedTrades.add(recipe);
+                }
 
-			for (AoATraderRecipe trade : matchedTraderTrades.get(trader)) {
-				count++;
+                if (!matchedTrades.isEmpty())
+                    matchedTraderTrades.put(trader, matchedTrades);
+            }
+        }
 
-				ItemStack buyStack1 = trade.getItemToBuy();
-				ItemStack buyStack2 = trade.getSecondItemToBuy();
-				ItemStack sellStack = trade.getItemToSell();
+        write("{|class=\"wikitable\"");
+        write("|-");
+        write("! Item !! Cost !! Trader");
 
-				write("|-");
-				write("|" + buildPictureLink(sellStack) + " " + sellStack.getCount() + " " + buildItemLink(sellStack, targetStack) + " || " + buildPictureLink(buyStack1) + " " + buyStack1.getCount() + " " + buildItemLink(buyStack1, targetStack) + (buyStack2 == ItemStack.EMPTY ? "" : " + " + buildPictureLink(buyStack2) + " " + buyStack2.getCount() + " " + buildItemLink(buyStack2, targetStack)) + " || [[" + trader.getDisplayName().getUnformattedText() + "]]");
-			}
-		}
+        for (AoATrader trader : matchedTraderTrades.keySet().stream().sorted(new TraderComparator()).collect(Collectors.toList())) {
+            traderCount++;
 
-		write("|}");
+            for (AoATraderRecipe trade : matchedTraderTrades.get(trader)) {
+                count++;
 
-		disableWriter();
-		sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Printed out " + count + " trades from " + traderCount + " traders paying out ", new File(configDir, fileName), targetStack.getDisplayName(), copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
-	}
+                ItemStack buyStack1 = trade.getBuyingStackFirst();
+                ItemStack buyStack2 = trade.getBuyingStackSecond();
+                ItemStack sellStack = trade.getSellingStack();
 
-	protected static void printTradeUsages(ICommandSender sender, ItemStack targetStack, boolean copyToClipboard) {
-		if (writer != null) {
-			sender.sendMessage(new TextComponentString("You're already outputting data! Wait a moment and try again"));
+                write("|-");
+                write("|" + buildPictureLink(sellStack) + " " + sellStack.getCount() + " " + buildItemLink(sellStack, targetStack) + " || " + buildPictureLink(buyStack1) + " " + buyStack1.getCount() + " " + buildItemLink(buyStack1, targetStack) + (buyStack2 == ItemStack.EMPTY ? "" : " + " + buildPictureLink(buyStack2) + " " + buyStack2.getCount() + " " + buildItemLink(buyStack2, targetStack)) + " || [[" + trader.getDisplayName().getString() + "]]");
+            }
+        }
 
-			return;
-		}
+        write("|}");
 
-		String fileName = targetStack.getItem().getItemStackDisplayName(targetStack) + " Usage Trades.txt";
-		int count = 0;
-		int traderCount = 0;
+        disableWriter();
+        sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Printed out " + count + " trades from " + traderCount + " traders paying out ", new File(configDir, fileName), targetStack.getDisplayName().getString(), copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
+    }
 
-		enableWriter(fileName);
+    protected static void printTradeUsages(ICommandSource sender, ItemStack targetStack, boolean copyToClipboard) {
+        if (writer != null) {
+            sender.sendMessage(new StringTextComponent("You're already outputting data! Wait a moment and try again"));
 
-		World world = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0);
-		Method tradesMethod = ObfuscationReflectionHelper.findMethod(AoATrader.class, "getTradesList", Void.class, NonNullList.class);
-		HashMap<AoATrader, ArrayList<AoATraderRecipe>> matchedTraderTrades = new HashMap<AoATrader, ArrayList<AoATraderRecipe>>();
+            return;
+        }
 
-		for (EntityEntry entry : ForgeRegistries.ENTITIES.getValuesCollection()) {
-			if (AoATrader.class.isAssignableFrom(entry.getEntityClass())) {
-				AoATrader trader = (AoATrader)entry.newInstance(world);
-				NonNullList<AoATraderRecipe> trades = NonNullList.<AoATraderRecipe>create();
-				ArrayList<AoATraderRecipe> matchedTrades = new ArrayList<AoATraderRecipe>();
+        String fileName = targetStack.getItem().getDisplayName(targetStack).getString() + " Usage Trades.txt";
+        int count = 0;
+        int traderCount = 0;
 
-				try {
-					tradesMethod.invoke(trader, trades);
-				}
-				catch (Exception e) {
-					continue;
-				}
+        enableWriter(fileName);
 
-				if (trades.isEmpty())
-					continue;
+        World world = ServerLifecycleHooks.getCurrentServer().getWorld(DimensionType.OVERWORLD);
+        Method tradesMethod = ObfuscationReflectionHelper.findMethod(AoATrader.class, "getTradesList", NonNullList.class);
+        HashMap<AoATrader, ArrayList<AoATraderRecipe>> matchedTraderTrades = new HashMap<AoATrader, ArrayList<AoATraderRecipe>>();
 
-				for (AoATraderRecipe recipe : trades) {
-					if (quickCompareStacks(targetStack, recipe.getItemToBuy(), recipe.getSecondItemToBuy()))
-						matchedTrades.add(recipe);
-				}
+        for (EntityType entry : ForgeRegistries.ENTITIES.getValues()) {
 
-				if (!matchedTrades.isEmpty())
-					matchedTraderTrades.put(trader, matchedTrades);
-			}
-		}
+            if(!entry.getRegistryName().getNamespace().equals("aoa3")) {
+                continue;
+            }
 
-		write("{|class=\"wikitable\"");
-		write("|-");
-		write("! Item !! Cost !! Trader");
+            Entity traderCandidate = entry.create(world);
 
-		for (AoATrader trader : matchedTraderTrades.keySet().stream().sorted(new TraderComparator()).collect(Collectors.toList())) {
-			traderCount++;
+            if (AoATrader.class.isAssignableFrom(traderCandidate.getClass())) {
+                AoATrader trader = (AoATrader)traderCandidate;
+                NonNullList<AoATraderRecipe> trades = NonNullList.<AoATraderRecipe>create();
+                ArrayList<AoATraderRecipe> matchedTrades = new ArrayList<AoATraderRecipe>();
 
-			for (AoATraderRecipe trade : matchedTraderTrades.get(trader)) {
-				count++;
+                try {
+                    tradesMethod.invoke(trader, trades);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    continue;
+                }
 
-				ItemStack buyStack1 = trade.getItemToBuy();
-				ItemStack buyStack2 = trade.getSecondItemToBuy();
-				ItemStack sellStack = trade.getItemToSell();
+                if (trades.isEmpty())
+                    continue;
 
-				write("|-");
-				write("|" + buildPictureLink(sellStack) + " " + sellStack.getCount() + " " + buildItemLink(sellStack, targetStack) + " || " + buildPictureLink(buyStack1) + " " + buyStack1.getCount() + " " + buildItemLink(buyStack1, targetStack) + (buyStack2 == ItemStack.EMPTY ? "" : " + " + buildPictureLink(buyStack2) + " " + buyStack2.getCount() + " " + buildItemLink(buyStack2, targetStack)) + " || [[" + trader.getDisplayName().getUnformattedText() + "]]");
-			}
-		}
+                for (AoATraderRecipe recipe : trades) {
+                    if (quickCompareStacks(targetStack, recipe.getBuyingStackFirst(), recipe.getBuyingStackSecond()))
+                        matchedTrades.add(recipe);
+                }
 
-		write("|}");
+                if (!matchedTrades.isEmpty())
+                    matchedTraderTrades.put(trader, matchedTrades);
 
-		disableWriter();
-		sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Printed out " + count + " trades from " + traderCount + " traders using ", new File(configDir, fileName), targetStack.getDisplayName(), copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
-	}
+            }
+        }
 
-	protected static void printTraderTrades(ICommandSender sender, String name, NonNullList<AoATraderRecipe> trades, boolean copyToClipboard) {
-		if (writer != null) {
-			sender.sendMessage(new TextComponentString("You're already outputting data! Wait a moment and try again"));
+        write("{|class=\"wikitable\"");
+        write("|-");
+        write("! Item !! Cost !! Trader");
 
-			return;
-		}
+        for (AoATrader trader : matchedTraderTrades.keySet().stream().sorted(new TraderComparator()).collect(Collectors.toList())) {
+            traderCount++;
 
-		String fileName = name + " Trades.txt";
-		int count = 0;
+            for (AoATraderRecipe trade : matchedTraderTrades.get(trader)) {
+                count++;
 
-		enableWriter(fileName);
+                ItemStack buyStack1 = trade.getBuyingStackFirst();
+                ItemStack buyStack2 = trade.getBuyingStackSecond();
+                ItemStack sellStack = trade.getSellingStack();
 
-		write("{|class=\"wikitable\"");
-		write("|-");
-		write("! Price !! Item");
+                write("|-");
+                write("|" + buildPictureLink(sellStack) + " " + sellStack.getCount() + " " + buildItemLink(sellStack, targetStack) + " || " + buildPictureLink(buyStack1) + " " + buyStack1.getCount() + " " + buildItemLink(buyStack1, targetStack) + (buyStack2 == ItemStack.EMPTY ? "" : " + " + buildPictureLink(buyStack2) + " " + buyStack2.getCount() + " " + buildItemLink(buyStack2, targetStack)) + " || [[" + trader.getDisplayName().getString() + "]]");
+            }
+        }
 
-		for (AoATraderRecipe recipe : trades) {
-			count++;
-			write("|-");
+        write("|}");
 
-			ItemStack firstBuyStack = recipe.getItemToBuy();
-			ItemStack secondBuyStack = recipe.getSecondItemToBuy();
-			ItemStack sellStack = recipe.getItemToSell();
+        disableWriter();
 
-			write("|" + buildPictureLink(firstBuyStack) + " " + firstBuyStack.getCount() + " " + buildItemLink(firstBuyStack, null) + (secondBuyStack == ItemStack.EMPTY ? "" : " + " + buildPictureLink(secondBuyStack) + " " + secondBuyStack.getCount() + " " + buildItemLink(secondBuyStack, null)));
-			write("|" + buildPictureLink(sellStack) + " " + sellStack.getCount() + " " + buildItemLink(sellStack, null));
-		}
+        sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Printed out " + count + " trades from " + traderCount + " traders using ", new File(configDir, fileName), targetStack.getDisplayName().getString(), copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
+    }
 
-		write("|}");
+    protected static void printTraderTrades(ICommandSource sender, String name, NonNullList<AoATraderRecipe> trades, boolean copyToClipboard) {
+        if (writer != null) {
+            sender.sendMessage(new StringTextComponent("You're already outputting data! Wait a moment and try again"));
 
-		disableWriter();
-		sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Printed out " + count + " trades from ", new File(configDir, fileName), name, copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
-	}
+            return;
+        }
 
-	private static boolean quickCompareStacks(ItemStack stack1, ItemStack... compareStacks) {
-		for (ItemStack stack : compareStacks) {
-			if (stack1.getItem() == stack.getItem() && stack1.getItem().getItemStackDisplayName(stack1).equals(stack.getItem().getItemStackDisplayName(stack)))
-				return true;
-		}
+        String fileName = name + " Trades.txt";
+        int count = 0;
 
-		return false;
-	}
+        enableWriter(fileName);
 
-	private static String buildPictureLink(ItemStack stack) {
-		return "[[File:" + stack.getItem().getItemStackDisplayName(stack) + ".png" + (stack.getItem() instanceof ItemBlock ? "|32px" : "") + "]]";
-	}
+        write("{|class=\"wikitable\"");
+        write("|-");
+        write("! Price !! Item");
 
-	private static String buildItemLink(ItemStack item, @Nullable ItemStack targetStack) {
-		String stackName = item.getItem().getItemStackDisplayName(item);
-		String pluralName = item.getCount() > 1 && !stackName.endsWith("s") && !stackName.endsWith("y") ? stackName.endsWith("x") || stackName.endsWith("o") ? stackName + "es" : stackName + "s" : stackName;
-		boolean shouldLink = targetStack == null || item.getItem() != targetStack.getItem();
-		StringBuilder builder = new StringBuilder(shouldLink ? "[[" : "");
+        for (AoATraderRecipe recipe : trades) {
+            count++;
+            write("|-");
 
-		if (item.getItem().getRegistryName().getResourceDomain().equals("minecraft")) {
-			builder.append("mcw:");
-			builder.append(stackName);
-			builder.append("|");
-		}
-		else if (shouldLink && !pluralName.equals(stackName)) {
-			builder.append(stackName);
-			builder.append("|");
-		}
+            ItemStack firstBuyStack = recipe.getBuyingStackFirst();
+            ItemStack secondBuyStack = recipe.getBuyingStackSecond();
+            ItemStack sellStack = recipe.getSellingStack();
 
-		builder.append(pluralName);
+            write("|" + buildPictureLink(firstBuyStack) + " " + firstBuyStack.getCount() + " " + buildItemLink(firstBuyStack, null) + (secondBuyStack == ItemStack.EMPTY ? "" : " + " + buildPictureLink(secondBuyStack) + " " + secondBuyStack.getCount() + " " + buildItemLink(secondBuyStack, null)));
+            write("|" + buildPictureLink(sellStack) + " " + sellStack.getCount() + " " + buildItemLink(sellStack, null));
+        }
 
-		if (shouldLink)
-			builder.append("]]");
+        write("|}");
 
-		return builder.toString();
-	}
+        disableWriter();
+        sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Printed out " + count + " trades from ", new File(configDir, fileName), name, copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
+    }
 
-	private static class TraderComparator implements Comparator<AoATrader> {
-		@Override
-		public int compare(AoATrader trader1, AoATrader trader2) {
-			return trader1.getDisplayName().getUnformattedText().compareTo(trader2.getDisplayName().getUnformattedText());
-		}
-	}
+    private static boolean quickCompareStacks(ItemStack stack1, ItemStack... compareStacks) {
+        for (ItemStack stack : compareStacks) {
+            if (stack1.getItem() == stack.getItem() && stack1.getItem().getDisplayName(stack1).getString().equals(stack.getItem().getDisplayName(stack).getString()))
+                return true;
+        }
 
-	private static void enableWriter(final String fileName) {
-		configDir = AoAWikiHelperMod.prepConfigDir("Trades");
+        return false;
+    }
 
-		File streamFile = new File(configDir, fileName);
+    private static String buildPictureLink(ItemStack stack) {
+        return "[[File:" + stack.getItem().getDisplayName(stack).getString() + ".png" + (stack.getItem() instanceof BlockItem ? "|32px" : "") + "]]";
+    }
 
-		try {
-			if (streamFile.exists())
-				streamFile.delete();
+    private static String buildItemLink(ItemStack item, @Nullable ItemStack targetStack) {
+        String stackName = item.getItem().getDisplayName(item).getString();
+        String pluralName = item.getCount() > 1 && !stackName.endsWith("s") && !stackName.endsWith("y") ? stackName.endsWith("x") || stackName.endsWith("o") ? stackName + "es" : stackName + "s" : stackName;
+        boolean shouldLink = targetStack == null || item.getItem() != targetStack.getItem();
+        StringBuilder builder = new StringBuilder(shouldLink ? "[[" : "");
 
-			streamFile.createNewFile();
+        if (item.getItem().getRegistryName().getNamespace().equals("minecraft")) {
+            builder.append("mcw:");
+            builder.append(stackName);
+            builder.append("|");
+        }
+        else if (shouldLink && !pluralName.equals(stackName)) {
+            builder.append(stackName);
+            builder.append("|");
+        }
 
-			writer = new PrintWriter(streamFile);
-		}
-		catch (Exception e) {}
-	}
+        builder.append(pluralName);
 
-	private static void write(String line) {
-		if (writer != null)
-			writer.println(line);
-	}
+        if (shouldLink)
+            builder.append("]]");
 
-	private static void disableWriter() {
-		if (writer != null)
-			IOUtils.closeQuietly(writer);
+        return builder.toString();
+    }
 
-		writer = null;
-	}
+    private static class TraderComparator implements Comparator<AoATrader> {
+        @Override
+        public int compare(AoATrader trader1, AoATrader trader2) {
+            return trader1.getDisplayName().getString().compareTo(trader2.getDisplayName().getString());
+        }
+    }
+
+    private static void enableWriter(final String fileName) {
+        configDir = AoAWikiHelperMod.prepConfigDir("Trades");
+
+        File streamFile = new File(configDir, fileName);
+
+        try {
+            if (streamFile.exists())
+                streamFile.delete();
+
+            streamFile.createNewFile();
+
+            writer = new PrintWriter(streamFile);
+        }
+        catch (Exception e) {}
+    }
+
+    private static void write(String line) {
+        if (writer != null)
+            writer.println(line);
+    }
+
+    private static void disableWriter() {
+        if (writer != null)
+            IOUtils.closeQuietly(writer);
+
+        writer = null;
+    }
 }

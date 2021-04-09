@@ -1,6 +1,6 @@
 package net.tslat.aoawikihelpermod.weaponcategories;
 
-import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.PlayerEntity;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import org.apache.commons.io.IOUtils;
@@ -10,45 +10,46 @@ import java.io.PrintWriter;
 import java.util.List;
 
 public class CategoryTableWriter {
-	public static File configDir = null;
-	private static PrintWriter writer = null;
+    public static File configDir = null;
+    private static PrintWriter writer = null;
 
-	public static void writeData(String name, List<String> data, ICommandSender sender, boolean copyToClipboard) {
-		String fileName = name + " Printout " + AdventOfAscension.version + ".txt";
+    public static void writeData(String name, List<String> data, PlayerEntity sender, boolean copyToClipboard) {
+        String fileName = name + " Printout " + AdventOfAscension.VERSION + ".txt";
 
-		enableWriter(fileName);
+        enableWriter(fileName);
 
-		data.forEach(CategoryTableWriter::write);
+        data.forEach(CategoryTableWriter::write);
 
-		disableWriter();
-		sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Generated data file: ", new File(configDir, fileName), name, copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
-	}
+        disableWriter();
 
-	private static void enableWriter(final String fileName) {
-		configDir = AoAWikiHelperMod.prepConfigDir("Overview Pages Printouts");
+        sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Generated data file: ", new File(configDir, fileName), name, copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
+    }
 
-		File streamFile = new File(configDir, fileName);
+    private static void enableWriter(final String fileName) {
+        configDir = AoAWikiHelperMod.prepConfigDir("Overview Pages Printouts");
 
-		try {
-			if (streamFile.exists())
-				streamFile.delete();
+        File streamFile = new File(configDir, fileName);
 
-			streamFile.createNewFile();
+        try {
+            if (streamFile.exists())
+                streamFile.delete();
 
-			writer = new PrintWriter(streamFile);
-		}
-		catch (Exception e) {}
-	}
+            streamFile.createNewFile();
 
-	private static void disableWriter() {
-		if (writer != null)
-			IOUtils.closeQuietly(writer);
+            writer = new PrintWriter(streamFile);
+        }
+        catch (Exception e) {}
+    }
 
-		writer = null;
-	}
+    private static void disableWriter() {
+        if (writer != null)
+            IOUtils.closeQuietly(writer);
 
-	private static void write(String line) {
-		if (writer != null)
-			writer.println(line);
-	}
+        writer = null;
+    }
+
+    private static void write(String line) {
+        if (writer != null)
+            writer.println(line);
+    }
 }
