@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod.trades;
+package net.tslat.aoawikihelpermod.recipes;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -8,13 +8,15 @@ import net.minecraft.command.Commands;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
+import net.tslat.aoawikihelpermod.trades.TradesWriter;
 
-public class PrintTradeOutputsCommand {
+public class PrintItemUsageRecipesCommand {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(
-                Commands.literal("printtradeoutputs")
+                Commands.literal("printusagerecipes")
                         .then(Commands.argument("copyToClipboard", BoolArgumentType.bool())
                                 .executes(commandContext -> {
                                     print(commandContext, BoolArgumentType.getBool(commandContext, "copyToClipboard"));
@@ -57,7 +59,7 @@ public class PrintTradeOutputsCommand {
                 copyToClipboard = false;
             }
 
-            TradesWriter.printTradeOutputs(sender, targetStack, copyToClipboard);
+            RecipeWriter.printItemRecipeUsages(targetStack, sender, world.getRecipeManager(), copyToClipboard);
         }
     }
 }

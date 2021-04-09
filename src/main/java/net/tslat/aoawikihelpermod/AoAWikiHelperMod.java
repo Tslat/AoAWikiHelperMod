@@ -3,12 +3,17 @@ package net.tslat.aoawikihelpermod;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.common.LoaderException;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.tslat.aoawikihelpermod.recipes.*;
 import net.tslat.aoawikihelpermod.trades.PrintTradeOutputsCommand;
 import net.tslat.aoawikihelpermod.trades.PrintTradeUsagesCommand;
 import net.tslat.aoawikihelpermod.trades.PrintTraderTradesCommand;
@@ -28,9 +33,10 @@ import java.nio.charset.StandardCharsets;
 @Mod("aoawikihelpermod")
 public class AoAWikiHelperMod
 {
+    private static ModContainer aoaModContainer;
     private static File configDir;
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger();
 
     public AoAWikiHelperMod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
@@ -38,12 +44,22 @@ public class AoAWikiHelperMod
     }
 
     public void setup(FMLCommonSetupEvent event) {
+        aoaModContainer = ModList.get().getModContainerById("aoa3").orElse(null);
         configDir = new File(FMLPaths.CONFIGDIR.get().toFile(), "AoAWikiHelper");
     }
 
     @SubscribeEvent
     public void serverStarting(FMLServerStartingEvent evt)
     {
+        RecipeWriter.scrapeForRecipes(aoaModContainer);
+
+        RecipeWriter.registerRecipeInterface("InfusionRecipe", RecipeInterfaceInfusion.class);
+        RecipeWriter.registerRecipeInterface("ShapedRecipe", RecipeInterfaceShaped.class);
+        RecipeWriter.registerRecipeInterface("ShapelessRecipe", RecipeInterfaceShapeless.class);
+
+        PrintItemRecipesCommand.register(evt.getCommandDispatcher());
+        PrintItemUsageRecipesCommand.register(evt.getCommandDispatcher());
+
         PrintTraderTradesCommand.register(evt.getCommandDispatcher());
         PrintTradeUsagesCommand.register(evt.getCommandDispatcher());
         PrintTradeOutputsCommand.register(evt.getCommandDispatcher());

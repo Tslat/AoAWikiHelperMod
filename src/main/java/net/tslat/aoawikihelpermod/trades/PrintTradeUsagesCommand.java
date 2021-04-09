@@ -46,7 +46,7 @@ public class PrintTradeUsagesCommand {
                 return;
             }
             else if (!targetStack.getItem().getRegistryName().getNamespace().equals("aoa3")) {
-                sender.sendMessage(new StringTextComponent("The item you are holding is not from AoA! You are holding: " + targetStack.getDisplayName() + " (" + targetStack.getItem().getRegistryName().toString() + ")"));
+                sender.sendMessage(new StringTextComponent("The item you are holding is not from AoA! You are holding: " + targetStack.getDisplayName().getString() + " (" + targetStack.getItem().getRegistryName().toString() + ")"));
 
                 return;
             }
