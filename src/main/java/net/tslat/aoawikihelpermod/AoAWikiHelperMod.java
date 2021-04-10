@@ -52,11 +52,11 @@ public class AoAWikiHelperMod
     public void serverStarting(FMLServerStartingEvent evt)
     {
         RecipeWriter.scrapeForRecipes(aoaModContainer);
-
         RecipeWriter.registerRecipeInterface("InfusionRecipe", RecipeInterfaceInfusion.class);
         RecipeWriter.registerRecipeInterface("ShapedRecipe", RecipeInterfaceShaped.class);
         RecipeWriter.registerRecipeInterface("ShapelessRecipe", RecipeInterfaceShapeless.class);
 
+        PrintInfusionEnchantsCommand.register(evt.getCommandDispatcher());
         PrintItemRecipesCommand.register(evt.getCommandDispatcher());
         PrintItemUsageRecipesCommand.register(evt.getCommandDispatcher());
 
