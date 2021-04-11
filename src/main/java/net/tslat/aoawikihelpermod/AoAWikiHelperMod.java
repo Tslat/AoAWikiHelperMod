@@ -13,6 +13,9 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.tslat.aoawikihelpermod.dataprintouts.PrintEntityDataCommand;
+import net.tslat.aoawikihelpermod.dataprintouts.PrintHunterCreatureDataCommand;
+import net.tslat.aoawikihelpermod.dataprintouts.PrintWeaponsDataCommand;
 import net.tslat.aoawikihelpermod.recipes.*;
 import net.tslat.aoawikihelpermod.trades.PrintTradeOutputsCommand;
 import net.tslat.aoawikihelpermod.trades.PrintTradeUsagesCommand;
@@ -22,6 +25,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.io.BufferedReader;
@@ -55,6 +59,10 @@ public class AoAWikiHelperMod
         RecipeWriter.registerRecipeInterface("InfusionRecipe", RecipeInterfaceInfusion.class);
         RecipeWriter.registerRecipeInterface("ShapedRecipe", RecipeInterfaceShaped.class);
         RecipeWriter.registerRecipeInterface("ShapelessRecipe", RecipeInterfaceShapeless.class);
+
+        PrintEntityDataCommand.register(evt.getCommandDispatcher());
+        PrintHunterCreatureDataCommand.register(evt.getCommandDispatcher());
+        PrintWeaponsDataCommand.register(evt.getCommandDispatcher());
 
         PrintInfusionEnchantsCommand.register(evt.getCommandDispatcher());
         PrintItemRecipesCommand.register(evt.getCommandDispatcher());
@@ -122,6 +130,28 @@ public class AoAWikiHelperMod
         }
 
         return false;
+    }
+
+    public static String capitaliseAllWords(@Nonnull String input) {
+        if (input.isEmpty())
+            return input;
+
+        StringBuilder buffer = new StringBuilder(input.length()).append(Character.toTitleCase(input.charAt(0)));
+
+        for (int i = 1; i < input.length(); i++) {
+            char ch = input.charAt(i);
+
+            if (Character.isWhitespace(ch)) {
+                buffer.append(ch);
+                buffer.append(Character.toTitleCase(input.charAt(i + 1)));
+                i++;
+            }
+            else {
+                buffer.append(ch);
+            }
+        }
+
+        return buffer.toString();
     }
 
 }
