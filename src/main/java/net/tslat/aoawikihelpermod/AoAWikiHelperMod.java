@@ -16,6 +16,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import net.tslat.aoawikihelpermod.dataprintouts.PrintEntityDataCommand;
 import net.tslat.aoawikihelpermod.dataprintouts.PrintHunterCreatureDataCommand;
 import net.tslat.aoawikihelpermod.dataprintouts.PrintWeaponsDataCommand;
+import net.tslat.aoawikihelpermod.loottables.PrintLootTableCommand;
 import net.tslat.aoawikihelpermod.recipes.*;
 import net.tslat.aoawikihelpermod.trades.PrintTradeOutputsCommand;
 import net.tslat.aoawikihelpermod.trades.PrintTradeUsagesCommand;
@@ -63,6 +64,8 @@ public class AoAWikiHelperMod
         PrintEntityDataCommand.register(evt.getCommandDispatcher());
         PrintHunterCreatureDataCommand.register(evt.getCommandDispatcher());
         PrintWeaponsDataCommand.register(evt.getCommandDispatcher());
+
+        PrintLootTableCommand.register(evt.getCommandDispatcher());
 
         PrintInfusionEnchantsCommand.register(evt.getCommandDispatcher());
         PrintItemRecipesCommand.register(evt.getCommandDispatcher());

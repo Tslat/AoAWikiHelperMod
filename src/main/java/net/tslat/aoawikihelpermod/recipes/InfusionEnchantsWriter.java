@@ -57,7 +57,6 @@ public class InfusionEnchantsWriter {
         ArrayList<Integer> enchantLevelValues = new ArrayList<Integer>();
 
         for (InfusionRecipe recipe : imbuingRecipes) {
-            System.out.println(recipe.getId());
             EnchantmentData enchData = getEnchantmentData(recipe);
 
             if (enchData.enchantment == lastEnchantRow) {

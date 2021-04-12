@@ -84,7 +84,8 @@ public class DataPrintoutWriter {
 
         disableWriter();
         sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Printed out " + entities.size() + " entities that drop ", new File(configDir, fileName), targetStack.getDisplayName(), copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
-    }*/
+    }
+    */
 
     public static void writeData(String name, List<String> data, ICommandSource sender, boolean copyToClipboard) {
         String fileName = name + " Printout " + AdventOfAscension.VERSION + ".txt";
