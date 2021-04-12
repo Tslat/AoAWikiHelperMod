@@ -55,7 +55,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		List<Item> axes = ObjectHelper.scrapeRegistryForItems(item -> item.getRegistryName().getNamespace().equals("aoa3") && item instanceof AxeItem);
 
 		try (PrintHelper printHelper = PrintHelper.open("Overview - Axes")) {
-			
+
 		}
 
 		return 1;
