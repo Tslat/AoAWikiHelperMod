@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="MIT"
+
+[[mods]]
+modId="aoawikihelpermod"
+version="2.0"
+displayName="AoA WikiHelper Mod"
+credits="Silencer, for the everlasting wiki support for AoA. Fujino and Sonicwave for contributions to this mod and its continuation."
+authors="Tslat"
+description='''AoA WikiHelper Mod is a utility mod designed to interface with AoA and provide wiki-relevant info or pre-formatted data for use on the official wiki:
+https://adventofascension.gamepedia.com'''
+
+[[dependencies.aoawikihelpermod]]
+    modId="forge"
+    mandatory=true
+    versionRange="[36,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.aoawikihelpermod]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.16.5,)"
+    ordering="NONE"
+    side="BOTH"

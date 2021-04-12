@@ -1,69 +1,77 @@
 buildscript {
     repositories {
-        jcenter()
-        maven {
-            url "https://files.minecraftforge.net/maven"
-        }
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
     }
 }
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
-apply plugin: 'net.minecraftforge.gradle.forge'
-//Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+version = mod_version
+group = 'net.tslat.aoawikihelpermod'
+archivesBaseName = 'aoawikihelpermod'
 
-version = "1.8"
-group = "net.tslat.aoawikihelpermod" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "aoawikihelpermod"
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
-sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
-
-compileJava {
-    sourceCompatibility = targetCompatibility = '1.8'
-}
-
-
-
+println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    version = "1.12.2-14.23.5.2846"
-    runDir = "run"
-    
-    // the mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   snapshot are built nightly.
-    // stable_#            stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not always work.
-    // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings = "snapshot_20171003"
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+    mappings channel: mappings_channel, version: mappings_version
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            taskName 'Client'
+
+            mods {
+                aoawikihelpermod {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
 }
 
 repositories {
-    maven {
-        url "https://dl.bintray.com/tslat/aoa3/"
+    maven { // Cursemaven for Curseforge hosted dependencies. Skip official CF maven for legibility reasons
+        name = "CurseMaven"
+        url = "https://www.cursemaven.com"
+
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+
+    maven { // Mojmap w/ params & docs until forge implements it natively
+        name = "Thiakill Maven"
+        url = "https://maven.thiakil.com/"
     }
 }
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    compileOnly ("net.tslat.aoa3:aoa3:3.3.1") {transitive = false}
-    runtime files("./libs/AoA3-3.3.1.jar")
+    minecraft "net.minecraftforge:forge:$project.minecraft_version-$project.forge_version"
+    implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:3272095")
 }
 
-processResources {
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-                
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
-    }
-        
-    // copy everything else except the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": "aoawikihelpermod",
+            "Specification-Vendor": "Tslat",
+            "Specification-Version": "2.0",
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Vendor" :"Tslat",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
     }
 }
+
+jar.finalizedBy('reobfJar')
