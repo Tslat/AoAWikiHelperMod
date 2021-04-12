@@ -23,3 +23,9 @@ https://adventofascension.gamepedia.com'''
     versionRange="[1.16.5,)"
     ordering="NONE"
     side="BOTH"
+[[dependencies.aoawikihelpermod]]
+    modId="aoa3"
+    mandatory=true
+    versionRange="[3.5,)"
+    ordering="NONE"
+    side="BOTH"
