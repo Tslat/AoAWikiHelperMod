@@ -18,6 +18,7 @@ import net.tslat.aoawikihelpermod.dataprintouts.PrintEntityDataCommand;
 import net.tslat.aoawikihelpermod.dataprintouts.PrintHunterCreatureDataCommand;
 import net.tslat.aoawikihelpermod.dataprintouts.PrintWeaponsDataCommand;
 import net.tslat.aoawikihelpermod.loottables.PrintLootTableCommand;
+import net.tslat.aoawikihelpermod.loottables.TestLootTableCommand;
 import net.tslat.aoawikihelpermod.recipes.*;
 import net.tslat.aoawikihelpermod.trades.PrintTradeOutputsCommand;
 import net.tslat.aoawikihelpermod.trades.PrintTradeUsagesCommand;
@@ -68,6 +69,7 @@ public class AoAWikiHelperMod
         PrintWeaponsDataCommand.register(evt.getCommandDispatcher());
 
         PrintLootTableCommand.register(evt.getCommandDispatcher());
+        TestLootTableCommand.register(evt.getCommandDispatcher());
 
         PrintInfusionEnchantsCommand.register(evt.getCommandDispatcher());
         PrintItemRecipesCommand.register(evt.getCommandDispatcher());
