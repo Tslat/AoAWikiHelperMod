@@ -37,7 +37,7 @@ public class DataPrintoutWriter {
             return;
         }
 
-        String fileName = targetStack.getItem().getDisplayName(targetStack).getString() + " Output Trades.txt";
+        String fileName = targetStack.getItem().getDisplayName(targetStack).getString() + " Entity Sources.txt";
         ArrayList<String> entities = new ArrayList<String>();
         World world = ServerLifecycleHooks.getCurrentServer().getWorld(DimensionType.OVERWORLD);
         enableWriter(fileName);
