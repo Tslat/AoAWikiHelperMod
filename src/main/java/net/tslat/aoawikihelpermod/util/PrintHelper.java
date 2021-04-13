@@ -63,4 +63,17 @@ public class PrintHelper implements AutoCloseable {
 	public void close() {
 		this.writer.close();
 	}
+
+	public static class TablePrintHelper extends PrintHelper {
+		private static final String HEAD = "{| cellpadding=\"5\" width=\"100%\" cellspacing=\"0\" border=\"1\" style=\"background-color:#eee\"";
+		private static final String GAP = "|-";
+
+		private final int columns;
+
+		public TablePrintHelper(String fileName, String... columns) throws IOException {
+			super(fileName);
+
+			this.columns = columns.length;
+		}
+	}
 }
