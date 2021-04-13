@@ -1,6 +1,8 @@
 package net.tslat.aoawikihelpermod.dataprintouts;
 
 import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -11,8 +13,10 @@ import net.minecraft.world.storage.loot.LootPool;
 import net.minecraft.world.storage.loot.LootTable;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
+import net.tslat.aoawikihelpermod.loottables.AccessibleLootTable;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
@@ -26,7 +30,6 @@ public class DataPrintoutWriter {
     public static File configDir = null;
     private static PrintWriter writer = null;
 
-    /*
     public static void writeItemEntityDropsList(ICommandSource sender, ItemStack targetStack, boolean copyToClipboard) {
         if (writer != null) {
             sender.sendMessage(new StringTextComponent("You're already outputting data! Wait a moment and try again"));
@@ -37,24 +40,30 @@ public class DataPrintoutWriter {
         String fileName = targetStack.getItem().getDisplayName(targetStack).getString() + " Output Trades.txt";
         ArrayList<String> entities = new ArrayList<String>();
         World world = ServerLifecycleHooks.getCurrentServer().getWorld(DimensionType.OVERWORLD);
-        Method lootTableMethod = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_184647_J", ResourceLocation.class);
-
         enableWriter(fileName);
 
-        for (EntityEntry entry : ForgeRegistries.ENTITIES.getValuesCollection()) {
-            if (!LivingEntity.class.isAssignableFrom(entry.getEntityClass()))
-                continue;
+        for (EntityType entry : ForgeRegistries.ENTITIES.getValues()) {
 
-            LivingEntity entity = (LivingEntity)entry.newInstance(world);
+            if(!entry.getRegistryName().getNamespace().equals("aoa3")) {
+                continue;
+            }
+
+            Entity entity = entry.create(world);
+
+            if(!(entity instanceof LivingEntity)) {
+                continue;
+            }
+
+            LivingEntity livingEntity = (LivingEntity)entity;
             LootTable table;
 
             try {
-                ResourceLocation tableLocation = (ResourceLocation)lootTableMethod.invoke(entity);
+                ResourceLocation tableLocation = livingEntity.getLootTableResourceLocation();
 
                 if (tableLocation == null)
                     continue;
 
-                table = world.getLootTableManager().getLootTableFromLocation(tableLocation);
+                table = ServerLifecycleHooks.getCurrentServer().getLootTableManager().getLootTableFromLocation(tableLocation);
             }
             catch (Exception e) {
                 continue;
@@ -69,7 +78,7 @@ public class DataPrintoutWriter {
             for (AccessibleLootTable.AccessibleLootPool pool : accessibleTable.pools) {
                 for (AccessibleLootTable.AccessibleLootEntry poolEntry : pool.lootEntries) {
                     if (poolEntry.item == targetStack.getItem())
-                        entities.add(entity.getDisplayName().getUnformattedText());
+                        entities.add(entity.getDisplayName().getString());
                 }
             }
         }
@@ -83,9 +92,8 @@ public class DataPrintoutWriter {
         entities.forEach(e -> write("* [[" + e + "]]"));
 
         disableWriter();
-        sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Printed out " + entities.size() + " entities that drop ", new File(configDir, fileName), targetStack.getDisplayName(), copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
+        sender.sendMessage(AoAWikiHelperMod.generateInteractiveMessagePrintout("Printed out " + entities.size() + " entities that drop ", new File(configDir, fileName), targetStack.getDisplayName().getString(), copyToClipboard && AoAWikiHelperMod.copyFileToClipboard(new File(configDir, fileName)) ? ". Copied to clipboard" : ""));
     }
-    */
 
     public static void writeData(String name, List<String> data, ICommandSource sender, boolean copyToClipboard) {
         String fileName = name + " Printout " + AdventOfAscension.VERSION + ".txt";

@@ -13,6 +13,7 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.tslat.aoawikihelpermod.dataprintouts.PrintEntitiesDropListCommand;
 import net.tslat.aoawikihelpermod.dataprintouts.PrintEntityDataCommand;
 import net.tslat.aoawikihelpermod.dataprintouts.PrintHunterCreatureDataCommand;
 import net.tslat.aoawikihelpermod.dataprintouts.PrintWeaponsDataCommand;
@@ -61,6 +62,7 @@ public class AoAWikiHelperMod
         RecipeWriter.registerRecipeInterface("ShapedRecipe", RecipeInterfaceShaped.class);
         RecipeWriter.registerRecipeInterface("ShapelessRecipe", RecipeInterfaceShapeless.class);
 
+        PrintEntitiesDropListCommand.register(evt.getCommandDispatcher());
         PrintEntityDataCommand.register(evt.getCommandDispatcher());
         PrintHunterCreatureDataCommand.register(evt.getCommandDispatcher());
         PrintWeaponsDataCommand.register(evt.getCommandDispatcher());

@@ -1,5 +1,6 @@
 package net.tslat.aoawikihelpermod.loottables;
 
+import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
@@ -8,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.crafting.FurnaceRecipe;
 import net.minecraft.item.crafting.IRecipeType;
+import net.minecraft.tags.Tag;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
@@ -120,14 +122,29 @@ public class AccessibleLootTable {
                         notesBuilder.append("This pool will only roll if the player has at least level ").append(level).append(" ").append(skill).append(". ");
                     }
                     else if (condition instanceof HoldingItem) {
-                        Item item = ObfuscationReflectionHelper.getPrivateValue(HoldingItem.class, (HoldingItem)condition, "tool");
+
+                        ItemPredicate predicate = ObfuscationReflectionHelper.getPrivateValue(HoldingItem.class, (HoldingItem)condition, "predicate");
                         Hand hand = ObfuscationReflectionHelper.getPrivateValue(HoldingItem.class, (HoldingItem)condition, "hand");
+
+                        Item item = ObfuscationReflectionHelper.getPrivateValue(ItemPredicate.class, predicate, "field_200313_b");
+                        Tag<Item> tag = ObfuscationReflectionHelper.getPrivateValue(ItemPredicate.class, predicate, "field_200314_c");
 
                         if (firstConditionPrinted)
                             notesBuilder.append("<br/>");
 
-                        notesBuilder.append("This pool will only roll if the player is holding ").append(item.getDisplayName(new ItemStack(item)).toString());
+                        String itemRequired;
 
+                        if(item != null && tag != null) {
+                            itemRequired = "...can an ItemPredicate even have both a tag and an item?";
+                        } else if (item != null) {
+                            itemRequired = item.getDisplayName(new ItemStack(item)).toString();
+                        } if (tag != null) {
+                            itemRequired = "an item with tag " + tag.getId();
+                        } else {
+                            itemRequired = "...nothing...this probably shouldn't happen";
+                        }
+
+                        notesBuilder.append("This pool will only roll if the player is holding ").append(itemRequired);
                         if (hand != null)
                             notesBuilder.append(" in the ").append(hand.toString().toLowerCase().replace("_", ""));
 
