@@ -66,7 +66,7 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
         else if (json.has("infusion")) {
             JsonObject enchantObj = JSONUtils.getJsonObject(json, "infusion");
             enchant = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(JSONUtils.getString(enchantObj, "enchantment")));
-            enchantLevel = JSONUtils.getInt(enchantObj, "level");
+            enchantLevel = JSONUtils.getInt(enchantObj, "level", 1);
             inputItem = null;
         }
         else {
@@ -276,7 +276,8 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
         if (enchant == null)
             return super.buildSummaryLine(targetStack, matchedRecipes);
 
-        return "[[" + (enchant.getRegistryName().getNamespace().equals("minecraft") ? "mcw:" : "") + I18n.format(enchant.getName()) + "|" + "IV" + "]] || " + getImbuingApplicableTo(enchant) + " || " + buildIngredientSummaryLine(targetStack, matchedRecipes) + " || {{Infusion";
+        String enchantName = I18n.format(enchant.getName());
+        return "[[" + (enchant.getRegistryName().getNamespace().equals("minecraft") ? "mcw:" : "") + enchantName + "|" + enchantName + " " + lazyNumberToRoman(this.enchantLevel) + "]] || " + getImbuingApplicableTo(enchant) + " || " + buildIngredientSummaryLine(targetStack, matchedRecipes) + " || {{Infusion";
     }
 
     @Override
@@ -354,6 +355,35 @@ public class RecipeInterfaceInfusion extends IRecipeInterface {
                 return "Any item";
             default:
                 return "?";
+        }
+    }
+
+    private static String lazyNumberToRoman(int number) {
+        switch (number) {
+            case 0:
+                return "0";
+            case 1:
+                return "I";
+            case 2:
+                return "II";
+            case 3:
+                return "III";
+            case 4:
+                return "IV";
+            case 5:
+                return "V";
+            case 6:
+                return "VI";
+            case 7:
+                return "VII";
+            case 8:
+                return "VIII";
+            case 9:
+                return "IX";
+            case 10:
+                return "X";
+            default:
+                return String.valueOf(number);
         }
     }
 }
