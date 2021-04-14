@@ -2,8 +2,17 @@ package net.tslat.aoawikihelpermod.util;
 
 import com.ibm.icu.text.PluralFormat;
 import net.minecraft.util.IItemProvider;
+import net.tslat.aoa3.util.NumberUtil;
 
 public class FormattingHelper {
+	public static String bold(String text) {
+		return "'''" + text + "'''";
+	}
+
+	public static String healthValue(float value) {
+		return "{{hp|" + NumberUtil.roundToNthDecimalPlace(value, 3) + "}}";
+	}
+
 	public static String createImageBlock(String name) {
 		return createImageBlock(name, 32);
 	}

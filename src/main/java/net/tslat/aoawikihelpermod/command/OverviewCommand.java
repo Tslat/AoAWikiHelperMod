@@ -8,8 +8,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.Item;
+import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.PrintHelper;
 
@@ -51,14 +53,27 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printAxes(CommandContext<CommandSource> cmd) throws CommandSyntaxException {
+	private static int printAxes(CommandContext<CommandSource> cmd) {
 		List<Item> axes = ObjectHelper.scrapeRegistryForItems(item -> item.getRegistryName().getNamespace().equals("aoa3") && item instanceof AxeItem);
 
 		axes = ObjectHelper.sortCollection(axes, ObjectHelper::getItemName);
 
-		try (PrintHelper printHelper = PrintHelper.open("Overview - Axes")) {
-			for (Item item : axes) {
+		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open("Overview - Axes", "Name", "Damage", "Efficiency", "Durability", "Effects")) {
+			printHelper.withProperty("class", "sortable");
 
+			for (Item item : axes) {
+				AxeItem axe = (AxeItem)item;
+				String itemName = ObjectHelper.getItemName(item);
+				float damage = (float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_DAMAGE);
+				String efficiency = String.valueOf(axe.getTier().getSpeed());
+				String durability = String.valueOf(axe.getTier().getUses());
+
+				printHelper.entry(
+						FormattingHelper.createImageBlock(itemName) + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false ,true)),
+						FormattingHelper.healthValue(damage),
+						efficiency,
+						durability,
+						"");
 			}
 		}
 
