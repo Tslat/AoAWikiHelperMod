@@ -24,21 +24,21 @@ public class OverviewCommand implements Command<CommandSource> {
 	public static ArgumentBuilder<CommandSource, ?> register(CommandDispatcher<CommandSource> dispatcher) {
 		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("overview").executes(CMD);
 
-		builder.then(Commands.literal("axes")).executes(OverviewCommand::printAxes);
-		builder.then(Commands.literal("blasters")).executes(OverviewCommand::printBlasters);
-		builder.then(Commands.literal("bows")).executes(OverviewCommand::printBows);
-		builder.then(Commands.literal("cannons")).executes(OverviewCommand::printCannons);
-		builder.then(Commands.literal("crossbows")).executes(OverviewCommand::printCrossbows);
-		builder.then(Commands.literal("greatblades")).executes(OverviewCommand::printGreatblades);
-		builder.then(Commands.literal("guns")).executes(OverviewCommand::printGuns);
-		builder.then(Commands.literal("mauls")).executes(OverviewCommand::printMauls);
-		builder.then(Commands.literal("pickaxes")).executes(OverviewCommand::printPickaxes);
-		builder.then(Commands.literal("shotguns")).executes(OverviewCommand::printShotguns);
-		builder.then(Commands.literal("shovels")).executes(OverviewCommand::printShovels);
-		builder.then(Commands.literal("snipers")).executes(OverviewCommand::printSnipers);
-		builder.then(Commands.literal("staves")).executes(OverviewCommand::printStaves);
-		builder.then(Commands.literal("swords")).executes(OverviewCommand::printSwords);
-		builder.then(Commands.literal("thrownWeapons")).executes(OverviewCommand::printThrownWeapons);
+		builder.then(Commands.literal("axes").executes(OverviewCommand::printAxes));
+		builder.then(Commands.literal("blasters").executes(OverviewCommand::printBlasters));
+		builder.then(Commands.literal("bows").executes(OverviewCommand::printBows));
+		builder.then(Commands.literal("cannons").executes(OverviewCommand::printCannons));
+		builder.then(Commands.literal("crossbows").executes(OverviewCommand::printCrossbows));
+		builder.then(Commands.literal("greatblades").executes(OverviewCommand::printGreatblades));
+		builder.then(Commands.literal("guns").executes(OverviewCommand::printGuns));
+		builder.then(Commands.literal("mauls").executes(OverviewCommand::printMauls));
+		builder.then(Commands.literal("pickaxes").executes(OverviewCommand::printPickaxes));
+		builder.then(Commands.literal("shotguns").executes(OverviewCommand::printShotguns));
+		builder.then(Commands.literal("shovels").executes(OverviewCommand::printShovels));
+		builder.then(Commands.literal("snipers").executes(OverviewCommand::printSnipers));
+		builder.then(Commands.literal("staves").executes(OverviewCommand::printStaves));
+		builder.then(Commands.literal("swords").executes(OverviewCommand::printSwords));
+		builder.then(Commands.literal("thrownWeapons").executes(OverviewCommand::printThrownWeapons));
 
 		return builder;
 	}
@@ -71,7 +71,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String durability = String.valueOf(axe.getTier().getUses());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false ,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false ,true)),
 						FormattingHelper.healthValue(damage),
 						efficiency,
 						durability,

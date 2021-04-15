@@ -15,7 +15,7 @@ public class WikiHelperCommand {
 	}
 
 	protected static StringTextComponent getCmdPrefix(String subcommand) {
-		return new StringTextComponent(TextFormatting.DARK_RED + "[AoAWikiHelper|" + TextFormatting.GOLD + subcommand + TextFormatting.DARK_RED + "]");
+		return new StringTextComponent(TextFormatting.DARK_RED + "[AoAWikiHelper|" + TextFormatting.GOLD + subcommand + TextFormatting.DARK_RED + "] ");
 	}
 
 	protected static void error(CommandSource source, String subcommand, String message, ITextComponent... args) {

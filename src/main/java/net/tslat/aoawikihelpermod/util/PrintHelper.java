@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class PrintHelper implements AutoCloseable {
@@ -60,7 +59,17 @@ public class PrintHelper implements AutoCloseable {
 		if (this.lines.size() <= lineNumber)
 			return;
 
-		this.lines.add(lineNumber, lineEditor.apply(this.lines.get(lineNumber)));
+		this.lines.set(lineNumber, lineEditor.apply(this.lines.get(lineNumber)));
+	}
+
+	public void insert(int lineNumber, String value) {
+		if (this.lines.size() <= lineNumber) {
+			write(value);
+
+			return;
+		}
+
+		this.lines.add(lineNumber, value);
 	}
 
 	public void undo() {
@@ -96,7 +105,7 @@ public class PrintHelper implements AutoCloseable {
 	@Override
 	public void close() {
 		for (String line : lines) {
-			this.writer.write(line);
+			this.writer.println(line);
 		}
 
 		this.writer.close();
@@ -157,8 +166,10 @@ public class PrintHelper implements AutoCloseable {
 			StringBuilder builder = new StringBuilder("| ");
 
 			for (String value : values) {
+				if (builder.length() > 2)
+					builder.append(" || ");
+
 				builder.append(value);
-				builder.append(" || ");
 			}
 
 			write(builder.toString());
@@ -211,6 +222,7 @@ public class PrintHelper implements AutoCloseable {
 			edit(0, line -> propertiesBuilder.toString());
 			edit(1, line -> headerBuilder.toString());
 			edit(2, line -> columnsBuilder.toString());
+			insert(3, GAP);
 			write("|}");
 
 			super.close();
