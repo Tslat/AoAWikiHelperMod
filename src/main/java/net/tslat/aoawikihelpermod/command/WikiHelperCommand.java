@@ -8,9 +8,8 @@ import net.minecraft.util.text.*;
 
 public class WikiHelperCommand {
 	public static void registerSubCommands(CommandDispatcher<CommandSource> dispatcher) {
-		LiteralArgumentBuilder<CommandSource> cmd = Commands.literal("wikihelper");
-
-		cmd.then(OverviewCommand.register(dispatcher));
+		LiteralArgumentBuilder<CommandSource> cmd = Commands.literal("wikihelper")
+				.then(OverviewCommand.register(dispatcher));
 
 		dispatcher.register(cmd);
 	}
@@ -20,18 +19,34 @@ public class WikiHelperCommand {
 	}
 
 	protected static void error(CommandSource source, String subcommand, String message, ITextComponent... args) {
-		source.sendFailure(getCmdPrefix(subcommand).append(new TranslationTextComponent(message, args).setStyle(Style.EMPTY.applyFormat(TextFormatting.DARK_RED))));
+		error(source, subcommand, new TranslationTextComponent(message, args));
+	}
+
+	protected static void error(CommandSource source, String subcommand, IFormattableTextComponent message, ITextComponent... args) {
+		source.sendFailure(getCmdPrefix(subcommand).append(message.setStyle(Style.EMPTY.applyFormat(TextFormatting.DARK_RED))));
 	}
 
 	protected static void info(CommandSource source, String subcommand, String message, ITextComponent... args) {
-		source.sendSuccess(getCmdPrefix(subcommand).append(new TranslationTextComponent(message, args).setStyle(Style.EMPTY.applyFormat(TextFormatting.GRAY))), true);
+		info(source, subcommand, new TranslationTextComponent(message, args));
+	}
+
+	protected static void info(CommandSource source, String subcommand, IFormattableTextComponent message, ITextComponent... args) {
+		source.sendSuccess(getCmdPrefix(subcommand).append(message.setStyle(Style.EMPTY.applyFormat(TextFormatting.GRAY))), true);
 	}
 
 	protected static void success(CommandSource source, String subcommand, String message, ITextComponent... args) {
-		source.sendSuccess(getCmdPrefix(subcommand).append(new TranslationTextComponent(message, args).setStyle(Style.EMPTY.applyFormat(TextFormatting.GREEN))), true);
+		success(source, subcommand, new TranslationTextComponent(message, args));
+	}
+
+	protected static void success(CommandSource source, String subcommand, IFormattableTextComponent message) {
+		source.sendSuccess(getCmdPrefix(subcommand).append(message.setStyle(Style.EMPTY.applyFormat(TextFormatting.GREEN))), true);
 	}
 
 	protected static void warn(CommandSource source, String subcommand, String message, ITextComponent... args) {
-		source.sendSuccess(getCmdPrefix(subcommand).append(new TranslationTextComponent(message, args).setStyle(Style.EMPTY.applyFormat(TextFormatting.RED))), true);
+		warn(source, subcommand, new TranslationTextComponent(message, args));
+	}
+
+	protected static void warn(CommandSource source, String subcommand, IFormattableTextComponent message) {
+		source.sendSuccess(getCmdPrefix(subcommand).append(message.setStyle(Style.EMPTY.applyFormat(TextFormatting.RED))), true);
 	}
 }

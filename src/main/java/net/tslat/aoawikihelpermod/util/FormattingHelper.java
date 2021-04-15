@@ -2,7 +2,11 @@ package net.tslat.aoawikihelpermod.util;
 
 import com.ibm.icu.text.PluralFormat;
 import net.minecraft.util.IItemProvider;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
 import net.tslat.aoa3.util.NumberUtil;
+
+import java.io.File;
 
 public class FormattingHelper {
 	public static String bold(String text) {
@@ -49,5 +53,11 @@ public class FormattingHelper {
 
 	public static String lazyPluralise(String text) {
 		return !text.endsWith("s") && !text.endsWith("y") ? text.endsWith("x") || text.endsWith("o") ? text + "es" : text + "s" : text;
+	}
+
+	public static IFormattableTextComponent generateResultMessage(File file, String linkName) {
+		String fileUrl = file.getAbsolutePath().replace("\\", "/");
+
+		return ITextComponent.Serializer.fromJson("{\"translate\":\"" + "Generated data file: " + "%s" + "\",\"with\":[{\"text\":\"" + linkName + "\",\"color\":\"blue\",\"underlined\":true,\"clickEvent\":{\"action\":\"open_file\",\"value\":\"" + fileUrl + "\"}}]}");
 	}
 }

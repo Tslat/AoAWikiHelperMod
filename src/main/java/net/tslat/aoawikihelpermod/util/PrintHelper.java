@@ -1,5 +1,6 @@
 package net.tslat.aoawikihelpermod.util;
 
+import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 
 import javax.annotation.Nonnull;
@@ -27,7 +28,7 @@ public class PrintHelper implements AutoCloseable {
 
 	private PrintHelper(String fileName) throws IOException {
 		this.name = fileName;
-		this.outputFile = new File(configDir, name);
+		this.outputFile = new File(configDir, formatFileName(fileName));
 
 		try {
 			if (this.outputFile.exists())
@@ -41,6 +42,14 @@ public class PrintHelper implements AutoCloseable {
 
 			throw ex;
 		}
+	}
+
+	private static String formatFileName(String fileName) {
+		return fileName + " Printout " + AdventOfAscension.VERSION + ".txt";
+	}
+
+	public File getOutputFile() {
+		return this.outputFile;
 	}
 
 	public void write(String line) {

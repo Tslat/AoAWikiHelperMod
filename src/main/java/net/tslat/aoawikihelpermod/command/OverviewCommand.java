@@ -15,6 +15,7 @@ import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.PrintHelper;
 
+import java.io.File;
 import java.util.List;
 
 public class OverviewCommand implements Command<CommandSource> {
@@ -55,10 +56,11 @@ public class OverviewCommand implements Command<CommandSource> {
 
 	private static int printAxes(CommandContext<CommandSource> cmd) {
 		List<Item> axes = ObjectHelper.scrapeRegistryForItems(item -> item.getRegistryName().getNamespace().equals("aoa3") && item instanceof AxeItem);
-
+		String fileName = "Overview - Axes";
+		File outputFile;
 		axes = ObjectHelper.sortCollection(axes, ObjectHelper::getItemName);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open("Overview - Axes", "Name", "Damage", "Efficiency", "Durability", "Effects")) {
+		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Efficiency", "Durability", "Effects")) {
 			printHelper.withProperty("class", "sortable");
 
 			for (Item item : axes) {
@@ -75,7 +77,11 @@ public class OverviewCommand implements Command<CommandSource> {
 						durability,
 						"");
 			}
+
+			outputFile = printHelper.getOutputFile();
 		}
+
+		WikiHelperCommand.success(cmd.getSource(), "Overview", FormattingHelper.generateResultMessage(outputFile, fileName));
 
 		return 1;
 	}
