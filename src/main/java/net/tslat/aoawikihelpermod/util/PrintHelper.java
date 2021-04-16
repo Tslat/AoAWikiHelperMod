@@ -1,6 +1,7 @@
 package net.tslat.aoawikihelpermod.util;
 
 import net.tslat.aoa3.advent.AdventOfAscension;
+import net.tslat.aoa3.library.misc.MutableSupplier;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 
 import javax.annotation.Nonnull;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class PrintHelper implements AutoCloseable {
@@ -24,6 +26,7 @@ public class PrintHelper implements AutoCloseable {
 	private String indents = "";
 
 	private final ArrayList<String> lines = new ArrayList<String>();
+	private MutableSupplier<String> clipboardPrinter = null;
 
 	private PrintHelper(String fileName) throws IOException {
 		this.name = fileName;
@@ -41,6 +44,12 @@ public class PrintHelper implements AutoCloseable {
 
 			throw ex;
 		}
+	}
+
+	public PrintHelper withClipboardOutput(MutableSupplier<String> clipboardSupplier) {
+		this.clipboardPrinter = clipboardSupplier;
+
+		return this;
 	}
 
 	private static String formatFileName(String fileName) {
@@ -107,6 +116,9 @@ public class PrintHelper implements AutoCloseable {
 		for (String line : lines) {
 			this.writer.println(line);
 		}
+
+		if (this.clipboardPrinter != null)
+			this.clipboardPrinter.update(() -> FormattingHelper.listToString(lines, true));
 
 		this.writer.close();
 	}

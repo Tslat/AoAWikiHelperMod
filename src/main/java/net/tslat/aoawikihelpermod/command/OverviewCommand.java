@@ -6,17 +6,25 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.tslat.aoa3.common.registration.AoATools;
+import net.tslat.aoa3.item.tool.axe.EmberstoneAxe;
+import net.tslat.aoa3.library.misc.MutableSupplier;
+import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.PrintHelper;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public class OverviewCommand implements Command<CommandSource> {
 	private static final OverviewCommand CMD = new OverviewCommand();
@@ -58,30 +66,36 @@ public class OverviewCommand implements Command<CommandSource> {
 		List<Item> axes = ObjectHelper.scrapeRegistryForItems(item -> item.getRegistryName().getNamespace().equals("aoa3") && item instanceof AxeItem);
 		String fileName = "Overview - Axes";
 		File outputFile;
-		axes = ObjectHelper.sortCollection(axes, ObjectHelper::getItemName);
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Efficiency", "Durability", "Effects")) {
+		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Harvest Level", "Efficiency", "Durability", "Effects")) {
 			printHelper.withProperty("class", "sortable");
+			printHelper.withClipboardOutput(clipboardContent);
 
 			for (Item item : axes) {
 				AxeItem axe = (AxeItem)item;
 				String itemName = ObjectHelper.getItemName(item);
 				float damage = (float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_DAMAGE);
-				String efficiency = String.valueOf(axe.getTier().getSpeed());
+				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_SPEED) + 4, 2);
+				String efficiency = NumberUtil.roundToNthDecimalPlace(axe.getTier().getSpeed(), 2);
 				String durability = String.valueOf(axe.getTier().getUses());
+				String harvestLevel = String.valueOf(axe.getTier().getLevel());
+				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(item, AoATools.AMETHYST_AXE.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false ,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
 						FormattingHelper.healthValue(damage),
+						attackSpeed,
+						harvestLevel,
 						efficiency,
 						durability,
-						"");
+						tooltip);
 			}
 
 			outputFile = printHelper.getOutputFile();
 		}
 
-		WikiHelperCommand.success(cmd.getSource(), "Overview", FormattingHelper.generateResultMessage(outputFile, fileName));
+		WikiHelperCommand.success(cmd.getSource(), "Overview", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
 
 		return 1;
 	}

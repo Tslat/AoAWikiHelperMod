@@ -1,12 +1,20 @@
 package net.tslat.aoawikihelpermod.util;
 
 import com.ibm.icu.text.PluralFormat;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IItemProvider;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.*;
+import net.minecraft.util.text.event.ClickEvent;
 import net.tslat.aoa3.util.NumberUtil;
 
+import javax.annotation.Nullable;
+import java.awt.*;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class FormattingHelper {
 	public static String bold(String text) {
@@ -25,13 +33,17 @@ public class FormattingHelper {
 		return "[[File:" + name + ".png|" + size + "px|link=]]";
 	}
 
-	public static String createObjectBlock(IItemProvider object, boolean shouldLink) {
-		return createObjectBlock(ObjectHelper.getItemName(object.asItem()), object.asItem().getRegistryName().getNamespace().equals("minecraft"), shouldLink);
+	public static String createObjectBlock(ItemStack object, boolean shouldLink) {
+		return createObjectBlock(object.getItem(), object.getCount() > 1, shouldLink);
 	}
 
-	public static String createObjectBlock(String text, boolean isVanilla, boolean shouldLink) {
+	public static String createObjectBlock(IItemProvider object, boolean pluralise, boolean shouldLink) {
+		return createObjectBlock(ObjectHelper.getItemName(object.asItem()), pluralise, object.asItem().getRegistryName().getNamespace().equals("minecraft"), shouldLink);
+	}
+
+	public static String createObjectBlock(String text, boolean pluralise, boolean isVanilla, boolean shouldLink) {
 		StringBuilder builder = new StringBuilder(shouldLink ? "[[" : "");
-		String pluralName = lazyPluralise(text);
+		String pluralName = pluralise ? lazyPluralise(text) : text;
 
 		if (isVanilla) {
 			builder.append("mcw:");
@@ -55,9 +67,26 @@ public class FormattingHelper {
 		return !text.endsWith("s") && !text.endsWith("y") ? text.endsWith("x") || text.endsWith("o") ? text + "es" : text + "s" : text;
 	}
 
-	public static IFormattableTextComponent generateResultMessage(File file, String linkName) {
+	public static IFormattableTextComponent generateResultMessage(File file, String linkName, String clipboardContent) {
 		String fileUrl = file.getAbsolutePath().replace("\\", "/");
 
-		return ITextComponent.Serializer.fromJson("{\"translate\":\"" + "Generated data file: " + "%s" + "\",\"with\":[{\"text\":\"" + linkName + "\",\"color\":\"blue\",\"underlined\":true,\"clickEvent\":{\"action\":\"open_file\",\"value\":\"" + fileUrl + "\"}}]}");
+		return new TranslationTextComponent("Generated data file: ")
+				.append(new StringTextComponent(linkName).withStyle(style -> style.withColor(TextFormatting.BLUE).setUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, fileUrl))))
+				.append(new StringTextComponent(" "))
+				.append(new StringTextComponent("(Copy to Clipboard)").withStyle(style -> style.withColor(TextFormatting.BLUE).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, clipboardContent))));
+	}
+
+	public static String listToString(List<String> list, boolean nativeLineBreaks) {
+		String newLineDelimiter = nativeLineBreaks ? System.lineSeparator() : "<br/>";
+		StringBuilder builder = new StringBuilder();
+
+		for (String str : list) {
+			if (builder.length() > 0)
+				builder.append(newLineDelimiter);
+
+			builder.append(str);
+		}
+
+		return builder.toString();
 	}
 }
