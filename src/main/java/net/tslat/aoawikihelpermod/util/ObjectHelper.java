@@ -1,6 +1,5 @@
 package net.tslat.aoawikihelpermod.util;
 
-import com.google.common.collect.Comparators;
 import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
 import net.minecraft.client.util.ITooltipFlag;
@@ -14,19 +13,29 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ObjectHelper {
+	private static final ArrayList<Pattern> TOOLTIP_BLACKLIST = new ArrayList<Pattern>();
+
+	static {
+		TOOLTIP_BLACKLIST.add(Pattern.compile("^[\\d|\\.]+ \\w+ Damage$"));
+		TOOLTIP_BLACKLIST.add(Pattern.compile("^Firing Rate: .*?"));
+		TOOLTIP_BLACKLIST.add(Pattern.compile("^Ammo: .*?"));
+		TOOLTIP_BLACKLIST.add(Pattern.compile("^Consumes [\\d|\\.]+ \\w+$"));
+		TOOLTIP_BLACKLIST.add(Pattern.compile("^[\\d|\\.]+ Average \\w+ Damage$"));
+		TOOLTIP_BLACKLIST.add(Pattern.compile("^Runes Required: .*?"));
+		TOOLTIP_BLACKLIST.add(Pattern.compile("^\\d+ \\w+ Runes?"));
+	}
+
 	public static List<Item> scrapeRegistryForItems(Predicate<Item> filter) {
 		return ObjectHelper.sortCollection(ForgeRegistries.ITEMS.getValues().stream().filter(filter).collect(Collectors.toList()), ObjectHelper::getItemName);
 	}
@@ -77,27 +86,39 @@ public class ObjectHelper {
 	}
 
 	public static String attemptToExtractItemSpecificEffects(Item item, @Nullable Item controlItem) {
+		StringTextComponent dummyComponent = new StringTextComponent("");
+
 		List<ITextComponent> itemTooltip = new ArrayList<ITextComponent>();
 		List<ITextComponent> controlItemTooltip = new ArrayList<ITextComponent>();
 		StringBuilder builder = new StringBuilder();
 
+		itemTooltip.add(dummyComponent);
+		itemTooltip.add(dummyComponent);
+		controlItemTooltip.add(dummyComponent);
+		controlItemTooltip.add(dummyComponent);
 		item.appendHoverText(new ItemStack(item), null, itemTooltip, ITooltipFlag.TooltipFlags.NORMAL);
 
 		if (controlItem != null)
 			controlItem.appendHoverText(new ItemStack(controlItem), null, controlItemTooltip, ITooltipFlag.TooltipFlags.NORMAL);
 
+		tooltipLoop:
 		for (ITextComponent text : itemTooltip) {
 			String line = text.getString();
-			boolean matching = false;
 
-			for (ITextComponent controlText : controlItemTooltip) {
-				if (line.equals(controlText.getString())) {
-					matching = true;
-					break;
-				}
+			if (line.isEmpty())
+				continue;
+
+			for (Pattern pattern : TOOLTIP_BLACKLIST) {
+				if (pattern.matcher(line).matches())
+					continue tooltipLoop;
 			}
 
-			if (!matching) {
+			for (ITextComponent controlText : controlItemTooltip) {
+				if (areStringsSimilar(line, controlText.getString()))
+					continue tooltipLoop;
+			}
+
+			if (text != dummyComponent) {
 				if (builder.length() > 0)
 					builder.append("<br/>");
 
@@ -106,5 +127,27 @@ public class ObjectHelper {
 		}
 
 		return builder.toString();
+	}
+
+	public static boolean areStringsSimilar(String str1, String str2) {
+		if (str1.equals(str2))
+			return true;
+
+		if (Math.abs(str1.length() - str2.length()) / (float)str1.length() > 0.5f)
+			return false;
+
+		int matches = 0;
+
+		for (int i = 0; i < str1.length(); i++) {
+			if (i >= str2.length())
+				break;
+
+			if (str1.charAt(i) != str2.charAt(i))
+				continue;
+
+			matches++;
+		}
+
+		return matches / (float)str1.length() >= 0.75f;
 	}
 }

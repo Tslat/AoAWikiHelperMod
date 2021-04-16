@@ -1,19 +1,15 @@
 package net.tslat.aoawikihelpermod.util;
 
-import com.ibm.icu.text.PluralFormat;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IItemProvider;
-import net.minecraft.util.text.*;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 import net.tslat.aoa3.util.NumberUtil;
 
-import javax.annotation.Nullable;
-import java.awt.*;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class FormattingHelper {
