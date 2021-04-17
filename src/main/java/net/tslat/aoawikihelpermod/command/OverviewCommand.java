@@ -31,7 +31,7 @@ import net.tslat.aoa3.library.misc.MutableSupplier;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
-import net.tslat.aoawikihelpermod.util.PrintHelper;
+import net.tslat.aoawikihelpermod.util.printers.TablePrintHelper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -80,7 +80,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Harvest Level", "Efficiency", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Harvest Level", "Efficiency", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -95,7 +96,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(axe, AoATools.AMETHYST_AXE.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						FormattingHelper.healthValue(damage),
 						attackSpeed,
 						harvestLevel,
@@ -118,7 +119,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Unholster Time", "Fire Rate", "Energy Cost", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Unholster Time", "Fire Rate", "Energy Cost", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -133,7 +135,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(blaster, AoAWeapons.BONE_BLASTER.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						damage,
 						unholsterTime,
 						fireRate,
@@ -156,7 +158,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Average Damage (Full Charge)", "Draw Time", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Average Damage (Full Charge)", "Draw Time", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -169,7 +172,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(bow, AoAWeapons.ALACRITY_BOW.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						damage,
 						drawTime,
 						durability,
@@ -190,7 +193,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Unholster Time", "Fire Rate", "Recoil", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Unholster Time", "Fire Rate", "Recoil", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -205,7 +209,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(cannon, AoAWeapons.MINI_CANNON.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						damage,
 						unholsterTime,
 						fireRate,
@@ -228,7 +232,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -240,7 +245,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(crossbow, AoAWeapons.TROLLS_CROSSBOW.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						damage,
 						durability,
 						tooltip);
@@ -260,7 +265,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -273,7 +279,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(greatblade, AoAWeapons.ROYAL_GREATBLADE.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						damage,
 						attackSpeed,
 						durability,
@@ -294,7 +300,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Unholster Time", "Fire Rate", "Recoil", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Unholster Time", "Fire Rate", "Recoil", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -309,7 +316,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(gun, AoAWeapons.SQUAD_GUN.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						damage,
 						unholsterTime,
 						fireRate,
@@ -332,7 +339,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Knockback (Approx)", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Knockback (Approx)", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -346,7 +354,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(maul, AoAWeapons.CORALSTONE_MAUL.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						damage,
 						attackSpeed,
 						knockback,
@@ -368,7 +376,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Harvest Level", "Efficiency", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Harvest Level", "Efficiency", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -383,7 +392,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(pickaxe, AoATools.AMETHYST_PICKAXE.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						FormattingHelper.healthValue(damage),
 						attackSpeed,
 						harvestLevel,
@@ -406,7 +415,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage (Per Pellet)", "Pellets", "Unholster Time", "Fire Rate", "Recoil", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage (Per Pellet)", "Pellets", "Unholster Time", "Fire Rate", "Recoil", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -422,7 +432,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(shotgun, AoAWeapons.MINI_CANNON.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						damage,
 						pellets,
 						unholsterTime,
@@ -446,7 +456,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Harvest Level", "Efficiency", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Harvest Level", "Efficiency", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -461,7 +472,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(shovel, AoATools.AMETHYST_SHOVEL.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						FormattingHelper.healthValue(damage),
 						attackSpeed,
 						harvestLevel,
@@ -484,7 +495,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Unholster Time", "Fire Rate", "Recoil", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Unholster Time", "Fire Rate", "Recoil", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -499,7 +511,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(sniper, AoAWeapons.MINI_CANNON.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						damage,
 						unholsterTime,
 						fireRate,
@@ -522,7 +534,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Runes", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Runes", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -537,11 +550,11 @@ public class OverviewCommand implements Command<CommandSource> {
 				for (Map.Entry<RuneItem, Integer> runeEntry : staff.getRunes().entrySet()) {
 					String name = ObjectHelper.getItemName(runeEntry.getKey());
 
-					runeArray.add(runeEntry.getValue() + "x " + FormattingHelper.createImageBlock(name) + " " + FormattingHelper.createObjectBlock(name, runeEntry.getValue() > 1 , false, true));
+					runeArray.add(runeEntry.getValue() + "x " + FormattingHelper.createImageBlock(name) + " " + FormattingHelper.createLinkableItem(name, runeEntry.getValue() > 1 , false, true));
 				}
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						FormattingHelper.listToString(runeArray, false),
 						durability,
 						tooltip);
@@ -561,7 +574,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -574,7 +588,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(item, AoAWeapons.AMETHYST_SWORD.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						FormattingHelper.healthValue(damage),
 						attackSpeed,
 						durability,
@@ -595,7 +609,8 @@ public class OverviewCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (PrintHelper.TablePrintHelper printHelper = PrintHelper.TablePrintHelper.open(fileName, "Name", "Damage", "Throw Rate", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Throw Rate", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
@@ -607,7 +622,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(thrownWeapon, AoAWeapons.SQUAD_GUN.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createObjectBlock(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableItem(itemName, false, false,true)),
 						damage,
 						fireRate,
 						tooltip);

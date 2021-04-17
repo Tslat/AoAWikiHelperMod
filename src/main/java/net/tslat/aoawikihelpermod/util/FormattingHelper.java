@@ -1,6 +1,8 @@
 package net.tslat.aoawikihelpermod.util;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -8,6 +10,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 import net.tslat.aoa3.util.NumberUtil;
+import net.tslat.aoa3.util.StringUtil;
 
 import java.io.File;
 import java.util.List;
@@ -29,15 +32,30 @@ public class FormattingHelper {
 		return "[[File:" + name + ".png|" + size + "px|link=]]";
 	}
 
-	public static String createObjectBlock(ItemStack object, boolean shouldLink) {
-		return createObjectBlock(object.getItem(), object.getCount() > 1, shouldLink);
+	public static String createLinkableItem(ItemStack object, boolean shouldLink) {
+		return createLinkableItem(object.getItem(), object.getCount() > 1, shouldLink);
 	}
 
-	public static String createObjectBlock(IItemProvider object, boolean pluralise, boolean shouldLink) {
-		return createObjectBlock(ObjectHelper.getItemName(object.asItem()), pluralise, object.asItem().getRegistryName().getNamespace().equals("minecraft"), shouldLink);
+	public static String createLinkableItem(IItemProvider object, boolean pluralise, boolean shouldLink) {
+		return createLinkableItem(ObjectHelper.getItemName(object.asItem()), pluralise, object.asItem().getRegistryName().getNamespace().equals("minecraft"), shouldLink);
 	}
 
-	public static String createObjectBlock(String text, boolean pluralise, boolean isVanilla, boolean shouldLink) {
+	public static String createLinkableTag(ITag.INamedTag<Item> tag) {
+		StringBuilder builder = new StringBuilder("[[");
+		String tagName = StringUtil.toTitleCase(tag.getName().getPath());
+
+		if (tag.getName().getNamespace().equals("minecraft"))
+			builder.append("mcw:");
+
+		builder.append(tagName);
+		builder.append("|");
+		builder.append(lazyPluralise(tagName));
+		builder.append(" (Any)]]");
+
+		return builder.toString();
+	}
+
+	public static String createLinkableItem(String text, boolean pluralise, boolean isVanilla, boolean shouldLink) {
 		StringBuilder builder = new StringBuilder(shouldLink ? "[[" : "");
 		String pluralName = pluralise ? lazyPluralise(text) : text;
 
