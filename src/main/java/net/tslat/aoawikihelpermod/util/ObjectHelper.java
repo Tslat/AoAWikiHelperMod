@@ -32,7 +32,7 @@ public class ObjectHelper {
 		TOOLTIP_BLACKLIST.add(Pattern.compile("^Ammo: .*?"));
 		TOOLTIP_BLACKLIST.add(Pattern.compile("^Consumes [\\d|\\.]+ \\w+$"));
 		TOOLTIP_BLACKLIST.add(Pattern.compile("^[\\d|\\.]+ Average \\w+ Damage$"));
-		TOOLTIP_BLACKLIST.add(Pattern.compile("^Runes Required: .*?"));
+		TOOLTIP_BLACKLIST.add(Pattern.compile("^Runes Required:.*?"));
 		TOOLTIP_BLACKLIST.add(Pattern.compile("^\\d+ \\w+ Runes?"));
 	}
 
