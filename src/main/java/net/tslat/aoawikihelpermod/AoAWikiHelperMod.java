@@ -1,9 +1,10 @@
 package net.tslat.aoawikihelpermod;
 
-import com.mojang.datafixers.types.Type;
-import cpw.mods.modlauncher.EnumerationHelper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
@@ -27,12 +28,28 @@ public class AoAWikiHelperMod {
 	public static final String MOD_ID = "aoawikihelpermod";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
+	public static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
+
 	public AoAWikiHelperMod() {
 		File outputDir = FMLPaths.CONFIGDIR.get().resolve(MOD_ID).toFile();
 
 		FileUtils.getOrCreateDirectory(outputDir.toPath(), MOD_ID);
+		patchClickEvent();
 		MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
+		MinecraftForge.EVENT_BUS.addListener(this::registerRecipeSkimmer);
+	}
 
+	@SubscribeEvent
+	public void registerCommands(RegisterCommandsEvent ev) {
+		WikiHelperCommand.registerSubCommands(ev.getDispatcher());
+	}
+
+	@SubscribeEvent
+	public void registerRecipeSkimmer(AddReloadListenerEvent ev) {
+		ev.addListener(new RecipeLoaderSkimmer());
+	}
+
+	private void patchClickEvent() {
 		if (LogicalSidedProvider.WORKQUEUE.get(LogicalSide.CLIENT) != null) {
 			try {
 				Field targetField = null;
@@ -62,10 +79,5 @@ public class AoAWikiHelperMod {
 				LOGGER.error("Failed to patch in support for opening files from chat. Skipping", ex);
 			}
 		}
-	}
-
-	@SubscribeEvent
-	public void registerCommands(RegisterCommandsEvent ev) {
-		WikiHelperCommand.registerSubCommands(ev.getDispatcher());
 	}
 }

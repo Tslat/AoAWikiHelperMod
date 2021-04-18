@@ -9,6 +9,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.StringUtil;
 
@@ -18,6 +19,10 @@ import java.util.List;
 public class FormattingHelper {
 	public static String bold(String text) {
 		return "'''" + text + "'''";
+	}
+
+	public static String tooltip(String text, String tooltip) {
+		return "{{tooltip|" + text + "|" + tooltip + "}}";
 	}
 
 	public static String healthValue(float value) {
@@ -52,7 +57,7 @@ public class FormattingHelper {
 		builder.append(lazyPluralise(tagName));
 		builder.append(" (Any)]]");
 
-		return builder.toString();
+		return tooltip(builder.toString(), "Any item in tag collection");
 	}
 
 	public static String createLinkableItem(String text, boolean pluralise, boolean isVanilla, boolean shouldLink) {
@@ -85,9 +90,13 @@ public class FormattingHelper {
 		String fileUrl = file.getAbsolutePath().replace("\\", "/");
 
 		return new TranslationTextComponent("Generated data file: ")
-				.append(new StringTextComponent(linkName).withStyle(style -> style.withColor(TextFormatting.BLUE).setUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, fileUrl))))
+				.append(new StringTextComponent(linkName).withStyle(style -> style.withColor(TextFormatting.BLUE)
+						.setUnderlined(true)
+						.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, fileUrl))))
 				.append(new StringTextComponent(" "))
-				.append(new StringTextComponent("(Copy to Clipboard)").withStyle(style -> style.withColor(TextFormatting.BLUE).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, clipboardContent))));
+				.append(new StringTextComponent("(Copy)").withStyle(style -> style.withColor(TextFormatting.BLUE)
+						.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, clipboardContent))
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Copy contents of file to clipboard")))));
 	}
 
 	public static String listToString(List<String> list, boolean nativeLineBreaks) {

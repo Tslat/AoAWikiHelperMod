@@ -1,7 +1,6 @@
 package net.tslat.aoawikihelpermod.command;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -41,7 +40,7 @@ import java.util.Map;
 public class OverviewCommand implements Command<CommandSource> {
 	private static final OverviewCommand CMD = new OverviewCommand();
 
-	public static ArgumentBuilder<CommandSource, ?> register(CommandDispatcher<CommandSource> dispatcher) {
+	public static ArgumentBuilder<CommandSource, ?> register() {
 		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("overview").executes(CMD);
 
 		builder.then(Commands.literal("axes").executes(OverviewCommand::printAxes));

@@ -9,7 +9,8 @@ import net.minecraft.util.text.*;
 public class WikiHelperCommand {
 	public static void registerSubCommands(CommandDispatcher<CommandSource> dispatcher) {
 		LiteralArgumentBuilder<CommandSource> cmd = Commands.literal("wikihelper")
-				.then(OverviewCommand.register(dispatcher));
+				.then(OverviewCommand.register())
+				.then(UsagesCommand.register());
 
 		dispatcher.register(cmd);
 	}
