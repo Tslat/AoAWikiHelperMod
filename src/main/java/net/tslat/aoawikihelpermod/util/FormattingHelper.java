@@ -29,6 +29,10 @@ public class FormattingHelper {
 		return "{{hp|" + NumberUtil.roundToNthDecimalPlace(value, 3) + "}}";
 	}
 
+	public static String createImageBlock(IItemProvider item) {
+		return createImageBlock(ObjectHelper.getItemName(item));
+	}
+
 	public static String createImageBlock(String name) {
 		return createImageBlock(name, 32);
 	}

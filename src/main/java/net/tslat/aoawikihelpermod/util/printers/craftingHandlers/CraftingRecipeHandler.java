@@ -15,11 +15,12 @@ public class CraftingRecipeHandler extends RecipePrintHandler {
 	private final JsonObject rawRecipe;
 	private final IRecipe<?> recipe;
 
-
+	private final RecipeIngredientsHandler ingredientsHandler;
 
 	public CraftingRecipeHandler(JsonObject rawRecipe, IRecipe<?> recipe) {
 		this.rawRecipe = rawRecipe;
 		this.recipe = recipe;
+		this.ingredientsHandler = new RecipeIngredientsHandler(this.recipe.getIngredients().size());
 	}
 
 	@Override

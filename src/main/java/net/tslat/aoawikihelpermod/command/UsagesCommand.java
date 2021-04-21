@@ -14,7 +14,7 @@ import net.tslat.aoa3.library.misc.MutableSupplier;
 import net.tslat.aoawikihelpermod.RecipeLoaderSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
-import net.tslat.aoawikihelpermod.util.printers.TablePrintHelper;
+import net.tslat.aoawikihelpermod.util.printers.RecipePrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.craftingHandlers.RecipePrintHandler;
 
 import java.io.File;
@@ -64,10 +64,14 @@ public class UsagesCommand implements Command<CommandSource> {
 
 			for (String type : sortedRecipes.keySet()) {
 				ArrayList<RecipePrintHandler> recipeHandlers = new ArrayList<RecipePrintHandler>(sortedRecipes.get(type));
+
+				if (recipeHandlers.isEmpty())
+					continue;
+
 				String fileName = baseFileName + " - " + type;
 				recipeHandlers.sort(Comparator.comparing(handler -> handler.getRecipeId().toString()));
 
-				try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Ingredients", "Recipe")) {
+				try (RecipePrintHelper printHelper = RecipePrintHelper.open(fileName, recipeHandlers.get(0))) {
 					printHelper.withProperty("class", "wikitable");
 					printHelper.withClipboardOutput(clipboardContent);
 
