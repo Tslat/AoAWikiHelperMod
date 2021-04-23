@@ -1,9 +1,8 @@
 package net.tslat.aoawikihelpermod.util;
 
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tags.ITag;
 import net.minecraft.util.IItemProvider;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -49,11 +48,12 @@ public class FormattingHelper {
 		return createLinkableItem(ObjectHelper.getItemName(object.asItem()), pluralise, object.asItem().getRegistryName().getNamespace().equals("minecraft"), shouldLink);
 	}
 
-	public static String createLinkableTag(ITag.INamedTag<Item> tag) {
+	public static String createLinkableTag(String tag) {
 		StringBuilder builder = new StringBuilder("[[");
-		String tagName = StringUtil.toTitleCase(tag.getName().getPath());
+		ResourceLocation tagId = new ResourceLocation(tag);
+		String tagName = StringUtil.toTitleCase(tagId.getPath());
 
-		if (tag.getName().getNamespace().equals("minecraft"))
+		if (tagId.getNamespace().equals("minecraft"))
 			builder.append("mcw:");
 
 		builder.append(tagName);

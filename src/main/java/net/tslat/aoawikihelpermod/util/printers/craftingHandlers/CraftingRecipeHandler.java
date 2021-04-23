@@ -1,25 +1,27 @@
 package net.tslat.aoawikihelpermod.util.printers.craftingHandlers;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.ICraftingRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
-import net.tslat.aoawikihelpermod.util.FormattingHelper;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 
 public class CraftingRecipeHandler extends RecipePrintHandler {
 	private final JsonObject rawRecipe;
-	private final IRecipe<?> recipe;
+	private final ICraftingRecipe recipe;
 
 	private final RecipeIngredientsHandler ingredientsHandler;
 
+	private String[] printout = null;
+
 	public CraftingRecipeHandler(JsonObject rawRecipe, IRecipe<?> recipe) {
 		this.rawRecipe = rawRecipe;
-		this.recipe = recipe;
+		this.recipe = (ICraftingRecipe)recipe;
 		this.ingredientsHandler = new RecipeIngredientsHandler(this.recipe.getIngredients().size());
 	}
 
@@ -29,15 +31,25 @@ public class CraftingRecipeHandler extends RecipePrintHandler {
 	}
 
 	private String[] compileShapelessRecipe(@Nullable Item targetItem) {
-		ItemStack result = recipe.getResultItem();
-		String output = FormattingHelper.bold(FormattingHelper.createLinkableItem(result, result.getItem() != targetItem));
-		HashMap<String, Integer> ingredientsMap = new HashMap<String, Integer>();
+		if (this.printout != null)
+			return this.printout;
+
+		for (JsonElement ele : JSONUtils.getAsJsonArray(rawRecipe, "ingredients")) {
+			ingredientsHandler.addIngredient(ele.getAsJsonObject());
+		}
 
 
+
+		return this.printout;
 	}
 
 	private String[] compileShapedRecipe(@Nullable Item targetItem) {
+		if (this.printout != null)
+			return this.printout;
 
+
+
+		return this.printout;
 	}
 
 	@Override
