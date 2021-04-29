@@ -11,8 +11,10 @@ import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.StringUtil;
+import net.tslat.aoawikihelpermod.util.printers.TablePrintHelper;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class FormattingHelper {
@@ -115,5 +117,19 @@ public class FormattingHelper {
 		}
 
 		return builder.toString();
+	}
+
+	public static String makeWikiTemplateObject(String type, String... entries) {
+		ArrayList<String> lines = new ArrayList<String>();
+
+		lines.add("{{" + type);
+
+		for (String str : entries) {
+			lines.add("|" + str);
+		}
+
+		lines.add("}}");
+
+		return TablePrintHelper.combineLines(lines);
 	}
 }

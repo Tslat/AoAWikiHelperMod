@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TablePrintHelper extends PrintHelper {
@@ -36,6 +37,23 @@ public class TablePrintHelper extends PrintHelper {
 		catch (IOException ex) {
 			return null;
 		}
+	}
+
+	public static String combineLines(String... lines) {
+		return combineLines(Arrays.asList(lines));
+	}
+
+	public static String combineLines(List<String> lines) {
+		StringBuilder builder = new StringBuilder();
+
+		for (String ln : lines) {
+			if (builder.length() > 0)
+				builder.append(System.lineSeparator());
+
+			builder.append(ln);
+		}
+
+		return builder.toString();
 	}
 
 	public TablePrintHelper defaultFullPageTableProperties() {
@@ -70,7 +88,18 @@ public class TablePrintHelper extends PrintHelper {
 			if (builder.length() > 2)
 				builder.append(" || ");
 
-			builder.append(value);
+			if (value.contains(System.lineSeparator())) {
+				for (String line : value.split(System.lineSeparator())) {
+					write(line);
+				}
+
+				write(GAP);
+
+				builder = new StringBuilder("");
+			}
+			else {
+				builder.append(value);
+			}
 		}
 
 		write(builder.toString());

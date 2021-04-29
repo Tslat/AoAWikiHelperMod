@@ -1,6 +1,9 @@
 package net.tslat.aoawikihelpermod.util;
 
 import com.google.common.collect.Multimap;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityType;
@@ -12,12 +15,19 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IItemProvider;
+import net.minecraft.util.JSONUtils;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoa3.util.StringUtil;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -83,6 +93,32 @@ public class ObjectHelper {
 
 	public static String getItemName(IItemProvider item) {
 		return new ItemStack(item).getHoverName().getString();
+	}
+
+	public static com.mojang.datafixers.util.Pair<String, String> getIngredientName(JsonObject obj) {
+		if ((obj.has("item") && obj.has("tag")) || (!obj.has("item") && !obj.has("tag")))
+			throw new JsonParseException("Invalidly formatted ingredient, unable to proceed.");
+
+		String ingredientName = null;
+		String ownerId = null;
+
+		if (obj.has("item")) {
+			ResourceLocation id = new ResourceLocation(JSONUtils.getAsString(obj, "item"));
+			Item item = Registry.ITEM.getOptional(id).orElse(null);
+
+			ingredientName = item == null ? StringUtil.toTitleCase(id.getPath()) : ObjectHelper.getItemName(item);
+			ownerId = id.getNamespace();
+		}
+		else if (obj.has("tag")) {
+			ingredientName = JSONUtils.getAsString(obj, "tag");
+
+			if (!ingredientName.contains(":"))
+				ingredientName = "minecraft:" + ingredientName;
+
+			ownerId = ingredientName.split(":")[0];
+		}
+
+		return new Pair<String, String>(ownerId, ingredientName);
 	}
 
 	public static String attemptToExtractItemSpecificEffects(Item item, @Nullable Item controlItem) {

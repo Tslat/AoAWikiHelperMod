@@ -2,16 +2,16 @@ package net.tslat.aoawikihelpermod.util.printers.craftingHandlers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.JSONUtils;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Tuple;
-import net.minecraft.util.registry.Registry;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
+import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -32,11 +32,14 @@ public abstract class RecipePrintHandler {
 	public static class RecipeIngredientsHandler {
 		public static final String[] slotPrefixes = new String[] {"a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3"};
 
-		private final NonNullList<Tuple<String, Integer>> ingredients;
+		private final NonNullList<Triple<String, Integer, String>> ingredients;
 		private final NonNullList<Integer> ingredientsIndex;
 
+		@Nullable
+		private ItemStack output = null;
+
 		public RecipeIngredientsHandler(int ingredientsSize) {
-			this.ingredients = NonNullList.withSize(ingredientsSize, new Tuple<String, Integer>("", 0));
+			this.ingredients = NonNullList.withSize(ingredientsSize, Triple.of("", 0, ""));
 			this.ingredientsIndex = NonNullList.withSize(ingredientsSize, 0);
 		}
 
@@ -44,51 +47,81 @@ public abstract class RecipePrintHandler {
 			ArrayList<String> lines = new ArrayList<String>(slotPrefixes.length);
 
 			for (int index = 0; index < slotPrefixes.length; index++) {
-				lines.add(slotPrefixes[index] + "=" + ingredients.get(ingredientsIndex.get(index)).getA());
+
+				
+				lines.add(slotPrefixes[index] + "=" + ingredients.get(ingredientsIndex.get(index)).getLeft());
 			}
 
 			return lines;
 		}
 
 		public String getIngredient(int slot) {
-			return this.ingredients.get(ingredientsIndex.get(slot)).getA();
+			return this.ingredients.get(ingredientsIndex.get(slot)).getLeft();
 		}
 
-		public ImmutableList<Tuple<String, Integer>> getIngredients() {
+		public ImmutableList<Triple<String, Integer, String>> getIngredients() {
 			return ImmutableList.copyOf(ingredients);
 		}
 
-		public void addIngredient(JsonObject json) {
-			addIngredient(json, this.ingredientsIndex.size());
-		}
+		public String getFormattedIngredientsList(@Nullable Item targetItem) {
+			StringBuilder builder = new StringBuilder();
 
-		public void addIngredient(JsonObject json, int position) {
-			if ((json.has("item") && json.has("tag")) || (!json.has("item") && !json.has("tag")))
-				throw new JsonParseException("Invalidly formatted ingredient, unable to proceed with recipe.");
+			for (Triple<String, Integer, String> ing : getIngredients()) {
+				if (builder.length() > 0)
+					builder.append(" +<br/>");
 
-			String ingredientName = null;
+				builder.append(ing.getMiddle());
+				builder.append(" ");
 
-			if (json.has("item")) {
-				ResourceLocation id = new ResourceLocation(JSONUtils.getAsString(json, "item"));
-				Item item = Registry.ITEM.getOptional(id).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + id + "'"));
-				ingredientName = ObjectHelper.getItemName(item);
+				if (ing.getLeft().contains(":")) {
+					builder.append(FormattingHelper.createLinkableTag(ing.getLeft()));
+				}
+				else {
+					builder.append(FormattingHelper.createLinkableItem(ing.getLeft(), ing.getMiddle() > 1, ing.getRight().equals("minecraft"), targetItem == null || !ObjectHelper.getItemName(targetItem).equals(ing.getLeft())));
+				}
 			}
-			else if (json.has("tag")) {
-				ingredientName = JSONUtils.getAsString(json, "tag");
-			}
 
-			addIngredient(ingredientName, position);
+			return builder.toString();
 		}
 
-		public void addIngredient(String ingredientName) {
-			addIngredient(ingredientName, this.ingredientsIndex.size());
+		@Nullable
+		public ItemStack getOutput() {
+			return this.output;
 		}
 
-		public void addIngredient(String ingredientName, int position) {
+		public String getOutputFormatted(@Nullable Item targetItem) {
+			return this.output.getCount() + " " + FormattingHelper.createLinkableItem(this.output, this.output.getItem() != targetItem);
+		}
+
+		public void addOutput(JsonObject json) {
+			this.output = CraftingHelper.getItemStack(json, true);
+		}
+
+		public void addOutput(ItemStack stack) {
+			this.output = stack;
+		}
+
+		public String addIngredient(JsonObject json) {
+			return addIngredient(json, this.ingredientsIndex.size());
+		}
+
+		public String addIngredient(JsonObject json, int position) {
+			Pair<String, String> id = ObjectHelper.getIngredientName(json);
+
+			addIngredient(id.getFirst(), id.getSecond(), position);
+
+			return id.getSecond();
+		}
+
+		public void addIngredient(String ingredientName, String ownerId) {
+			addIngredient(ingredientName, ownerId, this.ingredientsIndex.size());
+		}
+
+		public void addIngredient(String ingredientName, String ownerId, int position) {
 			int matchedIndex = -1;
 
 			for (int i = 0; i < ingredients.size(); i++) {
-				if (ingredients.get(i).getA().equals(ingredientName)) {
+				if (ingredients.get(i).getLeft().equals(ingredientName)) {
 					matchedIndex = i;
 
 					break;
@@ -97,11 +130,11 @@ public abstract class RecipePrintHandler {
 
 			if (matchedIndex == -1) {
 				this.ingredientsIndex.set(position, this.ingredients.size());
-				this.ingredients.add(new Tuple<String, Integer>(ingredientName, 1));
+				this.ingredients.add(Triple.of(ingredientName, 1, ownerId));
 			}
 			else {
 				this.ingredientsIndex.set(position, matchedIndex);
-				this.ingredients.set(matchedIndex, new Tuple<String, Integer>(ingredientName, this.ingredients.get(matchedIndex).getB() + 1));
+				this.ingredients.set(matchedIndex, Triple.of(ingredientName, this.ingredients.get(matchedIndex).getMiddle() + 1, ownerId));
 			}
 		}
 	}
