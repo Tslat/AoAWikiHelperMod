@@ -11,21 +11,35 @@ import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import javax.annotation.Nullable;
 
 public class UpgradeKitRecipeHandler extends RecipePrintHandler {
+	private final ResourceLocation recipeId;
+
 	private final JsonObject rawRecipe;
+	@Nullable
 	private final UpgradeKitRecipe recipe;
 
 	private String[] printout = null;
 
-	public UpgradeKitRecipeHandler(JsonObject rawRecipe, IRecipe<?> recipe) {
+	public UpgradeKitRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
 		this.recipe = (UpgradeKitRecipe)recipe;
+	}
+
+	@Override
+	public String getTableGroup() {
+		return "Divine Station";
+	}
+
+	@Override
+	public ResourceLocation getRecipeId() {
+		return this.recipeId;
 	}
 
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
 		if (this.printout != null)
 			return this.printout;
-
+		// TODO convert to raw recipe
 		this.printout = new String[3];
 		Item input = recipe.getIngredients().get(0).getItems()[0].getItem();
 		Item upgradeItem = recipe.getIngredients().get(1).getItems()[1].getItem();
@@ -36,15 +50,5 @@ public class UpgradeKitRecipeHandler extends RecipePrintHandler {
 		this.printout[2] = FormattingHelper.createImageBlock(output) + " " + FormattingHelper.createLinkableItem(recipe.getResultItem(), output != targetItem);
 
 		return this.printout;
-	}
-
-	@Override
-	public String getTableGroup() {
-		return "Divine Station";
-	}
-
-	@Override
-	public ResourceLocation getRecipeId() {
-		return this.recipe.getId();
 	}
 }

@@ -8,17 +8,21 @@ import net.minecraft.util.ResourceLocation;
 import javax.annotation.Nullable;
 
 public class SmeltingRecipeHandler extends RecipePrintHandler {
+	private final ResourceLocation recipeId;
+
 	private final JsonObject rawRecipe;
+	@Nullable
 	private final IRecipe<?> recipe;
 
-	public SmeltingRecipeHandler(JsonObject rawRecipe, IRecipe<?> recipe) {
+	public SmeltingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
 		this.recipe = recipe;
 	}
 
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
-		return new String[0];
+		return new String[0]; // TODO
 	}
 
 	@Override
@@ -28,6 +32,6 @@ public class SmeltingRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public ResourceLocation getRecipeId() {
-		return this.recipe.getId();
+		return this.recipeId;
 	}
 }

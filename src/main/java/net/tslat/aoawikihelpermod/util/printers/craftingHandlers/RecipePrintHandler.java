@@ -26,7 +26,7 @@ public abstract class RecipePrintHandler {
 	}
 
 	public interface Factory {
-		RecipePrintHandler create(JsonObject rawRecipe, IRecipe<?> recipe);
+		RecipePrintHandler create(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe);
 	}
 
 	public static class RecipeIngredientsHandler {
@@ -47,9 +47,10 @@ public abstract class RecipePrintHandler {
 			ArrayList<String> lines = new ArrayList<String>(slotPrefixes.length);
 
 			for (int index = 0; index < slotPrefixes.length; index++) {
+				String ingName = ingredients.get(ingredientsIndex.get(index)).getLeft();
 
-				
-				lines.add(slotPrefixes[index] + "=" + ingredients.get(ingredientsIndex.get(index)).getLeft());
+				if (!ingName.isEmpty())
+					lines.add(slotPrefixes[index] + "=" + ingName);
 			}
 
 			return lines;

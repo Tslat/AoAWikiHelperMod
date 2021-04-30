@@ -1,6 +1,7 @@
 package net.tslat.aoawikihelpermod.util;
 
 import com.google.common.collect.Multimap;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Pair;
@@ -22,6 +23,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.util.StringUtil;
+import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -91,11 +93,7 @@ public class ObjectHelper {
 		return (ArrayList<T>)collection.stream().sorted(Comparator.comparing(sortFunction)).collect(Collectors.toList());
 	}
 
-	public static String getItemName(IItemProvider item) {
-		return new ItemStack(item).getHoverName().getString();
-	}
-
-	public static com.mojang.datafixers.util.Pair<String, String> getIngredientName(JsonObject obj) {
+	public static Pair<String, String> getIngredientName(JsonObject obj) {
 		if ((obj.has("item") && obj.has("tag")) || (!obj.has("item") && !obj.has("tag")))
 			throw new JsonParseException("Invalidly formatted ingredient, unable to proceed.");
 
@@ -103,11 +101,7 @@ public class ObjectHelper {
 		String ownerId = null;
 
 		if (obj.has("item")) {
-			ResourceLocation id = new ResourceLocation(JSONUtils.getAsString(obj, "item"));
-			Item item = Registry.ITEM.getOptional(id).orElse(null);
-
-			ingredientName = item == null ? StringUtil.toTitleCase(id.getPath()) : ObjectHelper.getItemName(item);
-			ownerId = id.getNamespace();
+			return getFormattedItemDetails(new ResourceLocation(JSONUtils.getAsString(obj, "item")));
 		}
 		else if (obj.has("tag")) {
 			ingredientName = JSONUtils.getAsString(obj, "tag");
@@ -116,9 +110,41 @@ public class ObjectHelper {
 				ingredientName = "minecraft:" + ingredientName;
 
 			ownerId = ingredientName.split(":")[0];
+
+			return new Pair<String, String>(ownerId, ingredientName);
+		}
+		else {
+			throw new JsonParseException("Invalidly formatted ingredient, unable to proceed.");
+		}
+	}
+
+	public static String getItemName(IItemProvider item) {
+		return new ItemStack(item).getHoverName().getString();
+	}
+
+	public static Pair<String, String> getFormattedItemDetails(ResourceLocation id) {
+		Item item = Registry.ITEM.getOptional(id).orElse(null);
+
+		return new Pair<String, String>(id.getNamespace(), item == null ? StringUtil.toTitleCase(id.getPath()) : ObjectHelper.getItemName(item));
+	}
+
+	public static Triple<Integer, String, String> getStackDetailsFromJson(JsonElement element) {
+		Pair<String, String> itemName;
+		int count = 1;
+
+		if (element.isJsonObject()) {
+			JsonObject obj = (JsonObject)element;
+
+			if (obj.has("count"))
+				count = obj.get("count").getAsInt();
+
+			itemName = getFormattedItemDetails(new ResourceLocation(obj.get("item").getAsString()));
+		}
+		else {
+			itemName = getFormattedItemDetails(new ResourceLocation(element.getAsString()));
 		}
 
-		return new Pair<String, String>(ownerId, ingredientName);
+		return Triple.of(count, itemName.getFirst(), itemName.getSecond());
 	}
 
 	public static String attemptToExtractItemSpecificEffects(Item item, @Nullable Item controlItem) {
