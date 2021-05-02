@@ -46,6 +46,11 @@ public class SmokingRecipeHandler extends RecipePrintHandler {
 	}
 
 	@Override
+	public String[] getColumnTitles() {
+		return null;
+	}
+
+	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
 		if (printout != null)
 			return printout;
@@ -57,13 +62,13 @@ public class SmokingRecipeHandler extends RecipePrintHandler {
 		int cookingTime = JSONUtils.getAsInt(rawRecipe, "cookingtime", 100);
 
 		this.printout = new String[] {
-				FormattingHelper.createLinkableItem(input.getSecond(), true, input.getFirst().equals("minecraft"), input.getSecond().equals(targetName)) +
+				FormattingHelper.createLinkableItem(input.getSecond(), true, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) +
 						" can be processed in a " +
 						FormattingHelper.createLinkableItem(Blocks.SMOKER, false, true) +
 						" to produce " +
 						output.getLeft() +
 						" " +
-						FormattingHelper.createLinkableItem(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), output.getRight().equals(targetName)) +
+						FormattingHelper.createLinkableItem(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName)) +
 						" and " +
 						NumberUtil.roundToNthDecimalPlace(xp, 1) +
 						"xp, taking " +

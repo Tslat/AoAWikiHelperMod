@@ -89,6 +89,8 @@ public class TablePrintHelper extends PrintHelper {
 				builder.append(" || ");
 
 			if (value.contains(System.lineSeparator())) {
+				write(builder.toString());
+
 				for (String line : value.split(System.lineSeparator())) {
 					write(line);
 				}
@@ -102,14 +104,16 @@ public class TablePrintHelper extends PrintHelper {
 			}
 		}
 
-		write(builder.toString());
-		write(GAP);
+		if (builder.length() > 0) {
+			write(builder.toString());
+			write(GAP);
+		}
 	}
 
 	@Override
 	public void close() {
 		StringBuilder propertiesBuilder = new StringBuilder(HEAD);
-		StringBuilder stylesBuilder = new StringBuilder("style=\"");
+		StringBuilder stylesBuilder = new StringBuilder(" style=\"");
 		StringBuilder headerBuilder = new StringBuilder(GAP);
 		StringBuilder columnsBuilder = new StringBuilder("! ");
 		boolean sortable = false;
@@ -136,7 +140,7 @@ public class TablePrintHelper extends PrintHelper {
 		}
 
 		stylesBuilder.append("\"");
-		propertiesBuilder.append(stylesBuilder.toString());
+		propertiesBuilder.append(stylesBuilder);
 		headerBuilder.append(" style=background-color:#eee |");
 
 		if (sortable)

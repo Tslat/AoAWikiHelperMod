@@ -44,6 +44,11 @@ public class StonecuttingRecipeHandler extends RecipePrintHandler {
 	}
 
 	@Override
+	public String[] getColumnTitles() {
+		return null;
+	}
+
+	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
 		if (printout != null)
 			return printout;
@@ -52,16 +57,10 @@ public class StonecuttingRecipeHandler extends RecipePrintHandler {
 		Pair<String, String> input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("ingredient"));
 		Triple<Integer, String, String> output = ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result"));
 
-		this.printout = new String[] {
-				FormattingHelper.createLinkableItem(input.getSecond(), true, input.getFirst().equals("minecraft"), input.getSecond().equals(targetName)) +
-						" can be processed on a " +
-						FormattingHelper.createLinkableItem(Blocks.STONECUTTER, false, true) +
-						" to produce " +
-						output.getLeft() +
-						" " +
-						FormattingHelper.createLinkableItem(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), output.getRight().equals(targetName)) +
-						"."
-		};
+		this.printout = new String[3];
+		this.printout[0] = FormattingHelper.createImageBlock(Blocks.STONECUTTER) + " " + FormattingHelper.createLinkableItem(Blocks.STONECUTTER, false, true);
+		this.printout[1] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableItem(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName));
+		this.printout[2] = FormattingHelper.createImageBlock(output.getRight()) + " " + FormattingHelper.createLinkableItem(output.getRight(), false, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName));
 
 		return printout;
 	}

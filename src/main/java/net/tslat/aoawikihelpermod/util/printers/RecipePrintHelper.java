@@ -22,7 +22,7 @@ public class RecipePrintHelper implements AutoCloseable {
 			if (recipePrintHandler.isPlainTextPrintout())
 				return new RecipePrintHelper(new PrintHelper(fileName));
 
-			return new RecipePrintHelper(new TablePrintHelper(fileName, "Name", "Ingredients", "Recipe"));
+			return new RecipePrintHelper(new TablePrintHelper(fileName, recipePrintHandler.getColumnTitles()));
 		}
 		catch (IOException ex) {
 			return null;

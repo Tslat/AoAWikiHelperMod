@@ -28,7 +28,7 @@ public class UsagesCommand implements Command<CommandSource> {
 	public static ArgumentBuilder<CommandSource, ?> register() {
 		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("usages").executes(CMD);
 
-		builder.then(Commands.argument("id", ItemArgument.item())).executes(UsagesCommand::printUsages);
+		builder.then(Commands.argument("id", ItemArgument.item()).executes(UsagesCommand::printUsages));
 
 		return builder;
 	}
@@ -52,38 +52,42 @@ public class UsagesCommand implements Command<CommandSource> {
 		String baseFileName = "Usages - " + itemName;
 
 		Collection<ResourceLocation> containingRecipes = RecipeLoaderSkimmer.RECIPES_BY_INGREDIENT.get(item.getRegistryName());
+		try {
+			if (!containingRecipes.isEmpty()) {
+				HashMultimap<String, RecipePrintHandler> sortedRecipes = HashMultimap.create();
 
-		if (!containingRecipes.isEmpty()) {
-			HashMultimap<String, RecipePrintHandler> sortedRecipes = HashMultimap.create();
+				for (ResourceLocation id : containingRecipes) {
+					RecipePrintHandler handler = RecipeLoaderSkimmer.RECIPE_PRINTERS.get(id);
 
-			for (ResourceLocation id : containingRecipes) {
-				RecipePrintHandler handler = RecipeLoaderSkimmer.RECIPE_PRINTERS.get(id);
-
-				sortedRecipes.put(handler.getTableGroup(), handler);
-			}
-
-			for (String type : sortedRecipes.keySet()) {
-				ArrayList<RecipePrintHandler> recipeHandlers = new ArrayList<RecipePrintHandler>(sortedRecipes.get(type));
-
-				if (recipeHandlers.isEmpty())
-					continue;
-
-				String fileName = baseFileName + " - " + type;
-				recipeHandlers.sort(Comparator.comparing(handler -> handler.getRecipeId().toString()));
-
-				try (RecipePrintHelper printHelper = RecipePrintHelper.open(fileName, recipeHandlers.get(0))) {
-					printHelper.withProperty("class", "wikitable");
-					printHelper.withClipboardOutput(clipboardContent);
-
-					for (RecipePrintHandler handler : recipeHandlers) {
-						printHelper.entry(handler.toTableEntry(item));
-					}
-
-					outputFile = printHelper.getOutputFile();
+					sortedRecipes.put(handler.getTableGroup(), handler);
 				}
 
-				WikiHelperCommand.success(cmd.getSource(), "Usages", FormattingHelper.generateResultMessage(outputFile, baseFileName, clipboardContent.get()));
+				for (String type : sortedRecipes.keySet()) {
+					ArrayList<RecipePrintHandler> recipeHandlers = new ArrayList<RecipePrintHandler>(sortedRecipes.get(type));
+
+					if (recipeHandlers.isEmpty())
+						continue;
+
+					String fileName = baseFileName + " - " + type;
+					recipeHandlers.sort(Comparator.comparing(handler -> handler.getRecipeId().toString()));
+
+					try (RecipePrintHelper printHelper = RecipePrintHelper.open(fileName, recipeHandlers.get(0))) {
+						printHelper.withProperty("class", "wikitable");
+						printHelper.withClipboardOutput(clipboardContent);
+
+						for (RecipePrintHandler handler : recipeHandlers) {
+							printHelper.entry(handler.toTableEntry(item));
+						}
+
+						outputFile = printHelper.getOutputFile();
+					}
+
+					WikiHelperCommand.success(cmd.getSource(), "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+				}
 			}
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
 		}
 
 		// TODO further usages

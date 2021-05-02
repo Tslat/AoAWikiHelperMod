@@ -8,7 +8,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.crafting.CraftingHelper;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import org.apache.commons.lang3.tuple.Triple;
@@ -20,6 +19,7 @@ public abstract class RecipePrintHandler {
 	public abstract String[] toTableEntry(@Nullable Item targetItem);
 	public abstract String getTableGroup();
 	public abstract ResourceLocation getRecipeId();
+	public abstract String[] getColumnTitles();
 
 	public boolean isPlainTextPrintout() {
 		return false;
@@ -34,20 +34,26 @@ public abstract class RecipePrintHandler {
 
 		private final NonNullList<Triple<String, Integer, String>> ingredients;
 		private final NonNullList<Integer> ingredientsIndex;
-
-		@Nullable
-		private ItemStack output = null;
+		private Triple<Integer, String, String> output = null;
 
 		public RecipeIngredientsHandler(int ingredientsSize) {
-			this.ingredients = NonNullList.withSize(ingredientsSize, Triple.of("", 0, ""));
-			this.ingredientsIndex = NonNullList.withSize(ingredientsSize, 0);
+			this.ingredients = NonNullList.create();
+			this.ingredientsIndex = NonNullList.withSize(ingredientsSize, -1);
 		}
 
 		public ArrayList<String> getIngredientsWithSlots() {
 			ArrayList<String> lines = new ArrayList<String>(slotPrefixes.length);
 
 			for (int index = 0; index < slotPrefixes.length; index++) {
-				String ingName = ingredients.get(ingredientsIndex.get(index)).getLeft();
+				if (index >= ingredientsIndex.size())
+					break;
+
+				int ingredientIndex = ingredientsIndex.get(index);
+
+				if (ingredientIndex < 0)
+					continue;
+
+				String ingName = ingredients.get(ingredientIndex).getRight();
 
 				if (!ingName.isEmpty())
 					lines.add(slotPrefixes[index] + "=" + ingName);
@@ -57,7 +63,10 @@ public abstract class RecipePrintHandler {
 		}
 
 		public String getIngredient(int slot) {
-			return this.ingredients.get(ingredientsIndex.get(slot)).getLeft();
+			if (slot >= ingredients.size() || ingredientsIndex.get(slot) < 0)
+				return "";
+
+			return this.ingredients.get(ingredientsIndex.get(slot)).getRight();
 		}
 
 		public ImmutableList<Triple<String, Integer, String>> getIngredients() {
@@ -68,61 +77,74 @@ public abstract class RecipePrintHandler {
 			StringBuilder builder = new StringBuilder();
 
 			for (Triple<String, Integer, String> ing : getIngredients()) {
+				if (ing.getRight().isEmpty())
+					continue;
+
 				if (builder.length() > 0)
 					builder.append(" +<br/>");
 
 				builder.append(ing.getMiddle());
 				builder.append(" ");
 
-				if (ing.getLeft().contains(":")) {
-					builder.append(FormattingHelper.createLinkableTag(ing.getLeft()));
+				if (ing.getRight().contains(":")) {
+					builder.append(FormattingHelper.createLinkableTag(ing.getRight()));
 				}
 				else {
-					builder.append(FormattingHelper.createLinkableItem(ing.getLeft(), ing.getMiddle() > 1, ing.getRight().equals("minecraft"), targetItem == null || !ObjectHelper.getItemName(targetItem).equals(ing.getLeft())));
+					builder.append(FormattingHelper.createLinkableItem(ing.getRight(), ing.getMiddle() > 1, ing.getLeft().equals("minecraft"), targetItem == null || !ObjectHelper.getItemName(targetItem).equals(ing.getRight())));
 				}
 			}
 
 			return builder.toString();
 		}
 
-		@Nullable
-		public ItemStack getOutput() {
+		public Triple<Integer, String, String> getOutput() {
 			return this.output;
 		}
 
-		public String getOutputFormatted(@Nullable Item targetItem) {
-			return this.output.getCount() + " " + FormattingHelper.createLinkableItem(this.output, this.output.getItem() != targetItem);
+		public String getFormattedOutput(@Nullable Item targetItem) {
+			return (output.getLeft() > 1 ? output.getLeft() + " " : "") + FormattingHelper.createLinkableItem(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), (targetItem == null || !output.getRight().equals(ObjectHelper.getItemName(targetItem))));
 		}
 
 		public void addOutput(JsonObject json) {
-			this.output = CraftingHelper.getItemStack(json, true);
+			this.output = ObjectHelper.getStackDetailsFromJson(json);
 		}
 
 		public void addOutput(ItemStack stack) {
-			this.output = stack;
+			Pair<String, String> names = ObjectHelper.getFormattedItemDetails(stack.getItem().getRegistryName());
+			this.output = Triple.of(stack.getCount(), names.getFirst(), names.getSecond());
 		}
 
 		public String addIngredient(JsonObject json) {
-			return addIngredient(json, this.ingredientsIndex.size());
+			return addIngredient(json, -1);
 		}
 
 		public String addIngredient(JsonObject json, int position) {
 			Pair<String, String> id = ObjectHelper.getIngredientName(json);
 
-			addIngredient(id.getFirst(), id.getSecond(), position);
+			addIngredient(id.getSecond(), id.getFirst(), position);
 
 			return id.getSecond();
 		}
 
 		public void addIngredient(String ingredientName, String ownerId) {
-			addIngredient(ingredientName, ownerId, this.ingredientsIndex.size());
+			addIngredient(ingredientName, ownerId, -1);
 		}
 
 		public void addIngredient(String ingredientName, String ownerId, int position) {
 			int matchedIndex = -1;
 
+			if (position == -1) {
+				for (int i = 0; i < ingredientsIndex.size(); i++) {
+					if (ingredientsIndex.get(i) == -1) {
+						position = i;
+
+						break;
+					}
+				}
+			}
+
 			for (int i = 0; i < ingredients.size(); i++) {
-				if (ingredients.get(i).getLeft().equals(ingredientName)) {
+				if (ingredients.get(i).getRight().equals(ingredientName)) {
 					matchedIndex = i;
 
 					break;
@@ -131,11 +153,11 @@ public abstract class RecipePrintHandler {
 
 			if (matchedIndex == -1) {
 				this.ingredientsIndex.set(position, this.ingredients.size());
-				this.ingredients.add(Triple.of(ingredientName, 1, ownerId));
+				this.ingredients.add(Triple.of(ownerId, 1, ingredientName));
 			}
 			else {
 				this.ingredientsIndex.set(position, matchedIndex);
-				this.ingredients.set(matchedIndex, Triple.of(ingredientName, this.ingredients.get(matchedIndex).getMiddle() + 1, ownerId));
+				this.ingredients.set(matchedIndex, Triple.of(ownerId, this.ingredients.get(matchedIndex).getMiddle() + 1, ingredientName));
 			}
 		}
 	}

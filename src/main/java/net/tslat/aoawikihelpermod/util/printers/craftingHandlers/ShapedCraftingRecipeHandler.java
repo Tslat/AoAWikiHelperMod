@@ -8,11 +8,10 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
-import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
+import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,9 +41,14 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 	}
 
 	@Override
+	public String[] getColumnTitles() {
+		return new String[] {"Item", "Ingredients", "Recipe"};
+	}
+
+	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
-		if (this.printout != null)
-			return this.printout;
+		//if (this.printout != null)
+		//	return this.printout;
 
 		HashMap<String, Pair<String, String>> ingredientMap = new HashMap<String, Pair<String, String>>();
 
@@ -64,37 +68,24 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 		}
 
 		String[] pattern = ShapedRecipe.shrink(ShapedRecipe.patternFromJson(JSONUtils.getAsJsonArray(this.rawRecipe, "pattern")));
-		int height = pattern.length;
-		int width = pattern[0].length();
-		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(width * height);
+		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(9);
 
 		for (int x = 0; x < pattern.length; x++) {
 			for (int y = 0; y < pattern[x].length(); y++) {
 				String key = pattern[x].substring(y, y + 1);
 				Pair<String, String> ingredient = ingredientMap.get(key);
 
-				ingredientsHandler.addIngredient(ingredient.getFirst(), ingredient.getSecond(), y + width * x);
+				ingredientsHandler.addIngredient(ingredient.getSecond(), ingredient.getFirst(), y + 3 * x);
 			}
 		}
 
+		ingredientsHandler.addOutput(rawRecipe.getAsJsonObject("result"));
+
 		this.printout = new String[3];
-		this.printout[0] = ingredientsHandler.getOutputFormatted(targetItem);
+		this.printout[0] = ingredientsHandler.getFormattedOutput(targetItem);
 		this.printout[1] = ingredientsHandler.getFormattedIngredientsList(targetItem);
-		this.printout[2] = makeCraftingTemplate(ingredientsHandler, targetItem);
+		this.printout[2] = WikiTemplateHelper.makeCraftingTemplate(ingredientsHandler.getIngredientsWithSlots(), ingredientsHandler.getOutput(), false);
 
 		return this.printout;
-	}
-
-	protected String makeCraftingTemplate(RecipeIngredientsHandler ingredientsHandler, @Nullable Item targetItem) {
-		ArrayList<String> slottedIngredients = ingredientsHandler.getIngredientsWithSlots();
-		String[] lines = new String[slottedIngredients.size() + 1];
-
-		for (int i = 0; i < slottedIngredients.size(); i++) {
-			lines[i] = slottedIngredients.get(i);
-		}
-
-		lines[lines.length - 1] = "output=" + ingredientsHandler.getOutputFormatted(targetItem);
-
-		return FormattingHelper.makeWikiTemplateObject("crafting", lines);
 	}
 }

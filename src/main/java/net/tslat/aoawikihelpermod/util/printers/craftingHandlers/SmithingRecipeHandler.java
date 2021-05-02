@@ -29,6 +29,21 @@ public class SmithingRecipeHandler extends RecipePrintHandler {
 	}
 
 	@Override
+	public String getTableGroup() {
+		return "Smithing";
+	}
+
+	@Override
+	public ResourceLocation getRecipeId() {
+		return this.recipeId;
+	}
+
+	@Override
+	public String[] getColumnTitles() {
+		return null;
+	}
+
+	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
 		if (printout != null)
 			return printout;
@@ -39,28 +54,18 @@ public class SmithingRecipeHandler extends RecipePrintHandler {
 		Triple<Integer, String, String> output = ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result"));
 
 		this.printout = new String[] {
-				FormattingHelper.createLinkableItem(input.getSecond(), true, input.getFirst().equals("minecraft"), input.getSecond().equals(targetName)) +
+				FormattingHelper.createLinkableItem(input.getSecond(), true, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) +
 						" can be smithed on a " +
 						FormattingHelper.createLinkableItem(Blocks.SMITHING_TABLE, false, true) +
 						" with a " +
-						FormattingHelper.createLinkableItem(material.getSecond(), false, material.getFirst().equals("minecraft"), material.getSecond().equals(targetName)) +
+						FormattingHelper.createLinkableItem(material.getSecond(), false, material.getFirst().equals("minecraft"), !material.getSecond().equals(targetName)) +
 						" to produce " +
 						output.getLeft() +
 						" " +
-						FormattingHelper.createLinkableItem(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), output.getRight().equals(targetName)) +
+						FormattingHelper.createLinkableItem(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName)) +
 						"."
 		};
 
 		return printout;
-	}
-
-	@Override
-	public String getTableGroup() {
-		return "Smithing";
-	}
-
-	@Override
-	public ResourceLocation getRecipeId() {
-		return this.recipeId;
 	}
 }

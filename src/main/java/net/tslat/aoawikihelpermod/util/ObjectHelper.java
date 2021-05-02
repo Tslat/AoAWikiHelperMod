@@ -7,6 +7,7 @@ import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -97,8 +98,8 @@ public class ObjectHelper {
 		if ((obj.has("item") && obj.has("tag")) || (!obj.has("item") && !obj.has("tag")))
 			throw new JsonParseException("Invalidly formatted ingredient, unable to proceed.");
 
-		String ingredientName = null;
-		String ownerId = null;
+		String ingredientName;
+		String ownerId;
 
 		if (obj.has("item")) {
 			return getFormattedItemDetails(new ResourceLocation(JSONUtils.getAsString(obj, "item")));
@@ -122,6 +123,10 @@ public class ObjectHelper {
 		return new ItemStack(item).getHoverName().getString();
 	}
 
+	public static String getEnchantmentName(Enchantment enchant, int level) {
+		return enchant.getFullname(level).getString();
+	}
+
 	public static Pair<String, String> getFormattedItemDetails(ResourceLocation id) {
 		Item item = Registry.ITEM.getOptional(id).orElse(null);
 
@@ -138,7 +143,7 @@ public class ObjectHelper {
 			if (obj.has("count"))
 				count = obj.get("count").getAsInt();
 
-			itemName = getFormattedItemDetails(new ResourceLocation(obj.get("item").getAsString()));
+			itemName = getIngredientName(obj);
 		}
 		else {
 			itemName = getFormattedItemDetails(new ResourceLocation(element.getAsString()));

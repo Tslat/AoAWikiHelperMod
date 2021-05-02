@@ -8,10 +8,9 @@ import net.minecraft.item.crafting.ICraftingRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
-import net.tslat.aoawikihelpermod.util.FormattingHelper;
+import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 
 public class ShapelessCraftingRecipeHandler extends RecipePrintHandler {
 	private final ResourceLocation recipeId;
@@ -39,6 +38,11 @@ public class ShapelessCraftingRecipeHandler extends RecipePrintHandler {
 	}
 
 	@Override
+	public String[] getColumnTitles() {
+		return new String[] {"Item", "Ingredients", "Recipe"};
+	}
+
+	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
 		if (this.printout != null)
 			return this.printout;
@@ -53,23 +57,10 @@ public class ShapelessCraftingRecipeHandler extends RecipePrintHandler {
 		ingredientsHandler.addOutput(rawRecipe.getAsJsonObject("result"));
 
 		this.printout = new String[3];
-		this.printout[0] = ingredientsHandler.getOutputFormatted(targetItem);
+		this.printout[0] = ingredientsHandler.getFormattedOutput(targetItem);
 		this.printout[1] = ingredientsHandler.getFormattedIngredientsList(targetItem);
-		this.printout[2] = makeCraftingTemplate(ingredientsHandler, targetItem);
+		this.printout[2] = WikiTemplateHelper.makeCraftingTemplate(ingredientsHandler.getIngredientsWithSlots(), ingredientsHandler.getOutput(), true);
 
 		return this.printout;
-	}
-
-	protected String makeCraftingTemplate(RecipeIngredientsHandler ingredientsHandler, @Nullable Item targetItem) {
-		ArrayList<String> slottedIngredients = ingredientsHandler.getIngredientsWithSlots();
-		String[] lines = new String[slottedIngredients.size() + 1];
-
-		for (int i = 0; i < slottedIngredients.size(); i++) {
-			lines[i] = slottedIngredients.get(i);
-		}
-
-		lines[lines.length - 1] = "output=" + ingredientsHandler.getOutputFormatted(targetItem);
-
-		return FormattingHelper.makeWikiTemplateObject("crafting", lines);
 	}
 }

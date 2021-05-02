@@ -1,12 +1,14 @@
 package net.tslat.aoawikihelpermod.util.printers.craftingHandlers;
 
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.ResourceLocation;
 import net.tslat.aoa3.common.container.recipe.UpgradeKitRecipe;
 import net.tslat.aoa3.common.registration.AoABlocks;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
+import net.tslat.aoawikihelpermod.util.ObjectHelper;
 
 import javax.annotation.Nullable;
 
@@ -36,18 +38,24 @@ public class UpgradeKitRecipeHandler extends RecipePrintHandler {
 	}
 
 	@Override
+	public String[] getColumnTitles() {
+		return new String[] {"Block", "Ingredients", "Item"};
+	}
+
+	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
 		if (this.printout != null)
 			return this.printout;
-		// TODO convert to raw recipe
-		this.printout = new String[3];
-		Item input = recipe.getIngredients().get(0).getItems()[0].getItem();
-		Item upgradeItem = recipe.getIngredients().get(1).getItems()[1].getItem();
-		Item output = recipe.getResultItem().getItem();
 
+		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
+		Pair<String, String> input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("input"));
+		Pair<String, String> upgradeKit = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("upgrade_kit"));
+		Pair<String, String> output = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("result"));
+
+		this.printout = new String[3];
 		this.printout[0] = FormattingHelper.createImageBlock(AoABlocks.DIVINE_STATION.get()) + " " + FormattingHelper.createLinkableItem(AoABlocks.DIVINE_STATION.get(), false, true);
-		this.printout[1] = FormattingHelper.createImageBlock(input) + " " + FormattingHelper.createLinkableItem(input, false, input != targetItem) + " + " + FormattingHelper.createImageBlock(upgradeItem) + " " + FormattingHelper.createLinkableItem(upgradeItem, false, upgradeItem != targetItem);
-		this.printout[2] = FormattingHelper.createImageBlock(output) + " " + FormattingHelper.createLinkableItem(recipe.getResultItem(), output != targetItem);
+		this.printout[1] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableItem(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) + " + " + FormattingHelper.createImageBlock(upgradeKit.getSecond()) + " " + FormattingHelper.createLinkableItem(upgradeKit.getSecond(), false, upgradeKit.getFirst().equals("minecraft"), !upgradeKit.getSecond().equals(targetName));
+		this.printout[2] = FormattingHelper.createImageBlock(output.getSecond()) + " " + FormattingHelper.createLinkableItem(output.getSecond(), false, output.getFirst().equals("minecraft"), !output.getSecond().equals(targetName));
 
 		return this.printout;
 	}
