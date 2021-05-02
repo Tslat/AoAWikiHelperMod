@@ -85,6 +85,9 @@ public class ObtainingCommand implements Command<CommandSource> {
 					WikiHelperCommand.success(cmd.getSource(), "Obtaining", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
 				}
 			}
+			else {
+				WikiHelperCommand.info(cmd.getSource(), "Obtaining", "No supported sources found for " + itemName);
+			}
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();

@@ -85,6 +85,9 @@ public class UsagesCommand implements Command<CommandSource> {
 					WikiHelperCommand.success(cmd.getSource(), "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
 				}
 			}
+			else {
+				WikiHelperCommand.info(cmd.getSource(), "Usages", "No supported usages found for " + itemName);
+			}
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
