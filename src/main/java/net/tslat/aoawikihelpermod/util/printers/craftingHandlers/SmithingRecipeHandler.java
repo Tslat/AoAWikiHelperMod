@@ -53,18 +53,10 @@ public class SmithingRecipeHandler extends RecipePrintHandler {
 		Pair<String, String> material = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("addition"));
 		Triple<Integer, String, String> output = ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result"));
 
-		this.printout = new String[] {
-				FormattingHelper.createLinkableItem(input.getSecond(), true, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) +
-						" can be smithed on a " +
-						FormattingHelper.createLinkableItem(Blocks.SMITHING_TABLE, false, true) +
-						" with a " +
-						FormattingHelper.createLinkableItem(material.getSecond(), false, material.getFirst().equals("minecraft"), !material.getSecond().equals(targetName)) +
-						" to produce " +
-						output.getLeft() +
-						" " +
-						FormattingHelper.createLinkableItem(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName)) +
-						"."
-		};
+		this.printout = new String[3];
+		this.printout[0] = FormattingHelper.createImageBlock(Blocks.SMITHING_TABLE) + " " + FormattingHelper.createLinkableItem(Blocks.SMITHING_TABLE, false, true);
+		this.printout[1] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableItem(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) + " + " + FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableItem(material.getSecond(), false, material.getFirst().equals("minecraft"), !material.getSecond().equals(targetName));
+		this.printout[2] = FormattingHelper.createImageBlock(output.getRight()) + " " + FormattingHelper.createLinkableItem(output.getRight(), false, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName));
 
 		return printout;
 	}

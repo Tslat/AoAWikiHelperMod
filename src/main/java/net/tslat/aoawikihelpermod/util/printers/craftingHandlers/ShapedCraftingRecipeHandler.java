@@ -47,8 +47,8 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
-		//if (this.printout != null)
-		//	return this.printout;
+		if (this.printout != null)
+			return this.printout;
 
 		HashMap<String, Pair<String, String>> ingredientMap = new HashMap<String, Pair<String, String>>();
 

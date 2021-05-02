@@ -41,13 +41,13 @@ public class SmeltingRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public String[] getColumnTitles() {
-		return new String[] {"Item", "Ingredients", "Recipe", "Smelt Time", "XP"};
+		return new String[] {"Item", "Smelt Time (Seconds)", "XP", "Ingredients", "Recipe"};
 	}
 
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
-		if (this.printout != null)
-			return this.printout;
+		//if (this.printout != null)
+		//	return this.printout;
 
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
 		Pair<String, String> input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("ingredient"));
@@ -55,12 +55,12 @@ public class SmeltingRecipeHandler extends RecipePrintHandler {
 		float xp = JSONUtils.getAsFloat(rawRecipe, "experience", 0);
 		int cookingTime = JSONUtils.getAsInt(rawRecipe, "cookingtime", 200);
 
-		this.printout = new String[3];
+		this.printout = new String[5];
 		this.printout[0] = (output.getLeft() > 1 ? output.getLeft() + " " : "") + FormattingHelper.createLinkableItem(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName));
-		this.printout[1] = FormattingHelper.createLinkableItem(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName));
-		this.printout[2] = WikiTemplateHelper.makeSmeltingTemplate(FormattingHelper.createLinkableItem(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)), FormattingHelper.createLinkableItem(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName)));
-		this.printout[3] = NumberUtil.roundToNthDecimalPlace(xp, 1);
-		this.printout[4] = NumberUtil.roundToNthDecimalPlace(cookingTime / 20f, 2);
+		this.printout[1] = NumberUtil.roundToNthDecimalPlace(cookingTime / 20f, 2);
+		this.printout[2] = NumberUtil.roundToNthDecimalPlace(xp, 1);
+		this.printout[3] = FormattingHelper.createLinkableItem(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName));
+		this.printout[4] = WikiTemplateHelper.makeSmeltingTemplate(input.getSecond(), output.getRight());
 
 		return this.printout;
 	}

@@ -10,7 +10,8 @@ public class WikiHelperCommand {
 	public static void registerSubCommands(CommandDispatcher<CommandSource> dispatcher) {
 		LiteralArgumentBuilder<CommandSource> cmd = Commands.literal("wikihelper")
 				.then(OverviewCommand.register())
-				.then(UsagesCommand.register());
+				.then(UsagesCommand.register())
+				.then(ObtainingCommand.register());
 
 		dispatcher.register(cmd);
 	}
