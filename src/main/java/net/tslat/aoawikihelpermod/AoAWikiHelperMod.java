@@ -10,6 +10,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.FileUtils;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
@@ -47,6 +48,11 @@ public class AoAWikiHelperMod {
 	@SubscribeEvent
 	public void registerRecipeSkimmer(AddReloadListenerEvent ev) {
 		ev.addListener(new RecipeLoaderSkimmer());
+	}
+
+	@SubscribeEvent
+	public void afterRegistration(FMLCommonSetupEvent ev) {
+		RepairablesSkimmer.init();
 	}
 
 	private void patchClickEvent() {

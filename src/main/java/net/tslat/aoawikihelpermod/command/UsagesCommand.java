@@ -12,8 +12,10 @@ import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.tslat.aoa3.library.misc.MutableSupplier;
 import net.tslat.aoawikihelpermod.RecipeLoaderSkimmer;
+import net.tslat.aoawikihelpermod.RepairablesSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
+import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.RecipePrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.craftingHandlers.RecipePrintHandler;
 
@@ -44,14 +46,14 @@ public class UsagesCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printUsages(CommandContext<CommandSource> cmd) {
-		Item item = ItemArgument.getItem(cmd, "id").getItem();
+	private static void checkRecipeUsages(Item item, CommandSource commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		String baseFileName = "Usages - " + itemName;
 
 		Collection<ResourceLocation> containingRecipes = RecipeLoaderSkimmer.RECIPES_BY_INGREDIENT.get(item.getRegistryName());
+
 		try {
 			if (!containingRecipes.isEmpty()) {
 				HashMultimap<String, RecipePrintHandler> sortedRecipes = HashMultimap.create();
@@ -69,6 +71,7 @@ public class UsagesCommand implements Command<CommandSource> {
 						continue;
 
 					String fileName = baseFileName + " - " + type;
+
 					recipeHandlers.sort(Comparator.comparing(handler -> handler.getRecipeId().toString()));
 
 					try (RecipePrintHelper printHelper = RecipePrintHelper.open(fileName, recipeHandlers.get(0))) {
@@ -82,16 +85,42 @@ public class UsagesCommand implements Command<CommandSource> {
 						outputFile = printHelper.getOutputFile();
 					}
 
-					WikiHelperCommand.success(cmd.getSource(), "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+					WikiHelperCommand.success(commandSource, "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
 				}
 			}
 			else {
-				WikiHelperCommand.info(cmd.getSource(), "Usages", "No supported usages found for " + itemName);
+				WikiHelperCommand.info(commandSource, "Usages", "No supported usages found for " + itemName);
 			}
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	private static void checkRepairUsages(Item item, CommandSource commandSource) {
+		String itemName = ObjectHelper.getItemName(item);
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+		File outputFile;
+		String repairInfo = RepairablesSkimmer.getRepairDescription(item.getRegistryName());
+
+		if (repairInfo != null) {
+			String fileName = "Usages - " + itemName + " - Repairing";
+
+			try (PrintHelper printHelper = PrintHelper.open(fileName)) {
+				printHelper.withClipboardOutput(clipboardContent);
+				printHelper.write(repairInfo);
+				outputFile = printHelper.getOutputFile();
+			}
+
+			WikiHelperCommand.success(commandSource, "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+		}
+	}
+
+	private static int printUsages(CommandContext<CommandSource> cmd) {
+		Item item = ItemArgument.getItem(cmd, "id").getItem();
+
+		checkRecipeUsages(item, cmd.getSource());
+		checkRepairUsages(item, cmd.getSource());
 
 		// TODO further usages
 
