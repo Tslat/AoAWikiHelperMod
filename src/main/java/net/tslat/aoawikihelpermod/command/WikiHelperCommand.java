@@ -11,7 +11,8 @@ public class WikiHelperCommand {
 		LiteralArgumentBuilder<CommandSource> cmd = Commands.literal("wikihelper")
 				.then(OverviewCommand.register())
 				.then(UsagesCommand.register())
-				.then(ObtainingCommand.register());
+				.then(ObtainingCommand.register())
+				.then(RecipeCommand.register());
 
 		dispatcher.register(cmd);
 	}
