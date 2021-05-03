@@ -102,7 +102,7 @@ public abstract class RecipePrintHandler {
 		}
 
 		public String getFormattedOutput(@Nullable Item targetItem) {
-			return (output.getLeft() > 1 ? output.getLeft() + " " : "") + FormattingHelper.createLinkableItem(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), (targetItem == null || !output.getRight().equals(ObjectHelper.getItemName(targetItem))));
+			return FormattingHelper.createLinkableItem(output.getRight(), false, output.getMiddle().equals("minecraft"), (targetItem == null || !output.getRight().equals(ObjectHelper.getItemName(targetItem))));
 		}
 
 		public void addOutput(JsonObject json) {

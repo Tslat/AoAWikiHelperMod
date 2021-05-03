@@ -65,6 +65,8 @@ public class FormattingHelper {
 	}
 
 	public static String createLinkableItem(String text, boolean pluralise, boolean isVanilla, boolean shouldLink) {
+		shouldLink = shouldLink | isVanilla;
+
 		StringBuilder builder = new StringBuilder(shouldLink ? "[[" : "");
 		String pluralName = pluralise ? lazyPluralise(text) : text;
 
