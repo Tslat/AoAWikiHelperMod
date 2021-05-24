@@ -11,11 +11,13 @@ import net.minecraft.command.arguments.ItemArgument;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.tslat.aoa3.library.misc.MutableSupplier;
-import net.tslat.aoawikihelpermod.RecipeLoaderSkimmer;
+import net.tslat.aoawikihelpermod.dataskimmers.LootTablesSkimmer;
+import net.tslat.aoawikihelpermod.dataskimmers.RecipesSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
+import net.tslat.aoawikihelpermod.util.printers.LootTablePrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.RecipePrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.craftingHandlers.RecipePrintHandler;
+import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -44,20 +46,19 @@ public class ObtainingCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printUsages(CommandContext<CommandSource> cmd) {
-		Item item = ItemArgument.getItem(cmd, "id").getItem();
+	private static void checkRecipeSources(Item item, CommandSource commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		String baseFileName = "Obtaining - " + itemName;
+		Collection<ResourceLocation> resultingRecipes = RecipesSkimmer.RECIPES_BY_OUTPUT.get(item.getRegistryName());
 
-		Collection<ResourceLocation> resultingRecipes = RecipeLoaderSkimmer.RECIPES_BY_OUTPUT.get(item.getRegistryName());
 		try {
 			if (!resultingRecipes.isEmpty()) {
 				HashMultimap<String, RecipePrintHandler> sortedRecipes = HashMultimap.create();
 
 				for (ResourceLocation id : resultingRecipes) {
-					RecipePrintHandler handler = RecipeLoaderSkimmer.RECIPE_PRINTERS.get(id);
+					RecipePrintHandler handler = RecipesSkimmer.RECIPE_PRINTERS.get(id);
 
 					sortedRecipes.put(handler.getTableGroup(), handler);
 				}
@@ -82,16 +83,52 @@ public class ObtainingCommand implements Command<CommandSource> {
 						outputFile = printHelper.getOutputFile();
 					}
 
-					WikiHelperCommand.success(cmd.getSource(), "Obtaining", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+					WikiHelperCommand.success(commandSource, "Obtaining", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
 				}
-			}
-			else {
-				WikiHelperCommand.info(cmd.getSource(), "Obtaining", "No supported sources found for " + itemName);
 			}
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	private static void checkTradeSources(Item item, CommandSource commandSource) {
+
+	}
+
+	private static void checkLootTableSources(Item item, CommandSource commandSource) {
+		String itemName = ObjectHelper.getItemName(item);
+		File outputFile;
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+		String baseFileName = "Obtaining - " + itemName;
+		Collection<ResourceLocation> resultingLootTables = LootTablesSkimmer.TABLES_BY_LOOT.get(item.getRegistryName());
+
+		if (!resultingLootTables.isEmpty()) {
+			String fileName = baseFileName + " - Loot Tables";
+
+			try (LootTablePrintHelper printHelper = LootTablePrintHelper.open(fileName)) {
+				printHelper.withClipboardOutput(clipboardContent);
+
+				for (ResourceLocation id : resultingLootTables) {
+					printHelper.printTable(id, LootTablesSkimmer.TABLE_PRINTERS.get(id));
+				}
+
+				outputFile = printHelper.getOutputFile();
+			}
+
+			WikiHelperCommand.success(commandSource, "Obtaining", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+		}
+	}
+
+	private static int printUsages(CommandContext<CommandSource> cmd) {
+		Item item = ItemArgument.getItem(cmd, "id").getItem();
+		CommandSource source = cmd.getSource();
+
+		WikiHelperCommand.info(cmd.getSource(), "Obtaining", "Searching for sources of '" + item.getRegistryName() + "'...");
+
+		checkRecipeSources(item, source);
+		checkLootTableSources(item, source);
+		checkTradeSources(item, source); // TODO
 
 		// TODO further usages
 

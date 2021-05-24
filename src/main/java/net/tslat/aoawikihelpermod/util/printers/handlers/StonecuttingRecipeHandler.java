@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod.util.printers.craftingHandlers;
+package net.tslat.aoawikihelpermod.util.printers.handlers;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
@@ -12,6 +12,8 @@ import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
 
 public class StonecuttingRecipeHandler extends RecipePrintHandler {
 	private final ResourceLocation recipeId;
@@ -48,6 +50,20 @@ public class StonecuttingRecipeHandler extends RecipePrintHandler {
 		return null;
 	}
 
+	@Nullable
+	@Override
+	public List<ResourceLocation> getIngredientsForLookup() {
+		ResourceLocation id = ObjectHelper.getIngredientItemId(this.rawRecipe.get("ingredient"));
+
+		return id == null ? null : Collections.singletonList(id);
+	}
+
+	@Nullable
+	@Override
+	public ResourceLocation getOutputForLookup() {
+		return ObjectHelper.getIngredientItemId(this.rawRecipe.get("result"));
+	}
+
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
 		if (printout != null)
@@ -59,8 +75,8 @@ public class StonecuttingRecipeHandler extends RecipePrintHandler {
 
 		this.printout = new String[3];
 		this.printout[0] = FormattingHelper.createImageBlock(Blocks.STONECUTTER) + " " + FormattingHelper.createLinkableItem(Blocks.STONECUTTER, false, true);
-		this.printout[1] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableItem(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName));
-		this.printout[2] = FormattingHelper.createImageBlock(output.getRight()) + " " + FormattingHelper.createLinkableItem(output.getRight(), false, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName));
+		this.printout[1] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName));
+		this.printout[2] = FormattingHelper.createImageBlock(output.getRight()) + " " + FormattingHelper.createLinkableText(output.getRight(), false, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName));
 
 		return printout;
 	}

@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod;
+package net.tslat.aoawikihelpermod.dataskimmers;
 
 import com.google.common.collect.HashMultimap;
 import net.minecraft.block.Blocks;

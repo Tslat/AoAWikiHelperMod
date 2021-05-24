@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod.util.printers.craftingHandlers;
+package net.tslat.aoawikihelpermod.util.printers.handlers;
 
 import com.google.gson.JsonObject;
 import net.minecraft.item.Item;
@@ -13,6 +13,8 @@ import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class TrophyRecipeHandler extends RecipePrintHandler {
 	private final ResourceLocation recipeId;
@@ -41,6 +43,18 @@ public class TrophyRecipeHandler extends RecipePrintHandler {
 	@Override
 	public String[] getColumnTitles() {
 		return new String[] {"Item", "Ingredients", "Recipe"};
+	}
+
+	@Nullable
+	@Override
+	public List<ResourceLocation> getIngredientsForLookup() {
+		return Collections.singletonList(AoABlocks.TROPHY.getId());
+	}
+
+	@Nullable
+	@Override
+	public ResourceLocation getOutputForLookup() {
+		return AoABlocks.GOLD_TROPHY.getId();
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod.util.printers.craftingHandlers;
+package net.tslat.aoawikihelpermod.util.printers.handlers;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
@@ -11,6 +11,8 @@ import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UpgradeKitRecipeHandler extends RecipePrintHandler {
 	private final ResourceLocation recipeId;
@@ -42,6 +44,28 @@ public class UpgradeKitRecipeHandler extends RecipePrintHandler {
 		return new String[] {"Block", "Ingredients", "Item"};
 	}
 
+	@Nullable
+	@Override
+	public List<ResourceLocation> getIngredientsForLookup() {
+		ArrayList<ResourceLocation> ingredients = new ArrayList<ResourceLocation>(2);
+		ResourceLocation input = ObjectHelper.getIngredientItemId(this.rawRecipe.get("input"));
+		ResourceLocation upgradeKit = ObjectHelper.getIngredientItemId(this.rawRecipe.get("upgrade_kit"));
+
+		if (input != null)
+			ingredients.add(input);
+
+		if (upgradeKit != null)
+			ingredients.add(upgradeKit);
+
+		return ingredients.isEmpty() ? null : ingredients;
+	}
+
+	@Nullable
+	@Override
+	public ResourceLocation getOutputForLookup() {
+		return ObjectHelper.getIngredientItemId(this.rawRecipe.get("result"));
+	}
+
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
 		if (this.printout != null)
@@ -54,8 +78,8 @@ public class UpgradeKitRecipeHandler extends RecipePrintHandler {
 
 		this.printout = new String[3];
 		this.printout[0] = FormattingHelper.createImageBlock(AoABlocks.DIVINE_STATION.get()) + " " + FormattingHelper.createLinkableItem(AoABlocks.DIVINE_STATION.get(), false, true);
-		this.printout[1] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableItem(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) + " + " + FormattingHelper.createImageBlock(upgradeKit.getSecond()) + " " + FormattingHelper.createLinkableItem(upgradeKit.getSecond(), false, upgradeKit.getFirst().equals("minecraft"), !upgradeKit.getSecond().equals(targetName));
-		this.printout[2] = FormattingHelper.createImageBlock(output.getSecond()) + " " + FormattingHelper.createLinkableItem(output.getSecond(), false, output.getFirst().equals("minecraft"), !output.getSecond().equals(targetName));
+		this.printout[1] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) + " + " + FormattingHelper.createImageBlock(upgradeKit.getSecond()) + " " + FormattingHelper.createLinkableText(upgradeKit.getSecond(), false, upgradeKit.getFirst().equals("minecraft"), !upgradeKit.getSecond().equals(targetName));
+		this.printout[2] = FormattingHelper.createImageBlock(output.getSecond()) + " " + FormattingHelper.createLinkableText(output.getSecond(), false, output.getFirst().equals("minecraft"), !output.getSecond().equals(targetName));
 
 		return this.printout;
 	}

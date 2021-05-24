@@ -1,6 +1,10 @@
 package net.tslat.aoawikihelpermod.util;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.BinomialRange;
+import net.minecraft.loot.ConstantRange;
+import net.minecraft.loot.IRandomRange;
+import net.minecraft.loot.RandomValueRange;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -45,7 +49,7 @@ public class FormattingHelper {
 	}
 
 	public static String createLinkableItem(IItemProvider object, boolean pluralise, boolean shouldLink) {
-		return createLinkableItem(ObjectHelper.getItemName(object.asItem()), pluralise, object.asItem().getRegistryName().getNamespace().equals("minecraft"), shouldLink);
+		return createLinkableText(ObjectHelper.getItemName(object.asItem()), pluralise, object.asItem().getRegistryName().getNamespace().equals("minecraft"), shouldLink);
 	}
 
 	public static String createLinkableTag(String tag) {
@@ -64,7 +68,7 @@ public class FormattingHelper {
 		return tooltip(builder.toString(), "Any item in tag collection");
 	}
 
-	public static String createLinkableItem(String text, boolean pluralise, boolean isVanilla, boolean shouldLink) {
+	public static String createLinkableText(String text, boolean pluralise, boolean isVanilla, boolean shouldLink) {
 		shouldLink = shouldLink | isVanilla;
 
 		StringBuilder builder = new StringBuilder(shouldLink ? "[[" : "");
@@ -117,5 +121,26 @@ public class FormattingHelper {
 		}
 
 		return builder.toString();
+	}
+
+	public static String getStringFromRange(IRandomRange range) {
+		if (range instanceof ConstantRange)
+			return String.valueOf(((ConstantRange)range).value);
+
+		if (range instanceof RandomValueRange) {
+			RandomValueRange randomRange = (RandomValueRange)range;
+
+			if (randomRange.getMin() != randomRange.getMax()) {
+				return NumberUtil.roundToNthDecimalPlace(randomRange.getMin(), 3) + "-" + NumberUtil.roundToNthDecimalPlace(randomRange.getMax(), 3);
+			}
+			else {
+				return NumberUtil.roundToNthDecimalPlace(randomRange.getMin(), 3);
+			}
+		}
+
+		if (range instanceof BinomialRange)
+			return "0+";
+
+		return "1";
 	}
 }

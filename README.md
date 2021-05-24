@@ -10,4 +10,4 @@ It should also help with consistent formatting and editing standards.
 
 All actions in-game are handled via the **/wikihelper** command and its subcommands.
 
-The mod can be downloaded here: http://tslat.net/Hosting/Tslat-AoA/aoawikihelpermod-2.0-Beta-1.jar
+The mod can be downloaded here: http://tslat.net/Hosting/Tslat-AoA/aoawikihelpermod-2.0.jar

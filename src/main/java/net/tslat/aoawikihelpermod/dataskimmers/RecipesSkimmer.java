@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod;
+package net.tslat.aoawikihelpermod.dataskimmers;
 
 import com.google.common.collect.HashMultimap;
 import com.google.gson.JsonElement;
@@ -11,13 +11,19 @@ import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
-import net.tslat.aoawikihelpermod.util.printers.craftingHandlers.*;
+import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
+import net.tslat.aoawikihelpermod.util.printers.handlers.*;
+import net.tslat.aoawikihelpermod.util.printers.handlers.thermalexpansion.TEChillerRecipeHandler;
+import net.tslat.aoawikihelpermod.util.printers.handlers.thermalexpansion.TEPulverizerRecipeHandler;
+import net.tslat.aoawikihelpermod.util.printers.handlers.thermalexpansion.TESawmillRecipeHandler;
+import net.tslat.aoawikihelpermod.util.printers.handlers.thermalexpansion.TETreeExtractorRecipeHandler;
 import org.apache.logging.log4j.Level;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class RecipeLoaderSkimmer extends JsonReloadListener {
+public class RecipesSkimmer extends JsonReloadListener {
 	private static final HashMap<String, RecipePrintHandler.Factory> RECIPE_HANDLERS = new HashMap<String, RecipePrintHandler.Factory>();
 	public static final HashMap<ResourceLocation, RecipePrintHandler> RECIPE_PRINTERS = new HashMap<ResourceLocation, RecipePrintHandler>();
 	public static final HashMultimap<ResourceLocation, ResourceLocation> RECIPES_BY_INGREDIENT = HashMultimap.create();
@@ -35,14 +41,30 @@ public class RecipeLoaderSkimmer extends JsonReloadListener {
 		RECIPE_HANDLERS.put("aoa3:upgrade_kit", UpgradeKitRecipeHandler::new);
 		RECIPE_HANDLERS.put("aoa3:infusion", InfusionRecipeHandler::new);
 		RECIPE_HANDLERS.put("aoa3:trophy", TrophyRecipeHandler::new);
+
+		RECIPE_HANDLERS.put("thermal:tree_extractor", TETreeExtractorRecipeHandler::new);
+		RECIPE_HANDLERS.put("thermal:sawmill", TESawmillRecipeHandler::new);
+		RECIPE_HANDLERS.put("thermal:pulverizer", TEPulverizerRecipeHandler::new);
+		RECIPE_HANDLERS.put("thermal:chiller", TEChillerRecipeHandler::new);
 	}
 
-	public RecipeLoaderSkimmer() {
+	public RecipesSkimmer() {
 		super(AoAWikiHelperMod.GSON, "recipes");
+	}
+
+	public static void registerRecipeHandler(String recipeType, RecipePrintHandler.Factory handlerFactory) {
+		RECIPE_HANDLERS.put(recipeType, handlerFactory);
+
+		if (RECIPE_PRINTERS.isEmpty())
+			AoAWikiHelperMod.LOGGER.log(Level.WARN, "Recipe handler registered after data loading. This will result in recipes being missed. Register recipe handler in constructor of addon");
 	}
 
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> jsonMap, IResourceManager resourceManager, IProfiler profiler) {
+		RECIPE_PRINTERS.clear();
+		RECIPES_BY_INGREDIENT.clear();
+		RECIPES_BY_OUTPUT.clear();
+
 		for (Map.Entry<ResourceLocation, JsonElement> entry : jsonMap.entrySet()) {
 			ResourceLocation id = entry.getKey();
 			JsonElement json = entry.getValue();
@@ -57,7 +79,7 @@ public class RecipeLoaderSkimmer extends JsonReloadListener {
 					recipe = RecipeManager.fromJson(id, json.getAsJsonObject());
 				}
 				catch (Exception ex) {
-					AoAWikiHelperMod.LOGGER.log(Level.WARN, "Invalid recipe found: " + id + ", using only json format.");
+					AoAWikiHelperMod.LOGGER.log(Level.WARN, "Unknown recipe found: " + id + ", using only json format.");
 				}
 
 				String recipeType = JSONUtils.getAsString(json.getAsJsonObject(), "type");
@@ -69,14 +91,16 @@ public class RecipeLoaderSkimmer extends JsonReloadListener {
 					continue;
 				}
 
+				RecipePrintHandler recipePrintHandler = factory.create(id, json.getAsJsonObject(), recipe);
+
 				if (recipe != null) {
 					populateIngredientsByRecipe(id, recipe);
 				}
 				else {
-					populateIngredientsByJson(id, json);
+					populateIngredientsByHandler(id, recipePrintHandler);
 				}
 
-				RECIPE_PRINTERS.put(id, factory.create(id, json.getAsJsonObject(), recipe));
+				RECIPE_PRINTERS.put(id, recipePrintHandler);
 			}
 			catch (Exception ex) {
 				AoAWikiHelperMod.LOGGER.log(Level.ERROR, "Failed recipe skim for: " + id + ", skipping recipe.");
@@ -94,12 +118,23 @@ public class RecipeLoaderSkimmer extends JsonReloadListener {
 		RECIPES_BY_OUTPUT.put(recipe.getResultItem().getItem().getRegistryName(), id);
 	}
 
-	private void populateIngredientsByJson(ResourceLocation id, JsonElement recipe) {
+	private void populateIngredientsByHandler(ResourceLocation id, RecipePrintHandler recipePrintHandler) {
+		List<ResourceLocation> ingredients = recipePrintHandler.getIngredientsForLookup();
 
+		if (ingredients != null) {
+			for (ResourceLocation ing : ingredients) {
+				RECIPES_BY_INGREDIENT.put(ing, id);
+			}
+		}
+
+		ResourceLocation output = recipePrintHandler.getOutputForLookup();
+
+		if (output != null)
+			RECIPES_BY_OUTPUT.put(output, id);
 	}
 
 	@Override
 	public String getName() {
-		return "Recipe Skimmer";
+		return "Recipes Skimmer";
 	}
 }

@@ -1,10 +1,10 @@
-package net.tslat.aoawikihelpermod.util.printers.craftingHandlers;
+package net.tslat.aoawikihelpermod.util.printers.handlers;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.item.crafting.BlastingRecipe;
+import net.minecraft.item.crafting.CampfireCookingRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
@@ -14,25 +14,27 @@ import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
 
-public class BlastingRecipeHandler extends RecipePrintHandler {
+public class CampfireRecipeHandler extends RecipePrintHandler {
 	private final ResourceLocation recipeId;
 
 	private final JsonObject rawRecipe;
 	@Nullable
-	private final BlastingRecipe recipe;
+	private final CampfireCookingRecipe recipe;
 
 	private String[] printout = null;
 
-	public BlastingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public CampfireRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
 		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
-		this.recipe = (BlastingRecipe)recipe;
+		this.recipe = (CampfireCookingRecipe)recipe;
 	}
 
 	@Override
 	public String getTableGroup() {
-		return "Blasting";
+		return "Campfire";
 	}
 
 	@Override
@@ -50,6 +52,20 @@ public class BlastingRecipeHandler extends RecipePrintHandler {
 		return null;
 	}
 
+	@Nullable
+	@Override
+	public List<ResourceLocation> getIngredientsForLookup() {
+		ResourceLocation id = ObjectHelper.getIngredientItemId(this.rawRecipe.get("ingredient"));
+
+		return id == null ? null : Collections.singletonList(id);
+	}
+
+	@Nullable
+	@Override
+	public ResourceLocation getOutputForLookup() {
+		return ObjectHelper.getIngredientItemId(this.rawRecipe.get("result"));
+	}
+
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
 		if (printout != null)
@@ -62,17 +78,17 @@ public class BlastingRecipeHandler extends RecipePrintHandler {
 		int cookingTime = JSONUtils.getAsInt(rawRecipe, "cookingtime", 100);
 
 		this.printout = new String[] {
-				FormattingHelper.createLinkableItem(input.getSecond(), true, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) +
-						" can be processed in a " +
-				FormattingHelper.createLinkableItem(Blocks.BLAST_FURNACE, false, true) +
+				FormattingHelper.createLinkableText(input.getSecond(), true, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) +
+						" can be cooked on a " +
+						FormattingHelper.createLinkableItem(Blocks.CAMPFIRE, false, true) +
 						" to produce " +
-				output.getLeft() +
+						output.getLeft() +
 						" " +
-				FormattingHelper.createLinkableItem(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName)) +
+						FormattingHelper.createLinkableText(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName)) +
 						" and " +
-				NumberUtil.roundToNthDecimalPlace(xp, 1) +
+						NumberUtil.roundToNthDecimalPlace(xp, 1) +
 						"xp, taking " +
-				NumberUtil.roundToNthDecimalPlace(cookingTime / 20f, 2) +
+						NumberUtil.roundToNthDecimalPlace(cookingTime / 20f, 2) +
 						" seconds."
 		};
 

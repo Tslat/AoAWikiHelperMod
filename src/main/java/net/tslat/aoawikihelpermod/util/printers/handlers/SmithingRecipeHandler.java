@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod.util.printers.craftingHandlers;
+package net.tslat.aoawikihelpermod.util.printers.handlers;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
@@ -12,6 +12,8 @@ import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SmithingRecipeHandler extends RecipePrintHandler {
 	private final ResourceLocation recipeId;
@@ -43,6 +45,28 @@ public class SmithingRecipeHandler extends RecipePrintHandler {
 		return null;
 	}
 
+	@Nullable
+	@Override
+	public List<ResourceLocation> getIngredientsForLookup() {
+		ArrayList<ResourceLocation> ingredients = new ArrayList<ResourceLocation>(2);
+		ResourceLocation base = ObjectHelper.getIngredientItemId(this.rawRecipe.get("base"));
+		ResourceLocation addition = ObjectHelper.getIngredientItemId(this.rawRecipe.get("addition"));
+
+		if (base != null)
+			ingredients.add(base);
+
+		if (addition != null)
+			ingredients.add(addition);
+
+		return ingredients.isEmpty() ? null : ingredients;
+	}
+
+	@Nullable
+	@Override
+	public ResourceLocation getOutputForLookup() {
+		return ObjectHelper.getIngredientItemId(this.rawRecipe.get("result"));
+	}
+
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
 		if (printout != null)
@@ -55,8 +79,8 @@ public class SmithingRecipeHandler extends RecipePrintHandler {
 
 		this.printout = new String[3];
 		this.printout[0] = FormattingHelper.createImageBlock(Blocks.SMITHING_TABLE) + " " + FormattingHelper.createLinkableItem(Blocks.SMITHING_TABLE, false, true);
-		this.printout[1] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableItem(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) + " + " + FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableItem(material.getSecond(), false, material.getFirst().equals("minecraft"), !material.getSecond().equals(targetName));
-		this.printout[2] = FormattingHelper.createImageBlock(output.getRight()) + " " + FormattingHelper.createLinkableItem(output.getRight(), false, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName));
+		this.printout[1] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) + " + " + FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableText(material.getSecond(), false, material.getFirst().equals("minecraft"), !material.getSecond().equals(targetName));
+		this.printout[2] = FormattingHelper.createImageBlock(output.getRight()) + " " + FormattingHelper.createLinkableText(output.getRight(), false, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName));
 
 		return printout;
 	}

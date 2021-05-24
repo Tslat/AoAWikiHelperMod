@@ -1,7 +1,7 @@
 package net.tslat.aoawikihelpermod.util.printers;
 
 import net.tslat.aoa3.library.misc.MutableSupplier;
-import net.tslat.aoawikihelpermod.util.printers.craftingHandlers.RecipePrintHandler;
+import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

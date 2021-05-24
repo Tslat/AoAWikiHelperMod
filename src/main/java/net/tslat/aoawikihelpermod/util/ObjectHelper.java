@@ -22,6 +22,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.util.StringUtil;
 import org.apache.commons.lang3.tuple.Triple;
@@ -119,11 +120,34 @@ public class ObjectHelper {
 		}
 	}
 
+	@Nullable
+	public static ResourceLocation getIngredientItemId(JsonElement element) {
+		if (element.isJsonObject()) {
+			JsonObject obj = element.getAsJsonObject();
+
+			if (obj.has("tag"))
+				return null;
+
+			if (obj.has("item")) {
+				return new ResourceLocation(JSONUtils.getAsString(obj, "item"));
+			}
+			else {
+				throw new JsonParseException("Invalidly formatted ingredient, unable to proceed.");
+			}
+		}
+		else {
+			return new ResourceLocation(element.getAsString());
+		}
+	}
+
 	public static String getItemName(IItemProvider item) {
 		return new ItemStack(item).getHoverName().getString();
 	}
 
 	public static String getEnchantmentName(Enchantment enchant, int level) {
+		if (level <= 0)
+			return new TranslationTextComponent(enchant.getDescriptionId()).getString();
+
 		return enchant.getFullname(level).getString();
 	}
 

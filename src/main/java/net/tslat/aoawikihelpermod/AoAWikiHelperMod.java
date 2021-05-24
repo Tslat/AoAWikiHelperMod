@@ -14,6 +14,10 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.FileUtils;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
+import net.tslat.aoawikihelpermod.dataskimmers.LootTablesSkimmer;
+import net.tslat.aoawikihelpermod.dataskimmers.MerchantsSkimmer;
+import net.tslat.aoawikihelpermod.dataskimmers.RecipesSkimmer;
+import net.tslat.aoawikihelpermod.dataskimmers.RepairablesSkimmer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,7 +29,7 @@ import static net.tslat.aoawikihelpermod.AoAWikiHelperMod.MOD_ID;
 
 @Mod(MOD_ID)
 public class AoAWikiHelperMod {
-	public static final String VERSION = "2.0-Beta-1";
+	public static final String VERSION = "2.0";
 	public static final String MOD_ID = "aoawikihelpermod";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
@@ -47,12 +51,14 @@ public class AoAWikiHelperMod {
 
 	@SubscribeEvent
 	public void registerRecipeSkimmer(AddReloadListenerEvent ev) {
-		ev.addListener(new RecipeLoaderSkimmer());
+		ev.addListener(new RecipesSkimmer());
+		ev.addListener(new LootTablesSkimmer());
 	}
 
 	@SubscribeEvent
 	public void afterRegistration(FMLCommonSetupEvent ev) {
 		RepairablesSkimmer.init();
+		MerchantsSkimmer.init();
 	}
 
 	private void patchClickEvent() {

@@ -12,7 +12,8 @@ public class WikiHelperCommand {
 				.then(OverviewCommand.register())
 				.then(UsagesCommand.register())
 				.then(ObtainingCommand.register())
-				.then(RecipeCommand.register());
+				.then(RecipeCommand.register())
+				.then(LootTableCommand.register());
 
 		dispatcher.register(cmd);
 	}

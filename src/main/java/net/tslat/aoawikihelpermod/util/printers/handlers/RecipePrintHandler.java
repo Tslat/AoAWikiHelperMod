@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod.util.printers.craftingHandlers;
+package net.tslat.aoawikihelpermod.util.printers.handlers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
@@ -14,12 +14,17 @@ import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class RecipePrintHandler {
 	public abstract String[] toTableEntry(@Nullable Item targetItem);
 	public abstract String getTableGroup();
 	public abstract ResourceLocation getRecipeId();
 	public abstract String[] getColumnTitles();
+	@Nullable
+	public abstract List<ResourceLocation> getIngredientsForLookup();
+	@Nullable
+	public abstract ResourceLocation getOutputForLookup();
 
 	public boolean isPlainTextPrintout() {
 		return false;
@@ -90,7 +95,7 @@ public abstract class RecipePrintHandler {
 					builder.append(FormattingHelper.createLinkableTag(ing.getRight()));
 				}
 				else {
-					builder.append(FormattingHelper.createLinkableItem(ing.getRight(), ing.getMiddle() > 1, ing.getLeft().equals("minecraft"), targetItem == null || !ObjectHelper.getItemName(targetItem).equals(ing.getRight())));
+					builder.append(FormattingHelper.createLinkableText(ing.getRight(), ing.getMiddle() > 1, ing.getLeft().equals("minecraft"), targetItem == null || !ObjectHelper.getItemName(targetItem).equals(ing.getRight())));
 				}
 			}
 
@@ -102,7 +107,7 @@ public abstract class RecipePrintHandler {
 		}
 
 		public String getFormattedOutput(@Nullable Item targetItem) {
-			return FormattingHelper.createLinkableItem(output.getRight(), false, output.getMiddle().equals("minecraft"), (targetItem == null || !output.getRight().equals(ObjectHelper.getItemName(targetItem))));
+			return FormattingHelper.createLinkableText(output.getRight(), false, output.getMiddle().equals("minecraft"), (targetItem == null || !output.getRight().equals(ObjectHelper.getItemName(targetItem))));
 		}
 
 		public void addOutput(JsonObject json) {

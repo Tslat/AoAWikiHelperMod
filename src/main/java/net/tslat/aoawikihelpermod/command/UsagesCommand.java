@@ -11,13 +11,13 @@ import net.minecraft.command.arguments.ItemArgument;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.tslat.aoa3.library.misc.MutableSupplier;
-import net.tslat.aoawikihelpermod.RecipeLoaderSkimmer;
-import net.tslat.aoawikihelpermod.RepairablesSkimmer;
+import net.tslat.aoawikihelpermod.dataskimmers.RecipesSkimmer;
+import net.tslat.aoawikihelpermod.dataskimmers.RepairablesSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.RecipePrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.craftingHandlers.RecipePrintHandler;
+import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -51,15 +51,14 @@ public class UsagesCommand implements Command<CommandSource> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		String baseFileName = "Usages - " + itemName;
-
-		Collection<ResourceLocation> containingRecipes = RecipeLoaderSkimmer.RECIPES_BY_INGREDIENT.get(item.getRegistryName());
+		Collection<ResourceLocation> containingRecipes = RecipesSkimmer.RECIPES_BY_INGREDIENT.get(item.getRegistryName());
 
 		try {
 			if (!containingRecipes.isEmpty()) {
 				HashMultimap<String, RecipePrintHandler> sortedRecipes = HashMultimap.create();
 
 				for (ResourceLocation id : containingRecipes) {
-					RecipePrintHandler handler = RecipeLoaderSkimmer.RECIPE_PRINTERS.get(id);
+					RecipePrintHandler handler = RecipesSkimmer.RECIPE_PRINTERS.get(id);
 
 					sortedRecipes.put(handler.getTableGroup(), handler);
 				}
@@ -116,13 +115,20 @@ public class UsagesCommand implements Command<CommandSource> {
 		}
 	}
 
+	private static void checkTradeUsages(Item item, CommandSource commandSource) {}
+
 	private static int printUsages(CommandContext<CommandSource> cmd) {
 		Item item = ItemArgument.getItem(cmd, "id").getItem();
+		CommandSource source = cmd.getSource();
 
-		checkRecipeUsages(item, cmd.getSource());
-		checkRepairUsages(item, cmd.getSource());
+		WikiHelperCommand.info(cmd.getSource(), "Usages", "Searching for usages of '" + item.getRegistryName() + "'...");
+
+		checkRecipeUsages(item, source);
+		checkRepairUsages(item, source);
+		checkTradeUsages(item, source); // TODO
 
 		// TODO further usages
+		// Fuels?
 
 		return 1;
 	}

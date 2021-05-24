@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod.util.printers.craftingHandlers;
+package net.tslat.aoawikihelpermod.util.printers.handlers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -16,6 +16,8 @@ import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InfusionRecipeHandler extends RecipePrintHandler {
 	private final ResourceLocation recipeId;
@@ -50,6 +52,30 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 			return new String[] {"Enchantment", "Used For", "Infusion Req.", "Infusion XP", "Ingredients", "Recipe"};
 
 		return new String[] {"Item", "Infusion Req.", "Infusion XP", "Ingredients", "Recipe"};
+	}
+
+	@Nullable
+	@Override
+	public List<ResourceLocation> getIngredientsForLookup() {
+		ArrayList<ResourceLocation> ingredients = new ArrayList<ResourceLocation>();
+
+		for (JsonElement element : JSONUtils.getAsJsonArray(rawRecipe, "ingredients")) {
+			ResourceLocation id = ObjectHelper.getIngredientItemId(element);
+
+			if (id != null)
+				ingredients.add(id);
+		}
+
+		return ingredients.isEmpty() ? null : ingredients;
+	}
+
+	@Nullable
+	@Override
+	public ResourceLocation getOutputForLookup() {
+		if (isImbuing)
+			return null;
+
+		return ObjectHelper.getIngredientItemId(this.rawRecipe.get("result"));
 	}
 
 	@Override
@@ -149,7 +175,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(ingredients.size() + 1);
 		Pair<String, String> input = ObjectHelper.getIngredientName(rawRecipe.getAsJsonObject("input"));
 		String targetItemName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
-		String inputItemName = FormattingHelper.createLinkableItem(input.getSecond(), false, input.getFirst().equals("minecraft"), input.getSecond().equals(targetItemName));
+		String inputItemName = FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), input.getSecond().equals(targetItemName));
 
 		for (JsonElement ele : ingredients) {
 			ingredientsHandler.addIngredient(ele.getAsJsonObject());
@@ -157,7 +183,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 
 		ingredientsHandler.addOutput(JSONUtils.getAsJsonObject(rawRecipe, "result"));
 
-		String output = FormattingHelper.createLinkableItem(ingredientsHandler.getOutput().getRight(), ingredientsHandler.getOutput().getLeft() > 1, ingredientsHandler.getOutput().getMiddle().equals("minecraft"), ingredientsHandler.getOutput().getRight().equals(targetItemName));;
+		String output = FormattingHelper.createLinkableText(ingredientsHandler.getOutput().getRight(), ingredientsHandler.getOutput().getLeft() > 1, ingredientsHandler.getOutput().getMiddle().equals("minecraft"), ingredientsHandler.getOutput().getRight().equals(targetItemName));;
 
 		this.printout[0] = ingredientsHandler.getOutput().getLeft() + output;
 		this.printout[1] = String.valueOf(infusionReq);
