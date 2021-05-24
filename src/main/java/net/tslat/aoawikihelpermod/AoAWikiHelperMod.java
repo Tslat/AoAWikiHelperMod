@@ -18,6 +18,7 @@ import net.tslat.aoawikihelpermod.dataskimmers.LootTablesSkimmer;
 import net.tslat.aoawikihelpermod.dataskimmers.MerchantsSkimmer;
 import net.tslat.aoawikihelpermod.dataskimmers.RecipesSkimmer;
 import net.tslat.aoawikihelpermod.dataskimmers.RepairablesSkimmer;
+import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,6 +40,7 @@ public class AoAWikiHelperMod {
 		File outputDir = FMLPaths.CONFIGDIR.get().resolve(MOD_ID).toFile();
 
 		FileUtils.getOrCreateDirectory(outputDir.toPath(), MOD_ID);
+		PrintHelper.init(outputDir);
 		patchClickEvent();
 		MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
 		MinecraftForge.EVENT_BUS.addListener(this::registerRecipeSkimmer);
