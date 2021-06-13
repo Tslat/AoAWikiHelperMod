@@ -10,19 +10,25 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.ItemArgument;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
-import net.tslat.aoa3.library.misc.MutableSupplier;
+import net.tslat.aoa3.util.misc.MutableSupplier;
+import net.tslat.aoawikihelpermod.dataskimmers.ItemMiscUsageSkimmer;
 import net.tslat.aoawikihelpermod.dataskimmers.LootTablesSkimmer;
+import net.tslat.aoawikihelpermod.dataskimmers.MerchantsSkimmer;
 import net.tslat.aoawikihelpermod.dataskimmers.RecipesSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.LootTablePrintHelper;
+import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.RecipePrintHelper;
+import net.tslat.aoawikihelpermod.util.printers.TradesPrintHelper;
+import net.tslat.aoawikihelpermod.util.printers.handlers.MerchantTradePrintHandler;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Set;
 
 public class ObtainingCommand implements Command<CommandSource> {
 	private static final ObtainingCommand CMD = new ObtainingCommand();
@@ -30,7 +36,7 @@ public class ObtainingCommand implements Command<CommandSource> {
 	public static ArgumentBuilder<CommandSource, ?> register() {
 		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("obtaining").executes(CMD);
 
-		builder.then(Commands.argument("id", ItemArgument.item()).executes(ObtainingCommand::printUsages));
+		builder.then(Commands.argument("id", ItemArgument.item()).executes(ObtainingCommand::printSources));
 
 		return builder;
 	}
@@ -46,7 +52,7 @@ public class ObtainingCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static void checkRecipeSources(Item item, CommandSource commandSource) {
+	private static boolean checkRecipeSources(Item item, CommandSource commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -85,18 +91,67 @@ public class ObtainingCommand implements Command<CommandSource> {
 
 					WikiHelperCommand.success(commandSource, "Obtaining", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
 				}
+
+				return true;
 			}
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
 		}
+
+		return false;
 	}
 
-	private static void checkTradeSources(Item item, CommandSource commandSource) {
+	private static boolean checkTradeSources(Item item, CommandSource commandSource) {
+		String itemName = ObjectHelper.getItemName(item);
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+		File outputFile;
+		Set<MerchantTradePrintHandler> trades = MerchantsSkimmer.TRADES_BY_ITEM.get(item.getRegistryName());
 
+		if (!trades.isEmpty()) {
+			String fileName = "Obtaining - " + itemName + " - Merchants";
+
+			try (TradesPrintHelper printHelper = TradesPrintHelper.open(fileName, false)) {
+				printHelper.withClipboardOutput(clipboardContent);
+				printHelper.withProperty("class", "wikitable");
+				printHelper.handleTradeList(trades);
+
+				outputFile = printHelper.getOutputFile();
+			}
+
+			WikiHelperCommand.success(commandSource, "Obtaining", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+
+			return true;
+		}
+
+		return false;
 	}
 
-	private static void checkLootTableSources(Item item, CommandSource commandSource) {
+	private static boolean checkLogStrippingSources(Item item, CommandSource commandSource) {
+		String itemName = ObjectHelper.getItemName(item);
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+		File outputFile;
+		String stripInfo = ItemMiscUsageSkimmer.getStrippedBlockDescription(item.getRegistryName());
+
+		if (stripInfo != null) {
+			String fileName = "Obtaining - " + itemName + " - Log Stripping";
+
+			try (PrintHelper printHelper = PrintHelper.open(fileName)) {
+				printHelper.withClipboardOutput(clipboardContent);
+				printHelper.write(stripInfo);
+
+				outputFile = printHelper.getOutputFile();
+			}
+
+			WikiHelperCommand.success(commandSource, "Obtaining", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+
+			return true;
+		}
+
+		return false;
+	}
+
+	private static boolean checkLootTableSources(Item item, CommandSource commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -106,7 +161,7 @@ public class ObtainingCommand implements Command<CommandSource> {
 		if (!resultingLootTables.isEmpty()) {
 			String fileName = baseFileName + " - Loot Tables";
 
-			try (LootTablePrintHelper printHelper = LootTablePrintHelper.open(fileName)) {
+			try (LootTablePrintHelper printHelper = LootTablePrintHelper.open(fileName, false)) {
 				printHelper.withClipboardOutput(clipboardContent);
 
 				for (ResourceLocation id : resultingLootTables) {
@@ -117,20 +172,29 @@ public class ObtainingCommand implements Command<CommandSource> {
 			}
 
 			WikiHelperCommand.success(commandSource, "Obtaining", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+
+			return true;
 		}
+
+		return false;
 	}
 
-	private static int printUsages(CommandContext<CommandSource> cmd) {
+	private static int printSources(CommandContext<CommandSource> cmd) {
 		Item item = ItemArgument.getItem(cmd, "id").getItem();
 		CommandSource source = cmd.getSource();
+		boolean success;
 
 		WikiHelperCommand.info(cmd.getSource(), "Obtaining", "Searching for sources of '" + item.getRegistryName() + "'...");
 
-		checkRecipeSources(item, source);
-		checkLootTableSources(item, source);
-		checkTradeSources(item, source); // TODO
+		success = checkRecipeSources(item, source);
+		success |= checkLootTableSources(item, source);
+		success |= checkTradeSources(item, source);
+		success |= checkLogStrippingSources(item, source);
 
 		// TODO further usages
+
+		if (!success)
+			WikiHelperCommand.info(cmd.getSource(), "Obtaining", "No source information found.");
 
 		return 1;
 	}

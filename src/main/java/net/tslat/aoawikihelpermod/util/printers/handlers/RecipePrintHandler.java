@@ -1,11 +1,15 @@
 package net.tslat.aoawikihelpermod.util.printers.handlers;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -117,6 +121,40 @@ public abstract class RecipePrintHandler {
 		public void addOutput(ItemStack stack) {
 			Pair<String, String> names = ObjectHelper.getFormattedItemDetails(stack.getItem().getRegistryName());
 			this.output = Triple.of(stack.getCount(), names.getFirst(), names.getSecond());
+		}
+
+		public String addIngredient(JsonElement element) {
+			if (element.isJsonObject())
+				return addIngredient(element.getAsJsonObject());
+
+			if (element.isJsonArray()) {
+				JsonArray array = element.getAsJsonArray();
+				Pair<String, String> backup = null;
+				ITag<Item> potentialTag = null;
+
+				for (JsonElement ele : array) {
+					if (ele.isJsonObject()) {
+						return addIngredient(ele.getAsJsonObject());
+					}
+					else if (ele.isJsonPrimitive() && backup == null) {
+						Pair<String, String> id = ObjectHelper.getFormattedItemDetails(new ResourceLocation(ele.getAsString()));
+
+						addIngredient(id.getSecond(), id.getFirst(), -1);
+
+						return id.getSecond();
+					}
+				}
+			}
+
+			if (element.isJsonPrimitive()) {
+				Pair<String, String> id = ObjectHelper.getFormattedItemDetails(new ResourceLocation(element.getAsString()));
+
+				addIngredient(id.getSecond(), id.getFirst(), -1);
+
+				return id.getSecond();
+			}
+
+			throw new JsonParseException("Unrecognised json type for recipe, skipping.");
 		}
 
 		public String addIngredient(JsonObject json) {

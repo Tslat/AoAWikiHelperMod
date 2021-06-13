@@ -24,7 +24,7 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 	@Nullable
 	private final ShapedRecipe recipe;
 
-	private String[] printout = null;
+	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
 	public ShapedCraftingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
 		this.recipeId = recipeId;
@@ -79,8 +79,8 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
-		if (this.printout != null)
-			return this.printout;
+		if (this.printoutData.containsKey(targetItem))
+			return this.printoutData.get(targetItem);
 
 		HashMap<String, Pair<String, String>> ingredientMap = new HashMap<String, Pair<String, String>>();
 
@@ -113,11 +113,13 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 
 		ingredientsHandler.addOutput(rawRecipe.getAsJsonObject("result"));
 
-		this.printout = new String[3];
-		this.printout[0] = ingredientsHandler.getFormattedOutput(targetItem);
-		this.printout[1] = ingredientsHandler.getFormattedIngredientsList(targetItem);
-		this.printout[2] = WikiTemplateHelper.makeCraftingTemplate(ingredientsHandler.getIngredientsWithSlots(), ingredientsHandler.getOutput(), false);
+		String[] printData = new String[3];
+		printData[0] = ingredientsHandler.getFormattedOutput(targetItem);
+		printData[1] = ingredientsHandler.getFormattedIngredientsList(targetItem);
+		printData[2] = WikiTemplateHelper.makeCraftingTemplate(ingredientsHandler.getIngredientsWithSlots(), ingredientsHandler.getOutput(), false);
 
-		return this.printout;
+		this.printoutData.put(targetItem, printData);
+
+		return printData;
 	}
 }

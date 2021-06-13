@@ -13,6 +13,7 @@ import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class StonecuttingRecipeHandler extends RecipePrintHandler {
@@ -22,7 +23,7 @@ public class StonecuttingRecipeHandler extends RecipePrintHandler {
 	@Nullable
 	private final StonecuttingRecipe recipe;
 
-	private String[] printout = null;
+	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
 	public StonecuttingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
 		this.recipeId = recipeId;
@@ -66,18 +67,20 @@ public class StonecuttingRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
-		if (printout != null)
-			return printout;
+		if (this.printoutData.containsKey(targetItem))
+			return this.printoutData.get(targetItem);
 
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
 		Pair<String, String> input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("ingredient"));
 		Triple<Integer, String, String> output = ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result"));
 
-		this.printout = new String[3];
-		this.printout[0] = FormattingHelper.createImageBlock(Blocks.STONECUTTER) + " " + FormattingHelper.createLinkableItem(Blocks.STONECUTTER, false, true);
-		this.printout[1] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName));
-		this.printout[2] = FormattingHelper.createImageBlock(output.getRight()) + " " + FormattingHelper.createLinkableText(output.getRight(), false, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName));
+		String[] printData = new String[3];
+		printData[0] = FormattingHelper.createImageBlock(Blocks.STONECUTTER) + " " + FormattingHelper.createLinkableItem(Blocks.STONECUTTER, false, true);
+		printData[1] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName));
+		printData[2] = FormattingHelper.createImageBlock(output.getRight()) + " " + FormattingHelper.createLinkableText(output.getRight(), false, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName));
 
-		return printout;
+		this.printoutData.put(targetItem, printData);
+
+		return printData;
 	}
 }

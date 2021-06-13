@@ -13,13 +13,14 @@ import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class TEChillerRecipeHandler extends RecipePrintHandler {
 	private final ResourceLocation recipeId;
 	private final JsonObject rawRecipe;
 
-	private String[] printout;
+	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
 	public TEChillerRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
 		this.recipeId = recipeId;
@@ -55,8 +56,8 @@ public class TEChillerRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
-		if (this.printout != null)
-			return this.printout;
+		if (this.printoutData.containsKey(targetItem))
+			return this.printoutData.get(targetItem);
 
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
 		JsonObject input = JSONUtils.getAsJsonObject(this.rawRecipe, "fluid");
@@ -65,11 +66,13 @@ public class TEChillerRecipeHandler extends RecipePrintHandler {
 		int energy = JSONUtils.getAsInt(this.rawRecipe, "energy", 4000);
 		Triple<Integer, String, String> result = ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result"));
 
-		this.printout = new String[3];
-		this.printout[0] = inputAmount + " " + inputFluid;
-		this.printout[1] = String.valueOf(energy);
-		this.printout[2] = FormattingHelper.createImageBlock(result.getRight()) + " " + result.getLeft() + " " + FormattingHelper.createLinkableText(result.getRight(), result.getLeft() > 1, result.getMiddle().equals("minecraft"), !result.getRight().equals(targetName));
+		String[] printData = new String[3];
+		printData[0] = inputAmount + " " + inputFluid;
+		printData[1] = String.valueOf(energy);
+		printData[2] = FormattingHelper.createImageBlock(result.getRight()) + " " + result.getLeft() + " " + FormattingHelper.createLinkableText(result.getRight(), result.getLeft() > 1, result.getMiddle().equals("minecraft"), !result.getRight().equals(targetName));
 
-		return this.printout;
+		this.printoutData.put(targetItem, printData);
+
+		return printData;
 	}
 }

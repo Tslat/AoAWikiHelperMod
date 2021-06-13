@@ -6,18 +6,39 @@ import org.apache.commons.lang3.tuple.Triple;
 import java.util.ArrayList;
 
 public class WikiTemplateHelper {
-	public static String makeWikiTemplateObject(String type, String... entries) {
-		ArrayList<String> lines = new ArrayList<String>();
+	public static String tooltip(String text, String tooltip) {
+		return makeWikiTemplateObject("tooltip", true, text, tooltip);
+	}
 
-		lines.add("{{" + type);
+	public static String makeWikiTemplateObject(String type, boolean singleLine, String... entries) {
+		if (singleLine) {
+			StringBuilder builder = new StringBuilder("{{");
 
-		for (String str : entries) {
-			lines.add("|" + str);
+			builder.append(type);
+
+			for (String str : entries) {
+				builder.append("|");
+				builder.append(str);
+			}
+
+			builder.append("}}");
+
+			return builder.toString();
 		}
+		else {
+			ArrayList<String> lines = new ArrayList<String>();
 
-		lines.add("}}");
+			lines.add("{{" + type);
 
-		return TablePrintHelper.combineLines(lines);
+
+			for (String str : entries) {
+				lines.add("|" + str);
+			}
+
+			lines.add("}}");
+
+			return TablePrintHelper.combineLines(lines);
+		}
 	}
 
 	public static String makeCraftingTemplate(ArrayList<String> ingredients, Triple<Integer, String, String> output, boolean shapeless) {
@@ -45,11 +66,11 @@ public class WikiTemplateHelper {
 		if (shapeless)
 			lines[++i] = "shapeless=1";
 
-		return makeWikiTemplateObject("Crafting", lines);
+		return makeWikiTemplateObject("Crafting", false, lines);
 	}
 
 	public static String makeSmeltingTemplate(String input, String output) {
-		return makeWikiTemplateObject("Smelting", "input=" + input, "output=" + output);
+		return makeWikiTemplateObject("Smelting", false, "input=" + input, "output=" + output);
 	}
 
 	public static String makeInfusionTemplate(ArrayList<String> ingredients, String input, String output) {
@@ -69,6 +90,6 @@ public class WikiTemplateHelper {
 		lines[lines.length - 2] = "output=" + output;
 		lines[lines.length - 1] = "shapeless=1";
 
-		return makeWikiTemplateObject("Infusion", lines);
+		return makeWikiTemplateObject("Infusion", false, lines);
 	}
 }

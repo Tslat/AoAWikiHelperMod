@@ -143,4 +143,20 @@ public class FormattingHelper {
 
 		return "1";
 	}
+
+	public static String getTimeFromTicks(int ticks) {
+		StringBuilder builder = new StringBuilder();
+
+		if (ticks > 1200) {
+			builder.append(ticks / 1200).append("m");
+
+			if (ticks % 1200 != 0)
+				builder.append(", ").append(NumberUtil.roundToNthDecimalPlace((ticks % 1200) / 20f, 2)).append("s");
+		}
+		else {
+			builder.append(NumberUtil.roundToNthDecimalPlace(ticks % 1200 / 20f, 2)).append("s");
+		}
+
+		return builder.toString();
+	}
 }

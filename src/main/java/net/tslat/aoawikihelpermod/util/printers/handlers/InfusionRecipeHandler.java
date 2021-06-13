@@ -17,6 +17,7 @@ import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class InfusionRecipeHandler extends RecipePrintHandler {
@@ -25,9 +26,9 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 	private final JsonObject rawRecipe;
 	@Nullable
 	private final IRecipe<?> recipe;
-
 	private final boolean isImbuing;
-	private String[] printout = null;
+
+	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
 	public InfusionRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
 		this.recipeId = recipeId;
@@ -80,14 +81,14 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
-		if (this.printout != null)
-			return this.printout;
+		if (this.printoutData.containsKey(targetItem))
+			return this.printoutData.get(targetItem);
 
 		return isImbuing ? makeImbuingRecipe(targetItem) : makeInfusionRecipe(targetItem);
 	}
 
 	private String[] makeImbuingRecipe(@Nullable Item targetItem) {
-		this.printout = new String[6];
+		String[] printData = new String[6];
 
 		int infusionReq = 1;
 		int minXp = 0;
@@ -132,21 +133,23 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(ingredients.size() + 1);
 
 		for (JsonElement ele : ingredients) {
-			ingredientsHandler.addIngredient(ele.getAsJsonObject());
+			ingredientsHandler.addIngredient(ele);
 		}
 
-		this.printout[0] = enchantmentName;
-		this.printout[1] = getImbuingApplicableTo(enchantmentId);
-		this.printout[2] = String.valueOf(infusionReq);
-		this.printout[3] = (minXp != maxXp) ? minXp + "-" + maxXp : String.valueOf(minXp);
-		this.printout[4] = ingredientsHandler.getFormattedIngredientsList(targetItem);
-		this.printout[5] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), "", "Air");
+		printData[0] = enchantmentName;
+		printData[1] = getImbuingApplicableTo(enchantmentId);
+		printData[2] = String.valueOf(infusionReq);
+		printData[3] = (minXp != maxXp) ? minXp + "-" + maxXp : String.valueOf(minXp);
+		printData[4] = ingredientsHandler.getFormattedIngredientsList(targetItem);
+		printData[5] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), "", "Air");
 
-		return this.printout;
+		this.printoutData.put(targetItem, printData);
+
+		return printData;
 	}
 
 	private String[] makeInfusionRecipe(@Nullable Item targetItem) {
-		this.printout = new String[5];
+		String[] printData = new String[5];
 
 		int infusionReq = 1;
 		int minXp = 0;
@@ -178,20 +181,22 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		String inputItemName = FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), input.getSecond().equals(targetItemName));
 
 		for (JsonElement ele : ingredients) {
-			ingredientsHandler.addIngredient(ele.getAsJsonObject());
+			ingredientsHandler.addIngredient(ele);
 		}
 
 		ingredientsHandler.addOutput(JSONUtils.getAsJsonObject(rawRecipe, "result"));
 
 		String output = FormattingHelper.createLinkableText(ingredientsHandler.getOutput().getRight(), ingredientsHandler.getOutput().getLeft() > 1, ingredientsHandler.getOutput().getMiddle().equals("minecraft"), ingredientsHandler.getOutput().getRight().equals(targetItemName));;
 
-		this.printout[0] = ingredientsHandler.getOutput().getLeft() + output;
-		this.printout[1] = String.valueOf(infusionReq);
-		this.printout[2] = (minXp != maxXp) ? minXp + "-" + maxXp : String.valueOf(minXp);
-		this.printout[3] = inputItemName + ingredientsHandler.getFormattedIngredientsList(targetItem);
-		this.printout[4] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), inputItemName, output);
+		printData[0] = ingredientsHandler.getOutput().getLeft() + output;
+		printData[1] = String.valueOf(infusionReq);
+		printData[2] = (minXp != maxXp) ? minXp + "-" + maxXp : String.valueOf(minXp);
+		printData[3] = inputItemName + ingredientsHandler.getFormattedIngredientsList(targetItem);
+		printData[4] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), inputItemName, output);
 
-		return this.printout;
+		this.printoutData.put(targetItem, printData);
+
+		return printData;
 	}
 
 	public static String getImbuingApplicableTo(ResourceLocation enchantId) {

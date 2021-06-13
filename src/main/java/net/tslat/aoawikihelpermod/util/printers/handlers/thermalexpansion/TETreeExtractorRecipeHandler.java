@@ -12,13 +12,14 @@ import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class TETreeExtractorRecipeHandler extends RecipePrintHandler {
 	private final ResourceLocation recipeId;
 	private final JsonObject rawRecipe;
 
-	private String[] printout;
+	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
 	public TETreeExtractorRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
 		this.recipeId = recipeId;
@@ -67,8 +68,8 @@ public class TETreeExtractorRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
-		if (this.printout != null)
-			return this.printout;
+		if (this.printoutData.containsKey(targetItem))
+			return this.printoutData.get(targetItem);
 
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
 		Pair<String, String> trunk = null;
@@ -110,11 +111,13 @@ public class TETreeExtractorRecipeHandler extends RecipePrintHandler {
 			output = 1000 + ObjectHelper.getFormattedItemDetails(new ResourceLocation(result.getAsString())).getSecond();
 		}
 
-		this.printout = new String[3];
-		this.printout[0] = trunk == null ? "" : FormattingHelper.createImageBlock(trunk.getSecond()) + " " + FormattingHelper.createLinkableText(trunk.getSecond(), false, trunk.getFirst().equals("minecraft"), !trunk.getSecond().equals(targetName));
-		this.printout[1] = leaves == null ? "" : FormattingHelper.createImageBlock(leaves.getSecond()) + " " + FormattingHelper.createLinkableText(leaves.getSecond(), false, leaves.getFirst().equals("minecraft"), !leaves.getSecond().equals(targetName));
-		this.printout[2] = output;
+		String[] printData = new String[3];
+		printData[0] = trunk == null ? "" : FormattingHelper.createImageBlock(trunk.getSecond()) + " " + FormattingHelper.createLinkableText(trunk.getSecond(), false, trunk.getFirst().equals("minecraft"), !trunk.getSecond().equals(targetName));
+		printData[1] = leaves == null ? "" : FormattingHelper.createImageBlock(leaves.getSecond()) + " " + FormattingHelper.createLinkableText(leaves.getSecond(), false, leaves.getFirst().equals("minecraft"), !leaves.getSecond().equals(targetName));
+		printData[2] = output;
 
-		return this.printout;
+		this.printoutData.put(targetItem, printData);
+
+		return printData;
 	}
 }

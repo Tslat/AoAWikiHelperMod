@@ -78,10 +78,7 @@ public class TablePrintHelper extends PrintHelper {
 		return this;
 	}
 
-	public void entry(@Nonnull String... values) {
-		if (values.length != columns.length)
-			throw new IllegalArgumentException("Provided invalid number of values for table entry (" + this.name + "). Values: " + Arrays.toString(values) + ", Columns: " + Arrays.toString(columns));
-
+	public void forceEntry(@Nonnull String... values) {
 		StringBuilder builder = new StringBuilder("| ");
 
 		for (String value : values) {
@@ -110,17 +107,33 @@ public class TablePrintHelper extends PrintHelper {
 		}
 	}
 
+	public void entry(@Nonnull String... values) {
+		if (values.length != columns.length)
+			throw new IllegalArgumentException("Provided invalid number of values for table entry (" + this.name + "). Values: " + Arrays.toString(values) + ", Columns: " + Arrays.toString(columns));
+
+		forceEntry(values);
+	}
+
 	@Override
 	public void close() {
 		StringBuilder propertiesBuilder = new StringBuilder(HEAD);
+		StringBuilder classesBuilder = new StringBuilder(" class=\"");
 		StringBuilder stylesBuilder = new StringBuilder(" style=\"");
 		StringBuilder headerBuilder = new StringBuilder(GAP);
 		StringBuilder columnsBuilder = new StringBuilder("! ");
 		boolean sortable = false;
 
 		for (Map.Entry<String, String> property : tableProperties.entrySet()) {
-			if (property.getKey().equals("class") && property.getValue().equals("sortable"))
-				sortable = true;
+			if (property.getKey().equals("class")) {
+				if (property.getValue().equals("sortable"))
+					sortable = true;
+
+				if (classesBuilder.length() > 8)
+					classesBuilder.append(" ");
+
+				classesBuilder.append(property.getValue());
+				continue;
+			}
 
 			propertiesBuilder.append(" ");
 			propertiesBuilder.append(property.getKey());
@@ -128,6 +141,11 @@ public class TablePrintHelper extends PrintHelper {
 			propertiesBuilder.append(property.getValue());
 			propertiesBuilder.append("\"");
 		}
+
+		classesBuilder.append("\"");
+
+		if (classesBuilder.length() > 9)
+			propertiesBuilder.append(classesBuilder);
 
 		for (Map.Entry<String, String> style : this.styles.entrySet()) {
 			if (stylesBuilder.length() > 7)
@@ -140,8 +158,9 @@ public class TablePrintHelper extends PrintHelper {
 		}
 
 		stylesBuilder.append("\"");
-		propertiesBuilder.append(stylesBuilder);
-		headerBuilder.append(" style=background-color:#eee |");
+
+		if (this.styles.size() > 0)
+			propertiesBuilder.append(stylesBuilder);
 
 		if (sortable)
 			headerBuilder.append(" data-sort-type=number |");

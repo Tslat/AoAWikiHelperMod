@@ -1,7 +1,7 @@
 package net.tslat.aoawikihelpermod.util.printers;
 
 import net.tslat.aoa3.advent.AdventOfAscension;
-import net.tslat.aoa3.library.misc.MutableSupplier;
+import net.tslat.aoa3.util.misc.MutableSupplier;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 

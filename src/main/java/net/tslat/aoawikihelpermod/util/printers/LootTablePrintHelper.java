@@ -11,15 +11,18 @@ public class LootTablePrintHelper extends PrintHelper {
 	private static final String END = "}}";
 
 	private int tableCount = 0;
+	private final boolean singleTable;
 
-	protected LootTablePrintHelper(String fileName) throws IOException {
+	protected LootTablePrintHelper(String fileName, boolean singleTable) throws IOException {
 		super(fileName);
+
+		this.singleTable = singleTable;
 	}
 
 	@Nullable
-	public static LootTablePrintHelper open(String fileName) {
+	public static LootTablePrintHelper open(String fileName, boolean singleTable) {
 		try {
-			return new LootTablePrintHelper(fileName);
+			return new LootTablePrintHelper(fileName, singleTable);
 		}
 		catch (IOException ex) {
 			return null;
@@ -30,7 +33,9 @@ public class LootTablePrintHelper extends PrintHelper {
 		if (tableCount > 0)
 			write("");
 
-		write(id.toString() + ":");
+		if (!singleTable)
+			write(id.toString() + ":");
+
 		write(HEAD);
 		write("|type=" + printHandler.getType());
 

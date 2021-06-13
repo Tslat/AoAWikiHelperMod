@@ -11,12 +11,11 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.ResourceLocationArgument;
 import net.minecraft.command.arguments.SuggestionProviders;
-import net.minecraft.command.impl.LootCommand;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.tslat.aoa3.library.misc.MutableSupplier;
 import net.tslat.aoa3.util.StringUtil;
+import net.tslat.aoa3.util.misc.MutableSupplier;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.dataskimmers.LootTablesSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -33,9 +32,8 @@ public class LootTableCommand implements Command<CommandSource> {
 		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("loottable").executes(CMD);
 
 		builder.then(Commands.literal("table").then(Commands.argument("loot_table", ResourceLocationArgument.id()).suggests(SUGGESTION_PROVIDER).executes(cmd -> printTable(cmd, ResourceLocationArgument.getId(cmd, "loot_table")))));
-		builder.then(Commands.literal("entity").then(Commands.argument("entity", ResourceLocationArgument.id()).executes(LootTableCommand::printEntityTable)));
+		builder.then(Commands.literal("entity").then(Commands.argument("entity", ResourceLocationArgument.id()).suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(LootTableCommand::printEntityTable)));
 		builder.then(Commands.literal("block").then(Commands.argument("block", ResourceLocationArgument.id()).executes(LootTableCommand::printBlockTable)));
-		builder.then(Commands.literal("other").then(Commands.argument("table_id", ResourceLocationArgument.id()).suggests(LootCommand.SUGGEST_LOOT_TABLE).executes(cmd -> printTable(cmd, ResourceLocationArgument.getId(cmd, "table_id")))));
 
 		return builder;
 	}
@@ -66,7 +64,7 @@ public class LootTableCommand implements Command<CommandSource> {
 		ResourceLocation id = ResourceLocationArgument.getId(cmd, "entity");
 		EntityType<?> entity = ForgeRegistries.ENTITIES.getValue(id);
 
-		if (entity == null) {
+		if (entity == null || (!id.toString().equals("minecraft:pig") && entity == EntityType.PIG)) {
 			WikiHelperCommand.warn(cmd.getSource(), "LootTable", "Invalid entity id '" + id + "'");
 
 			return 1;
@@ -94,12 +92,12 @@ public class LootTableCommand implements Command<CommandSource> {
 				pathName = StringUtil.toTitleCase(pathName.substring(pathName.indexOf("\\") + 1));
 			}
 			else if (pathName.contains("/")) {
-				pathName = StringUtil.toTitleCase(pathName.substring(pathName.indexOf("/") + 1));
+				pathName = StringUtil.toTitleCase(pathName.replaceAll("/", " - "));
 			}
 
 			fileName = fileName + pathName;
 
-			try (LootTablePrintHelper printHelper = LootTablePrintHelper.open(fileName)) {
+			try (LootTablePrintHelper printHelper = LootTablePrintHelper.open(fileName, true)) {
 				printHelper.withClipboardOutput(clipboardContent);
 				printHelper.printTable(tableId, printHandler);
 

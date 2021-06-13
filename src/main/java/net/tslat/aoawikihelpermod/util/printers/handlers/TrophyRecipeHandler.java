@@ -12,8 +12,8 @@ import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class TrophyRecipeHandler extends RecipePrintHandler {
@@ -22,7 +22,7 @@ public class TrophyRecipeHandler extends RecipePrintHandler {
 	@Nullable
 	private final TrophyRecipe recipe;
 
-	private String[] printout;
+	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
 	public TrophyRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
 		this.recipeId = recipeId;
@@ -59,8 +59,8 @@ public class TrophyRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
-		if (this.printout != null)
-			return this.printout;
+		if (this.printoutData.containsKey(targetItem))
+			return this.printoutData.get(targetItem);
 
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(9);
 		String trophyName = ObjectHelper.getItemName(AoABlocks.TROPHY.get());
@@ -72,24 +72,13 @@ public class TrophyRecipeHandler extends RecipePrintHandler {
 		ingredientsHandler.addOutput(new ItemStack(AoABlocks.GOLD_TROPHY.get()));
 		String targetItemName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
 
-		this.printout = new String[3];
-		this.printout[0] = ingredientsHandler.getFormattedOutput(targetItem);
-		this.printout[1] = ingredientsHandler.getFormattedIngredientsList(targetItem);
-		this.printout[2] = makeCraftingTemplate(ingredientsHandler, targetItem);
+		String[] printData = new String[3];
+		printData[0] = ingredientsHandler.getFormattedOutput(targetItem);
+		printData[1] = ingredientsHandler.getFormattedIngredientsList(targetItem);
+		printData[2] = WikiTemplateHelper.makeCraftingTemplate(ingredientsHandler.getIngredientsWithSlots(), ingredientsHandler.getOutput(), false);
 
-		return this.printout;
-	}
+		this.printoutData.put(targetItem, printData);
 
-	protected String makeCraftingTemplate(RecipeIngredientsHandler ingredientsHandler, @Nullable Item targetItem) {
-		ArrayList<String> slottedIngredients = ingredientsHandler.getIngredientsWithSlots();
-		String[] lines = new String[slottedIngredients.size() + 1];
-
-		for (int i = 0; i < slottedIngredients.size(); i++) {
-			lines[i] = slottedIngredients.get(i);
-		}
-
-		lines[lines.length - 1] = "output=" + ingredientsHandler.getOutput().getRight();
-
-		return WikiTemplateHelper.makeWikiTemplateObject("Crafting", lines);
+		return printData;
 	}
 }

@@ -11,6 +11,7 @@ import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.ResourceLocationArgument;
 import net.minecraft.command.arguments.SuggestionProviders;
 import net.minecraft.util.ResourceLocation;
+import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoa3.util.misc.MutableSupplier;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
@@ -20,31 +21,37 @@ import net.tslat.aoawikihelpermod.util.printers.RecipePrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import java.io.File;
+import java.util.stream.Stream;
 
-public class RecipeCommand implements Command<CommandSource> {
-	private static final RecipeCommand CMD = new RecipeCommand();
-	private static final SuggestionProvider<CommandSource> SUGGESTION_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "raw_recipes"), (context, builder) -> ISuggestionProvider.suggestResource(RecipesSkimmer.RECIPE_PRINTERS.keySet().stream(), builder));
+public class StructuresCommand implements Command<CommandSource> {
+	private static final StructuresCommand CMD = new StructuresCommand();
+	private static final SuggestionProvider<CommandSource> SUGGESTION_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "structure_pieces"), (context, builder) -> ISuggestionProvider.suggestResource(Stream.of(
+			new ResourceLocation(AdventOfAscension.MOD_ID, "structures/abyss/abyssal_lotto_hut/abyssal_lotto_hut"),
+			new ResourceLocation(AdventOfAscension.MOD_ID, "structures/shyrelands/decorations/ruined_arch"),
+			new ResourceLocation("minecraft", "structures/ruined_portal/giant_portal_1"),
+			new ResourceLocation("minecraft", "structures/igloo/bottom"),
+			new ResourceLocation("minecraft", "structures/bastion/bridge/bridge_pieces/bridge")), builder));
 
 	public static ArgumentBuilder<CommandSource, ?> register() {
-		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("recipe").executes(CMD);
+		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("structure").executes(CMD);
 
-		builder.then(Commands.argument("recipe_id", ResourceLocationArgument.id()).suggests(SUGGESTION_PROVIDER).executes(RecipeCommand::printUsages));
+		builder.then(Commands.argument("structure_piece_id", ResourceLocationArgument.id()).suggests(SUGGESTION_PROVIDER).executes(StructuresCommand::printStructurePiece));
 
 		return builder;
 	}
 
 	protected String commandName() {
-		return "Recipe";
+		return "Structure";
 	}
 
 	@Override
 	public int run(CommandContext<CommandSource> context) {
-		WikiHelperCommand.info(context.getSource(), commandName(), "Print out a specific recipe in its relevant template format.");
+		WikiHelperCommand.info(context.getSource(), commandName(), "Print out a structure details for specific pieces or template pools.");
 
 		return 1;
 	}
 
-	private static int printUsages(CommandContext<CommandSource> cmd) {
+	private static int printStructurePiece(CommandContext<CommandSource> cmd) {
 		try {
 			ResourceLocation id = ResourceLocationArgument.getId(cmd, "recipe_id");
 			RecipePrintHandler recipeHandler = RecipesSkimmer.RECIPE_PRINTERS.get(id);

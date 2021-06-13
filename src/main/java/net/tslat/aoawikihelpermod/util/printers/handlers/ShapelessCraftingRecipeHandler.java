@@ -13,6 +13,7 @@ import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ShapelessCraftingRecipeHandler extends RecipePrintHandler {
@@ -22,7 +23,7 @@ public class ShapelessCraftingRecipeHandler extends RecipePrintHandler {
 	@Nullable
 	private final ICraftingRecipe recipe;
 
-	private String[] printout = null;
+	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
 	public ShapelessCraftingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
 		this.recipeId = recipeId;
@@ -68,23 +69,25 @@ public class ShapelessCraftingRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
-		if (this.printout != null)
-			return this.printout;
+		if (this.printoutData.containsKey(targetItem))
+			return this.printoutData.get(targetItem);
 
 		JsonArray ingredients = JSONUtils.getAsJsonArray(rawRecipe, "ingredients");
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(ingredients.size());
 
 		for (JsonElement ele : ingredients) {
-			ingredientsHandler.addIngredient(ele.getAsJsonObject());
+			ingredientsHandler.addIngredient(ele);
 		}
 
 		ingredientsHandler.addOutput(rawRecipe.getAsJsonObject("result"));
 
-		this.printout = new String[3];
-		this.printout[0] = ingredientsHandler.getFormattedOutput(targetItem);
-		this.printout[1] = ingredientsHandler.getFormattedIngredientsList(targetItem);
-		this.printout[2] = WikiTemplateHelper.makeCraftingTemplate(ingredientsHandler.getIngredientsWithSlots(), ingredientsHandler.getOutput(), true);
+		String[] printData = new String[3];
+		printData[0] = ingredientsHandler.getFormattedOutput(targetItem);
+		printData[1] = ingredientsHandler.getFormattedIngredientsList(targetItem);
+		printData[2] = WikiTemplateHelper.makeCraftingTemplate(ingredientsHandler.getIngredientsWithSlots(), ingredientsHandler.getOutput(), true);
 
-		return this.printout;
+		this.printoutData.put(targetItem, printData);
+
+		return printData;
 	}
 }

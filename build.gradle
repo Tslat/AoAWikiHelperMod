@@ -58,7 +58,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
     minecraft "net.minecraftforge:forge:$project.minecraft_version-$project.forge_version"
-    implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:3272095")
+    implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:3345448")
 }
 
 jar {

@@ -10,19 +10,23 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.ItemArgument;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
-import net.tslat.aoa3.library.misc.MutableSupplier;
+import net.tslat.aoa3.util.misc.MutableSupplier;
+import net.tslat.aoawikihelpermod.dataskimmers.MerchantsSkimmer;
 import net.tslat.aoawikihelpermod.dataskimmers.RecipesSkimmer;
-import net.tslat.aoawikihelpermod.dataskimmers.RepairablesSkimmer;
+import net.tslat.aoawikihelpermod.dataskimmers.ItemMiscUsageSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.RecipePrintHelper;
+import net.tslat.aoawikihelpermod.util.printers.TradesPrintHelper;
+import net.tslat.aoawikihelpermod.util.printers.handlers.MerchantTradePrintHandler;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Set;
 
 public class UsagesCommand implements Command<CommandSource> {
 	private static final UsagesCommand CMD = new UsagesCommand();
@@ -46,7 +50,7 @@ public class UsagesCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static void checkRecipeUsages(Item item, CommandSource commandSource) {
+	private static boolean checkRecipeUsages(Item item, CommandSource commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -86,21 +90,22 @@ public class UsagesCommand implements Command<CommandSource> {
 
 					WikiHelperCommand.success(commandSource, "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
 				}
-			}
-			else {
-				WikiHelperCommand.info(commandSource, "Usages", "No supported usages found for " + itemName);
+
+				return true;
 			}
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
 		}
+
+		return false;
 	}
 
-	private static void checkRepairUsages(Item item, CommandSource commandSource) {
+	private static boolean checkRepairUsages(Item item, CommandSource commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		String repairInfo = RepairablesSkimmer.getRepairDescription(item.getRegistryName());
+		String repairInfo = ItemMiscUsageSkimmer.getRepairDescription(item.getRegistryName());
 
 		if (repairInfo != null) {
 			String fileName = "Usages - " + itemName + " - Repairing";
@@ -112,23 +117,102 @@ public class UsagesCommand implements Command<CommandSource> {
 			}
 
 			WikiHelperCommand.success(commandSource, "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+
+			return true;
 		}
+
+		return false;
 	}
 
-	private static void checkTradeUsages(Item item, CommandSource commandSource) {}
+	private static boolean checkFuelUsages(Item item, CommandSource commandSource) {
+		String itemName = ObjectHelper.getItemName(item);
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+		File outputFile;
+		String fuelInfo = ItemMiscUsageSkimmer.getFuelDescription(item.getRegistryName());
+
+		if (fuelInfo != null) {
+			String fileName = "Usages - " + itemName + " - Fuels";
+
+			try (PrintHelper printHelper = PrintHelper.open(fileName)) {
+				printHelper.withClipboardOutput(clipboardContent);
+				printHelper.write(fuelInfo);
+				outputFile = printHelper.getOutputFile();
+			}
+
+			WikiHelperCommand.success(commandSource, "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+
+			return true;
+		}
+
+		return false;
+	}
+
+	private static boolean checkLogStrippingUsages(Item item, CommandSource commandSource) {
+		String itemName = ObjectHelper.getItemName(item);
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+		File outputFile;
+		String strippingInfo = ItemMiscUsageSkimmer.getStrippableBlockDescription(item.getRegistryName());
+
+		if (strippingInfo != null) {
+			String fileName = "Usages - " + itemName + " - Log Stripping";
+
+			try (PrintHelper printHelper = PrintHelper.open(fileName)) {
+				printHelper.withClipboardOutput(clipboardContent);
+				printHelper.write(strippingInfo);
+
+				outputFile = printHelper.getOutputFile();
+			}
+
+			WikiHelperCommand.success(commandSource, "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+
+			return true;
+		}
+
+		return false;
+	}
+
+	private static boolean checkTradeUsages(Item item, CommandSource commandSource) {
+		String itemName = ObjectHelper.getItemName(item);
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+		File outputFile;
+		Set<MerchantTradePrintHandler> trades = MerchantsSkimmer.TRADES_BY_COST.get(item.getRegistryName());
+
+		if (!trades.isEmpty()) {
+			String fileName = "Usages - " + itemName + " - Merchants";
+
+			try (TradesPrintHelper printHelper = TradesPrintHelper.open(fileName, false)) {
+				printHelper.withClipboardOutput(clipboardContent);
+				printHelper.withProperty("class", "wikitable");
+				printHelper.handleTradeList(trades);
+
+				outputFile = printHelper.getOutputFile();
+			}
+
+			WikiHelperCommand.success(commandSource, "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+
+			return true;
+		}
+
+		return false;
+	}
 
 	private static int printUsages(CommandContext<CommandSource> cmd) {
 		Item item = ItemArgument.getItem(cmd, "id").getItem();
 		CommandSource source = cmd.getSource();
+		boolean success;
 
 		WikiHelperCommand.info(cmd.getSource(), "Usages", "Searching for usages of '" + item.getRegistryName() + "'...");
 
-		checkRecipeUsages(item, source);
-		checkRepairUsages(item, source);
-		checkTradeUsages(item, source); // TODO
+		success = checkRecipeUsages(item, source);
+		success |= checkRepairUsages(item, source);
+		success |= checkTradeUsages(item, source);
+		success |= checkFuelUsages(item, source);
+		success |= checkLogStrippingUsages(item, source);
 
 		// TODO further usages
-		// Fuels?
+
+		if (!success)
+			WikiHelperCommand.info(cmd.getSource(), "Usages", "No usage information found.");
 
 		return 1;
 	}

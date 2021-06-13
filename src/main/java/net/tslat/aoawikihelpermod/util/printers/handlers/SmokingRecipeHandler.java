@@ -15,6 +15,7 @@ import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class SmokingRecipeHandler extends RecipePrintHandler {
@@ -24,7 +25,7 @@ public class SmokingRecipeHandler extends RecipePrintHandler {
 	@Nullable
 	private final SmokingRecipe recipe;
 
-	private String[] printout = null;
+	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
 	public SmokingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
 		this.recipeId = recipeId;
@@ -68,8 +69,8 @@ public class SmokingRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public String[] toTableEntry(@Nullable Item targetItem) {
-		if (printout != null)
-			return printout;
+		if (this.printoutData.containsKey(targetItem))
+			return this.printoutData.get(targetItem);
 
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
 		Pair<String, String> input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("ingredient"));
@@ -77,7 +78,7 @@ public class SmokingRecipeHandler extends RecipePrintHandler {
 		float xp = JSONUtils.getAsFloat(rawRecipe, "experience", 0);
 		int cookingTime = JSONUtils.getAsInt(rawRecipe, "cookingtime", 100);
 
-		this.printout = new String[] {
+		String[] printData = new String[] {
 				FormattingHelper.createLinkableText(input.getSecond(), true, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) +
 						" can be processed in a " +
 						FormattingHelper.createLinkableItem(Blocks.SMOKER, false, true) +
@@ -92,6 +93,8 @@ public class SmokingRecipeHandler extends RecipePrintHandler {
 						" seconds."
 		};
 
-		return printout;
+		this.printoutData.put(targetItem, printData);
+
+		return printData;
 	}
 }

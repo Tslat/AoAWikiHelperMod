@@ -4,18 +4,24 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.PotionItem;
 import net.minecraft.loot.*;
 import net.minecraft.loot.conditions.*;
 import net.minecraft.loot.functions.*;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.PotionUtils;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.Hand;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.tslat.aoa3.library.loot.conditions.HoldingItem;
-import net.tslat.aoa3.library.loot.conditions.PlayerHasLevel;
-import net.tslat.aoa3.library.loot.conditions.PlayerHasResource;
-import net.tslat.aoa3.library.loot.conditions.PlayerHasTribute;
-import net.tslat.aoa3.library.loot.functions.EnchantSpecific;
-import net.tslat.aoa3.library.loot.functions.GrantSkillXp;
+import net.tslat.aoa3.common.registration.AoABlocks;
+import net.tslat.aoa3.loottable.condition.HoldingItem;
+import net.tslat.aoa3.loottable.condition.PlayerHasLevel;
+import net.tslat.aoa3.loottable.condition.PlayerHasResource;
+import net.tslat.aoa3.loottable.condition.PlayerHasTribute;
+import net.tslat.aoa3.loottable.function.EnchantSpecific;
+import net.tslat.aoa3.loottable.function.GrantSkillXp;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoa3.util.constant.Deities;
@@ -258,7 +264,7 @@ public class LootTableHelper {
 		StringBuilder reBuilder = new StringBuilder(line[0]);
 
 		for (int i = 1; i < line.length; i++) {
-			reBuilder.append("and if").append(line[i].substring(line[i].indexOf("will only roll if") + 17));
+			reBuilder.append("<br/>").append("and if").append(line[i].substring(line[i].indexOf("will only roll if") + 17));
 		}
 
 		return reBuilder.toString();
@@ -272,6 +278,10 @@ public class LootTableHelper {
 		StringBuilder builder = new StringBuilder();
 
 		for (ILootFunction function : functions) {
+			if (function instanceof SetCount || function instanceof LootingEnchantBonus) {
+				continue;
+			}
+
 			if (builder.length() > 0)
 				builder.append(", and<br/>");
 
@@ -307,7 +317,7 @@ public class LootTableHelper {
 		StringBuilder reBuilder = new StringBuilder(line[0]);
 
 		for (int i = 1; i < line.length; i++) {
-			reBuilder.append("and if").append(line[i].substring(line[i].indexOf("will only roll if") + 17));
+			reBuilder.append("<br/>").append("and will").append(line[i].substring(line[i].indexOf("This drop will") + 14));
 		}
 
 		return reBuilder.toString();
@@ -374,11 +384,62 @@ public class LootTableHelper {
 		StringBuilder entryNotesBuilder = new StringBuilder();
 		StringBuilder entryBuilder = new StringBuilder("group:" + poolIndex + "; item:");
 		String looting = getLootingString(functions);
+		String itemName = ObjectHelper.getItemName(entry.item);
 
 		if (entry.item.getRegistryName().getNamespace().equals("minecraft"))
 			entryBuilder.append("mcw:");
 
-		entryBuilder.append(ObjectHelper.getItemName(entry.item)).append(";");
+		if (entry.item instanceof PotionItem) {
+			for (ILootFunction function : entry.functions) {
+				if (function instanceof SetNBT) {
+					ItemStack potionStack = new ItemStack(entry.item);
+
+					((SetNBT)function).run(potionStack, null);
+					entryBuilder.append(potionStack.getHoverName().getString()).append("; image:").append(ObjectHelper.getItemName(entry.item)).append(".png;");
+
+					List<EffectInstance> effects = PotionUtils.getMobEffects(potionStack);
+
+					if (!effects.isEmpty()) {
+						entryNotesBuilder.append("<br/>Effects:");
+
+						for (EffectInstance effect : effects) {
+							entryNotesBuilder.append("<br/>").append(effect.getEffect().getDisplayName().getString()).append(" ").append(effect.getAmplifier() + 1);
+							entryNotesBuilder.append(" (").append(FormattingHelper.getTimeFromTicks(effect.getDuration())).append(")");
+						}
+					}
+
+					break;
+				}
+			}
+		}
+		else if (entry.item == AoABlocks.TROPHY.get().asItem()) {
+			for (ILootFunction function : entry.functions) {
+				if (function instanceof SetNBT) {
+					ItemStack trophyStack = new ItemStack(entry.item);
+
+					((SetNBT)function).run(trophyStack, null);
+					entryBuilder.append(trophyStack.getHoverName().getString()).append("; image:").append(ObjectHelper.getItemName(entry.item)).append(".png;");
+
+					break;
+				}
+			}
+		}
+		else if (entry.item == Items.ENCHANTED_BOOK) {
+			for (ILootFunction function : entry.functions) {
+				if (function instanceof SetNBT) {
+					ItemStack trophyStack = new ItemStack(entry.item);
+
+					((SetNBT)function).run(trophyStack, null);
+					entryBuilder.append(trophyStack.getHoverName().getString()).append("; image:").append(ObjectHelper.getItemName(entry.item)).append(".png;");
+
+					break;
+				}
+			}
+		}
+		else {
+			entryBuilder.append(itemName).append(";");
+		}
+
 		entryBuilder.append(" weight:").append(entry.weight).append(";");
 		entryBuilder.append(" quantity:").append(getQuantityString(functions)).append(";");
 
@@ -387,29 +448,23 @@ public class LootTableHelper {
 
 		if (entry.quality != 0) {
 			if (entry.quality > 0) {
-				entryNotesBuilder.append("Chance is increased with each level of luck");
+				entryNotesBuilder.append("<br/>").append("Chance is increased with each level of luck");
 			}
 			else {
-				entryNotesBuilder.append("Chance is decreased with each level of luck");
+				entryNotesBuilder.append("<br/>").append("Chance is decreased with each level of luck");
 			}
 		}
 
 		if (conditions != null) {
-			if (entryNotesBuilder.length() > 0)
-				entryNotesBuilder.append("<br/>");
-
-			entryNotesBuilder.append(LootTableHelper.getConditionsDescription("drop", conditions));
+			entryNotesBuilder.append("<br/>").append(LootTableHelper.getConditionsDescription("drop", conditions));
 		}
 
 		if (!functions.isEmpty()) {
-			if (entryNotesBuilder.length() > 0)
-				entryNotesBuilder.append("<br/>");
-
-			entryNotesBuilder.append(LootTableHelper.getFunctionsDescription("drop", functions));
+			entryNotesBuilder.append("<br/>").append(LootTableHelper.getFunctionsDescription("drop", functions));
 		}
 
 		if (entryNotesBuilder.length() > 0)
-			entryBuilder.append(" notes:").append(entryNotesBuilder);
+			entryBuilder.append(" notes:").append(entryNotesBuilder.substring(5));
 
 		return entryBuilder.toString();
 	}
@@ -479,7 +534,7 @@ public class LootTableHelper {
 
 	private static String getTableLootEntryLine(int poolIndex, TableLootEntry entry, List<ILootCondition> conditions, List<ILootFunction> functions) {
 		StringBuilder entryNotesBuilder = new StringBuilder();
-		StringBuilder entryBuilder = new StringBuilder("group:" + poolIndex + "; item:");
+		StringBuilder entryBuilder = new StringBuilder("group:" + poolIndex + "; image:none; item:");
 		String looting = getLootingString(functions);
 		String poolName = entry.name.getPath();
 

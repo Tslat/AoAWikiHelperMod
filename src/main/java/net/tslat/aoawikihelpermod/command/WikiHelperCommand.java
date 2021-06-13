@@ -2,20 +2,35 @@ package net.tslat.aoawikihelpermod.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.util.text.*;
+import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 
 public class WikiHelperCommand {
 	public static void registerSubCommands(CommandDispatcher<CommandSource> dispatcher) {
-		LiteralArgumentBuilder<CommandSource> cmd = Commands.literal("wikihelper")
-				.then(OverviewCommand.register())
-				.then(UsagesCommand.register())
-				.then(ObtainingCommand.register())
-				.then(RecipeCommand.register())
-				.then(LootTableCommand.register());
+		LiteralArgumentBuilder<CommandSource> cmd = Commands.literal("wikihelper");
+
+		if (!AoAWikiHelperMod.isOutdatedAoA) {
+			cmd.then(OverviewCommand.register())
+					.then(UsagesCommand.register())
+					.then(ObtainingCommand.register())
+					.then(RecipeCommand.register())
+					.then(LootTableCommand.register())
+					.then(TradesCommand.register());
+		}
+		else {
+			cmd.executes(WikiHelperCommand::outdatedCommand);
+		}
 
 		dispatcher.register(cmd);
+	}
+
+	private static int outdatedCommand(CommandContext<CommandSource> cmd) {
+		cmd.getSource().sendFailure(new StringTextComponent("AoA is outdated! Update AoA to the latest version to use the Wikihelper mod!"));
+
+		return 1;
 	}
 
 	protected static StringTextComponent getCmdPrefix(String subcommand) {
