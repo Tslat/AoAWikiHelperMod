@@ -54,7 +54,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		if (isImbuing)
 			return new String[] {"Enchantment", "Used For", "Infusion Req.", "Infusion XP", "Ingredients", "Recipe"};
 
-		return new String[] {"Item", "Infusion Req.", "Infusion XP", "Ingredients", "Recipe"};
+		return new String[] {"Item", "Ingredients", "Recipe"};
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 	@Override
 	public List<ResourceLocation> getOutputsForLookup() {
 		if (isImbuing)
-			return null;
+			return Collections.emptyList();
 
 		return Collections.singletonList(ObjectHelper.getIngredientItemId(this.rawRecipe.get("result")));
 	}
@@ -149,36 +149,13 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 	}
 
 	private String[] makeInfusionRecipe(@Nullable Item targetItem) {
-		String[] printData = new String[5];
-
-		int infusionReq = 1;
-		int minXp = 0;
-		int maxXp = 0;
-
-		if (rawRecipe.has("infusion_level"))
-			infusionReq = JSONUtils.getAsInt(rawRecipe, "infusion_level");
-
-		if (rawRecipe.has("infusion_xp")) {
-			JsonElement xpJson = rawRecipe.get("infusion_xp");
-
-			if (xpJson.isJsonPrimitive()) {
-				minXp = maxXp = xpJson.getAsInt();
-			}
-			else if (xpJson.isJsonObject()) {
-				JsonObject xpJsonObj = xpJson.getAsJsonObject();
-
-				if (xpJsonObj.has("min") && xpJsonObj.has("max")) {
-					minXp = Math.max(0, JSONUtils.getAsInt(xpJsonObj, "min"));
-					maxXp = Math.max(minXp, JSONUtils.getAsInt(xpJsonObj, "max"));
-				}
-			}
-		}
+		String[] printData = new String[3];
 
 		JsonArray ingredients = JSONUtils.getAsJsonArray(rawRecipe, "ingredients");
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(ingredients.size() + 1);
 		Pair<String, String> input = ObjectHelper.getIngredientName(rawRecipe.getAsJsonObject("input"));
 		String targetItemName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
-		String inputItemName = FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), input.getSecond().equals(targetItemName));
+		String inputItemName = FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetItemName));
 
 		for (JsonElement ele : ingredients) {
 			ingredientsHandler.addIngredient(ele);
@@ -186,13 +163,11 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 
 		ingredientsHandler.addOutput(JSONUtils.getAsJsonObject(rawRecipe, "result"));
 
-		String output = FormattingHelper.createLinkableText(ingredientsHandler.getOutput().getRight(), ingredientsHandler.getOutput().getLeft() > 1, ingredientsHandler.getOutput().getMiddle().equals("minecraft"), ingredientsHandler.getOutput().getRight().equals(targetItemName));;
+		String output = FormattingHelper.createLinkableText(ingredientsHandler.getOutput().getRight(), ingredientsHandler.getOutput().getLeft() > 1, ingredientsHandler.getOutput().getMiddle().equals("minecraft"), !ingredientsHandler.getOutput().getRight().equals(targetItemName));
 
-		printData[0] = ingredientsHandler.getOutput().getLeft() + output;
-		printData[1] = String.valueOf(infusionReq);
-		printData[2] = (minXp != maxXp) ? minXp + "-" + maxXp : String.valueOf(minXp);
-		printData[3] = inputItemName + ingredientsHandler.getFormattedIngredientsList(targetItem);
-		printData[4] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), inputItemName, output);
+		printData[0] = output;
+		printData[1] = 1 + " " + inputItemName + "<br/>" + ingredientsHandler.getFormattedIngredientsList(targetItem);
+		printData[2] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), input.getSecond(), ingredientsHandler.getOutput().getRight());
 
 		this.printoutData.put(targetItem, printData);
 
