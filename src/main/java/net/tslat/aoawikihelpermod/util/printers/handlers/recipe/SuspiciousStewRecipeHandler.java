@@ -1,33 +1,30 @@
-package net.tslat.aoawikihelpermod.util.printers.handlers;
+package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonObject;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
-import net.tslat.aoa3.advent.AdventOfAscension;
-import net.tslat.aoa3.common.container.recipe.TrophyRecipe;
-import net.tslat.aoa3.common.registration.AoABlocks;
+import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
+import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class TrophyRecipeHandler extends RecipePrintHandler {
+public class SuspiciousStewRecipeHandler extends RecipePrintHandler {
 	private final ResourceLocation recipeId;
-	private final JsonObject rawRecipe;
-	@Nullable
-	private final TrophyRecipe recipe;
 
 	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
-	public TrophyRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public SuspiciousStewRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
 		this.recipeId = recipeId;
-		this.rawRecipe = rawRecipe;
-		this.recipe = (TrophyRecipe)recipe;
 	}
 
 	@Override
@@ -45,16 +42,19 @@ public class TrophyRecipeHandler extends RecipePrintHandler {
 		return new String[] {"Item", "Ingredients", "Recipe"};
 	}
 
-	@Nullable
 	@Override
 	public List<ResourceLocation> getIngredientsForLookup() {
-		return Collections.singletonList(AoABlocks.TROPHY.getId());
+		return Arrays.asList(
+				Items.BROWN_MUSHROOM.getRegistryName(),
+				Items.RED_MUSHROOM.getRegistryName(),
+				Items.BOWL.getRegistryName(),
+				ItemTags.SMALL_FLOWERS.getName()
+		);
 	}
 
-	@Nullable
 	@Override
-	public ResourceLocation getOutputForLookup() {
-		return AoABlocks.GOLD_TROPHY.getId();
+	public List<ResourceLocation> getOutputsForLookup() {
+		return Collections.singletonList(Items.SUSPICIOUS_STEW.getRegistryName());
 	}
 
 	@Override
@@ -63,13 +63,12 @@ public class TrophyRecipeHandler extends RecipePrintHandler {
 			return this.printoutData.get(targetItem);
 
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(9);
-		String trophyName = ObjectHelper.getItemName(AoABlocks.TROPHY.get());
 
-		for (int i = 0; i < 9; i++) {
-			ingredientsHandler.addIngredient(trophyName, AdventOfAscension.MOD_ID);
-		}
-
-		ingredientsHandler.addOutput(new ItemStack(AoABlocks.GOLD_TROPHY.get()));
+		ingredientsHandler.addIngredient(ObjectHelper.getItemName(Items.BROWN_MUSHROOM), "minecraft");
+		ingredientsHandler.addIngredient(ObjectHelper.getItemName(Items.RED_MUSHROOM), "minecraft");
+		ingredientsHandler.addIngredient(ObjectHelper.getItemName(Items.BOWL), "minecraft");
+		ingredientsHandler.addIngredient(StringUtil.toTitleCase(ItemTags.SMALL_FLOWERS.getName().getPath()), "minecraft");
+		ingredientsHandler.addOutput(new ItemStack(Items.SUSPICIOUS_STEW));
 		String targetItemName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
 
 		String[] printData = new String[3];

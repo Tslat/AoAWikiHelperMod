@@ -25,10 +25,8 @@ public abstract class RecipePrintHandler {
 	public abstract String getTableGroup();
 	public abstract ResourceLocation getRecipeId();
 	public abstract String[] getColumnTitles();
-	@Nullable
 	public abstract List<ResourceLocation> getIngredientsForLookup();
-	@Nullable
-	public abstract ResourceLocation getOutputForLookup();
+	public abstract List<ResourceLocation> getOutputsForLookup();
 
 	public boolean isPlainTextPrintout() {
 		return false;

@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod.util.printers.handlers.thermalexpansion;
+package net.tslat.aoawikihelpermod.util.printers.handlers.recipe.thermalexpansion;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -12,6 +12,7 @@ import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -41,7 +42,6 @@ public class TETreeExtractorRecipeHandler extends RecipePrintHandler {
 		return new String[] {"Trunk", "Leaves", "Output"};
 	}
 
-	@Nullable
 	@Override
 	public List<ResourceLocation> getIngredientsForLookup() {
 		ArrayList<ResourceLocation> ingredients = new ArrayList<ResourceLocation>();
@@ -52,18 +52,17 @@ public class TETreeExtractorRecipeHandler extends RecipePrintHandler {
 		if (this.rawRecipe.has("leaves"))
 			ingredients.add(ObjectHelper.getIngredientItemId(this.rawRecipe.get("leaves")));
 
-		return ingredients.isEmpty() ? null : ingredients;
+		return ingredients.isEmpty() ? Collections.emptyList() : ingredients;
 	}
 
-	@Nullable
 	@Override
-	public ResourceLocation getOutputForLookup() {
+	public List<ResourceLocation> getOutputsForLookup() {
 		JsonElement result = this.rawRecipe.get("result");
 
 		if (!result.isJsonObject() || !result.getAsJsonObject().has("item"))
-			return null;
+			return Collections.emptyList();
 
-		return ObjectHelper.getIngredientItemId(result.getAsJsonObject().get("item"));
+		return Collections.singletonList(ObjectHelper.getIngredientItemId(result.getAsJsonObject().get("item")));
 	}
 
 	@Override

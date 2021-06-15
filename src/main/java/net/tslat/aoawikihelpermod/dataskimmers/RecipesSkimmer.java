@@ -13,14 +13,12 @@ import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.printers.handlers.*;
-import net.tslat.aoawikihelpermod.util.printers.handlers.thermalexpansion.TEChillerRecipeHandler;
-import net.tslat.aoawikihelpermod.util.printers.handlers.thermalexpansion.TEPulverizerRecipeHandler;
-import net.tslat.aoawikihelpermod.util.printers.handlers.thermalexpansion.TESawmillRecipeHandler;
-import net.tslat.aoawikihelpermod.util.printers.handlers.thermalexpansion.TETreeExtractorRecipeHandler;
+import net.tslat.aoawikihelpermod.util.printers.handlers.recipe.*;
+import net.tslat.aoawikihelpermod.util.printers.handlers.recipe.immersivenegineering.IEClocheRecipeHandler;
+import net.tslat.aoawikihelpermod.util.printers.handlers.recipe.thermalexpansion.*;
 import org.apache.logging.log4j.Level;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class RecipesSkimmer extends JsonReloadListener {
@@ -38,6 +36,9 @@ public class RecipesSkimmer extends JsonReloadListener {
 		RECIPE_HANDLERS.put("minecraft:campfire_cooking", CampfireRecipeHandler::new);
 		RECIPE_HANDLERS.put("minecraft:stonecutting", StonecuttingRecipeHandler::new);
 		RECIPE_HANDLERS.put("minecraft:smithing", SmithingRecipeHandler::new);
+		RECIPE_HANDLERS.put("minecraft:crafting_special_firework_rocket", FireworkRecipeHandler::new);
+		RECIPE_HANDLERS.put("minecraft:crafting_special_shulkerboxcoloring", ShulkerColourRecipeHandler::new);
+		RECIPE_HANDLERS.put("minecraft:crafting_special_suspiciousstew", SuspiciousStewRecipeHandler::new);
 		RECIPE_HANDLERS.put("aoa3:upgrade_kit", UpgradeKitRecipeHandler::new);
 		RECIPE_HANDLERS.put("aoa3:infusion", InfusionRecipeHandler::new);
 		RECIPE_HANDLERS.put("aoa3:trophy", TrophyRecipeHandler::new);
@@ -46,6 +47,9 @@ public class RecipesSkimmer extends JsonReloadListener {
 		RECIPE_HANDLERS.put("thermal:sawmill", TESawmillRecipeHandler::new);
 		RECIPE_HANDLERS.put("thermal:pulverizer", TEPulverizerRecipeHandler::new);
 		RECIPE_HANDLERS.put("thermal:chiller", TEChillerRecipeHandler::new);
+		RECIPE_HANDLERS.put("thermal:insolator", TEInsolatorRecipeHandler::new);
+
+		RECIPE_HANDLERS.put("immersiveengineering:cloche", IEClocheRecipeHandler::new);
 	}
 
 	public RecipesSkimmer() {
@@ -103,7 +107,7 @@ public class RecipesSkimmer extends JsonReloadListener {
 				RECIPE_PRINTERS.put(id, recipePrintHandler);
 			}
 			catch (Exception ex) {
-				AoAWikiHelperMod.LOGGER.log(Level.ERROR, "Failed recipe skim for: " + id + ", skipping recipe.");
+				AoAWikiHelperMod.LOGGER.log(Level.ERROR, "Failed recipe skim for: " + id + ", skipping recipe.", ex);
 			}
 		}
 	}
@@ -119,18 +123,13 @@ public class RecipesSkimmer extends JsonReloadListener {
 	}
 
 	private void populateIngredientsByHandler(ResourceLocation id, RecipePrintHandler recipePrintHandler) {
-		List<ResourceLocation> ingredients = recipePrintHandler.getIngredientsForLookup();
-
-		if (ingredients != null) {
-			for (ResourceLocation ing : ingredients) {
-				RECIPES_BY_INGREDIENT.put(ing, id);
-			}
+		for (ResourceLocation ingredient : recipePrintHandler.getIngredientsForLookup()) {
+			RECIPES_BY_INGREDIENT.put(ingredient, id);
 		}
 
-		ResourceLocation output = recipePrintHandler.getOutputForLookup();
-
-		if (output != null)
+		for (ResourceLocation output : recipePrintHandler.getOutputsForLookup()) {
 			RECIPES_BY_OUTPUT.put(output, id);
+		}
 	}
 
 	@Override

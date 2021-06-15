@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod.util.printers.handlers;
+package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
@@ -9,9 +9,11 @@ import net.tslat.aoa3.common.container.recipe.UpgradeKitRecipe;
 import net.tslat.aoa3.common.registration.AoABlocks;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
+import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -45,7 +47,6 @@ public class UpgradeKitRecipeHandler extends RecipePrintHandler {
 		return new String[] {"Block", "Ingredients", "Item"};
 	}
 
-	@Nullable
 	@Override
 	public List<ResourceLocation> getIngredientsForLookup() {
 		ArrayList<ResourceLocation> ingredients = new ArrayList<ResourceLocation>(2);
@@ -58,13 +59,12 @@ public class UpgradeKitRecipeHandler extends RecipePrintHandler {
 		if (upgradeKit != null)
 			ingredients.add(upgradeKit);
 
-		return ingredients.isEmpty() ? null : ingredients;
+		return ingredients.isEmpty() ? Collections.emptyList() : ingredients;
 	}
 
-	@Nullable
 	@Override
-	public ResourceLocation getOutputForLookup() {
-		return ObjectHelper.getIngredientItemId(this.rawRecipe.get("result"));
+	public List<ResourceLocation> getOutputsForLookup() {
+		return Collections.singletonList(ObjectHelper.getIngredientItemId(this.rawRecipe.get("result")));
 	}
 
 	@Override

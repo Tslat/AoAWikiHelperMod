@@ -18,10 +18,12 @@ public class WikiHelperCommand {
 					.then(ObtainingCommand.register())
 					.then(RecipeCommand.register())
 					.then(LootTableCommand.register())
-					.then(TradesCommand.register());
+					.then(TradesCommand.register())
+					.then(StructuresCommand.register());
 		}
 		else {
 			cmd.executes(WikiHelperCommand::outdatedCommand);
+			cmd.then(Commands.literal("update_aoa").executes(WikiHelperCommand::outdatedCommand));
 		}
 
 		dispatcher.register(cmd);

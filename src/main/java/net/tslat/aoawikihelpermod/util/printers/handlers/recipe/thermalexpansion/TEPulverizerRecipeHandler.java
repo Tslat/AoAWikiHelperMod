@@ -1,5 +1,7 @@
-package net.tslat.aoawikihelpermod.util.printers.handlers.thermalexpansion;
+package net.tslat.aoawikihelpermod.util.printers.handlers.recipe.thermalexpansion;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.item.Item;
@@ -12,6 +14,7 @@ import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -42,16 +45,28 @@ public class TEPulverizerRecipeHandler extends RecipePrintHandler {
 		return new String[] {"Input", "Energy", "Output"};
 	}
 
-	@Nullable
 	@Override
 	public List<ResourceLocation> getIngredientsForLookup() {
 		return Collections.singletonList(ObjectHelper.getIngredientItemId(this.rawRecipe.get("input")));
 	}
 
-	@Nullable
 	@Override
-	public ResourceLocation getOutputForLookup() {
-		return ObjectHelper.getIngredientItemId(this.rawRecipe.get("result"));
+	public List<ResourceLocation> getOutputsForLookup() {
+		if (this.rawRecipe.get("result").isJsonObject()) {
+			return Collections.singletonList(ObjectHelper.getIngredientItemId(this.rawRecipe.get("result")));
+		}
+		else if (this.rawRecipe.get("result").isJsonArray()) {
+			ArrayList<ResourceLocation> outputs = new ArrayList<ResourceLocation>();
+
+			for (JsonElement ele : this.rawRecipe.get("result").getAsJsonArray()) {
+				outputs.add(ObjectHelper.getIngredientItemId(ele));
+			}
+
+			return outputs;
+		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	@Override
@@ -62,12 +77,40 @@ public class TEPulverizerRecipeHandler extends RecipePrintHandler {
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
 		Pair<String, String> input = ObjectHelper.getIngredientName(JSONUtils.getAsJsonObject(this.rawRecipe, "input"));
 		int energy = JSONUtils.getAsInt(this.rawRecipe, "energy", 4000);
-		Triple<Integer, String, String> result = ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result"));
+		List<Triple<Integer, String, String>> result;
+
+		if (this.rawRecipe.get("result").isJsonObject()) {
+			result = Collections.singletonList(ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result")));
+		}
+		else if (this.rawRecipe.get("result").isJsonArray()) {
+			JsonArray resultArray = this.rawRecipe.get("result").getAsJsonArray();
+			result = new ArrayList<Triple<Integer, String, String>>();
+
+			for (JsonElement ele : resultArray) {
+				result.add(ObjectHelper.getStackDetailsFromJson(ele));
+			}
+		}
+		else {
+			result = Collections.emptyList();
+		}
+
+		StringBuilder resultBuilder = new StringBuilder();
+
+		for (Triple<Integer, String, String> resultEntry : result) {
+			if (resultBuilder.length() > 0)
+				resultBuilder.append(" +<br/>");
+
+			resultBuilder.append(FormattingHelper.createImageBlock(resultEntry.getRight()))
+					.append(" ")
+					.append(resultEntry.getLeft())
+					.append(" ")
+					.append(FormattingHelper.createLinkableText(resultEntry.getRight(), resultEntry.getLeft() > 1, resultEntry.getMiddle().equals("minecraft"), !resultEntry.getRight().equals(targetName)));
+		}
 
 		String[] printData = new String[3];
 		printData[0] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName));
 		printData[1] = String.valueOf(energy);
-		printData[2] = FormattingHelper.createImageBlock(result.getRight()) + " " + result.getLeft() + " " + FormattingHelper.createLinkableText(result.getRight(), result.getLeft() > 1, result.getMiddle().equals("minecraft"), !result.getRight().equals(targetName));
+		printData[2] = resultBuilder.toString();
 
 		this.printoutData.put(targetItem, printData);
 

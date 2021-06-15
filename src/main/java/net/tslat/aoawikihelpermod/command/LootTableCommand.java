@@ -89,7 +89,7 @@ public class LootTableCommand implements Command<CommandSource> {
 			String pathName = tableId.getPath();
 
 			if (pathName.contains("\\")) {
-				pathName = StringUtil.toTitleCase(pathName.substring(pathName.indexOf("\\") + 1));
+				pathName = StringUtil.toTitleCase(pathName.replaceAll("\\\\", " - "));
 			}
 			else if (pathName.contains("/")) {
 				pathName = StringUtil.toTitleCase(pathName.replaceAll("/", " - "));

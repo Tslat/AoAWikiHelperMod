@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod.util.printers.handlers;
+package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -10,12 +10,10 @@ import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
+import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 	private final ResourceLocation recipeId;
@@ -47,7 +45,6 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 		return new String[] {"Item", "Ingredients", "Recipe"};
 	}
 
-	@Nullable
 	@Override
 	public List<ResourceLocation> getIngredientsForLookup() {
 		ArrayList<ResourceLocation> ingredients = new ArrayList<ResourceLocation>();
@@ -68,13 +65,12 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 				ingredients.add(id);
 		}
 
-		return ingredients.isEmpty() ? null : ingredients;
+		return ingredients.isEmpty() ? Collections.emptyList() : ingredients;
 	}
 
-	@Nullable
 	@Override
-	public ResourceLocation getOutputForLookup() {
-		return ObjectHelper.getIngredientItemId(this.rawRecipe.get("result"));
+	public List<ResourceLocation> getOutputsForLookup() {
+		return Collections.singletonList(ObjectHelper.getIngredientItemId(this.rawRecipe.get("result")));
 	}
 
 	@Override

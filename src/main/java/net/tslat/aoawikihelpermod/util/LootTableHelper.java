@@ -346,7 +346,7 @@ public class LootTableHelper {
 
 		entryBuilder.append("Nothing; image:none;");
 		entryBuilder.append(" weight:").append(entry.weight).append(";");
-		entryBuilder.append(" quantity:").append(getQuantityString(functions)).append(";");
+		entryBuilder.append(" quantity:-;");
 
 		if (!looting.isEmpty())
 			entryBuilder.append(" looting:").append(looting).append(";");

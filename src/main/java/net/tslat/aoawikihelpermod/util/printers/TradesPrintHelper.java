@@ -58,6 +58,9 @@ public class TradesPrintHelper extends TablePrintHelper {
 
 	public void handleTradeMap(Int2ObjectMap<ArrayList<MerchantTradePrintHandler>> trades) {
 		for (int i = 1; i <= 5; i++) {
+			if (!trades.containsKey(i))
+				continue;
+
 			ArrayList<MerchantTradePrintHandler> tieredTrades = trades.get(i);
 
 			if (tieredTrades.size() > 1) {

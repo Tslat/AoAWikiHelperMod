@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod.util.printers.handlers;
+package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -14,9 +14,11 @@ import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
+import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -55,7 +57,6 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		return new String[] {"Item", "Infusion Req.", "Infusion XP", "Ingredients", "Recipe"};
 	}
 
-	@Nullable
 	@Override
 	public List<ResourceLocation> getIngredientsForLookup() {
 		ArrayList<ResourceLocation> ingredients = new ArrayList<ResourceLocation>();
@@ -67,16 +68,15 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 				ingredients.add(id);
 		}
 
-		return ingredients.isEmpty() ? null : ingredients;
+		return ingredients.isEmpty() ? Collections.emptyList() : ingredients;
 	}
 
-	@Nullable
 	@Override
-	public ResourceLocation getOutputForLookup() {
+	public List<ResourceLocation> getOutputsForLookup() {
 		if (isImbuing)
 			return null;
 
-		return ObjectHelper.getIngredientItemId(this.rawRecipe.get("result"));
+		return Collections.singletonList(ObjectHelper.getIngredientItemId(this.rawRecipe.get("result")));
 	}
 
 	@Override

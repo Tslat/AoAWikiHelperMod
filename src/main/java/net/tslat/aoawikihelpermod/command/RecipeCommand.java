@@ -57,7 +57,17 @@ public class RecipeCommand implements Command<CommandSource> {
 
 			File outputFile;
 			MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
-			String fileName = "Recipe - " + StringUtil.toTitleCase(id.getPath());
+			String fileName = "Recipe - ";
+			String pathName = id.getPath();
+
+			if (pathName.contains("\\")) {
+				pathName = StringUtil.toTitleCase(pathName.replaceAll("\\\\", " - "));
+			}
+			else if (pathName.contains("/")) {
+				pathName = StringUtil.toTitleCase(pathName.replaceAll("/", " - "));
+			}
+
+			fileName = fileName + pathName;
 
 			try (RecipePrintHelper printHelper = RecipePrintHelper.open(fileName, recipeHandler)) {
 				printHelper.withProperty("class", "wikitable");
