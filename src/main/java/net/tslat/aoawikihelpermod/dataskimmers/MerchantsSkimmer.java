@@ -46,16 +46,16 @@ public class MerchantsSkimmer {
 		for (VillagerProfession profession : ForgeRegistries.PROFESSIONS.getValues()) {
 			ResourceLocation id = profession.getRegistryName();
 			Int2ObjectMap<VillagerTrades.ITrade[]> trades = VillagerTrades.TRADES.get(profession);
-			int i = 1;
 
-			while (trades.containsKey(i)) {
+			for (int i = 1; i <= 5; i++) {
+				if (!trades.containsKey(i))
+					continue;
+
 				VillagerTrades.ITrade[] offers = trades.get(i);
 
 				for (VillagerTrades.ITrade offer : offers) {
 					mapTradeToIngredients(world, profession, i, offer);
 				}
-
-				i++;
 			}
 		}
 
@@ -72,16 +72,15 @@ public class MerchantsSkimmer {
 					if (trades == null)
 						continue;
 
-					int i = 1;
+					for (int i = 1; i <= 5; i++) {
+						if (!trades.containsKey(i))
+							continue;
 
-					while (trades.containsKey(i)) {
 						VillagerTrades.ITrade[] offers = trades.get(i);
 
 						for (VillagerTrades.ITrade offer : offers) {
 							mapTradeToIngredients((AoATrader)entity, i, offer);
 						}
-
-						i++;
 					}
 				}
 
