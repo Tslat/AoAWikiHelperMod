@@ -4,41 +4,32 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.SuggestionProviders;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.template.Template;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
-import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoa3.util.misc.MutableSupplier;
-import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.printers.TablePrintHelper;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 public class StructuresCommand implements Command<CommandSource> {
 	private static final StructuresCommand CMD = new StructuresCommand();
-	private static final SuggestionProvider<CommandSource> SUGGESTION_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "structure_pieces"), (context, builder) -> ISuggestionProvider.suggestResource(Stream.of(
-			new ResourceLocation(AdventOfAscension.MOD_ID, "structures/abyss/abyssal_lotto_hut/abyssal_lotto_hut"),
-			new ResourceLocation(AdventOfAscension.MOD_ID, "structures/shyrelands/decorations/ruined_arch"),
-			new ResourceLocation("minecraft", "structures/ruined_portal/giant_portal_1"),
-			new ResourceLocation("minecraft", "structures/igloo/bottom"),
-			new ResourceLocation("minecraft", "structures/bastion/bridge/bridge_pieces/bridge")), builder));
 
 	public static ArgumentBuilder<CommandSource, ?> register() {
 		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("structure").executes(CMD);
 
-		builder.then(Commands.argument("structure_piece_id", net.tslat.aoa3.command.StructuresCommand.StructureIdArgument.instance()).suggests(SUGGESTION_PROVIDER).executes(StructuresCommand::printStructurePiece));
+		builder.then(Commands.argument("structure_piece_id", net.tslat.aoa3.command.StructuresCommand.StructureIdArgument.instance()).executes(StructuresCommand::printStructurePiece));
 
 		return builder;
 	}
@@ -56,11 +47,20 @@ public class StructuresCommand implements Command<CommandSource> {
 
 	private static int printStructurePiece(CommandContext<CommandSource> cmd) {
 		try {
-			ResourceLocation id = net.tslat.aoa3.command.StructuresCommand.StructureIdArgument.getStructureId(cmd, "structure_piece_id");
-			Template template = ServerLifecycleHooks.getCurrentServer().getStructureManager().get(id);
+			ResourceLocation id;
+			Template template;
+
+			try {
+				id = net.tslat.aoa3.command.StructuresCommand.StructureIdArgument.getStructureId(cmd, "structure_piece_id");
+				template = ServerLifecycleHooks.getCurrentServer().getStructureManager().get(id);
+			}
+			catch (Exception ex) {
+				template = null;
+				id = null;
+			}
 
 			if (template == null) {
-				WikiHelperCommand.error(cmd.getSource(), "Structures", "Invalid structure piece ID: '" + id + "'");
+				WikiHelperCommand.error(cmd.getSource(), "Structures", "Invalid or unable to locate structure piece ID: '" + id + "'");
 
 				return 1;
 			}
@@ -68,6 +68,7 @@ public class StructuresCommand implements Command<CommandSource> {
 			String[] lines = new String[4];
 			HashSet<Block> blocks = new HashSet<Block>();
 			HashSet<ResourceLocation> entities = new HashSet<ResourceLocation>();
+			ArrayList<String> entityEntries = new ArrayList<String>();
 			StringBuilder contentsBuilder = new StringBuilder();
 			BlockPos size = template.getSize();
 
@@ -75,46 +76,44 @@ public class StructuresCommand implements Command<CommandSource> {
 				for (Template.BlockInfo blockInfo : palette.blocks()) {
 					Block block = blockInfo.state.getBlock();
 
-					if (blocks.contains(block) || block == Blocks.AIR || block == Blocks.JIGSAW || block == Blocks.STRUCTURE_BLOCK)
+					if (block == Blocks.AIR || block == Blocks.JIGSAW || block == Blocks.STRUCTURE_BLOCK)
 						continue;
 
-					if (contentsBuilder.length() > 0)
-						contentsBuilder.append("<br/>");
-
-					String blockName = block.getName().getString();
-
-					contentsBuilder
-							.append(FormattingHelper.createImageBlock(blockName))
-							.append(" ")
-							.append(FormattingHelper.createLinkableText(blockName, false, block.getRegistryName().getNamespace().equals("minecraft"), true));
 					blocks.add(block);
 				}
+			}
+
+			for (Block block : blocks.stream().sorted(Comparator.comparing(bl -> bl.getName().getString())).collect(Collectors.toList())) {
+				if (contentsBuilder.length() > 0)
+					contentsBuilder.append("<br/>");
+
+				String blockName = block.getName().getString();
+
+				contentsBuilder
+						.append(FormattingHelper.createImageBlock(blockName))
+						.append(" ")
+						.append(FormattingHelper.createLinkableText(blockName, false, block.getRegistryName().getNamespace().equals("minecraft"), true));
 			}
 
 			for (Template.EntityInfo entity : template.entityInfoList) {
 				if (entity.nbt.contains("id")) {
 					ResourceLocation entityId = new ResourceLocation(entity.nbt.getString("id"));
 
-					if (entities.contains(entityId))
-						continue;
+					if (entities.add(entityId)) {
+						String entityName = StringUtil.toTitleCase(entityId.getPath());
 
-					if (contentsBuilder.length() > 0)
-						contentsBuilder.append("<br/>");
-
-					String entityName = StringUtil.toTitleCase(entityId.getPath());
-
-					contentsBuilder
-							.append(FormattingHelper.createImageBlock(entityName))
-							.append(" ")
-							.append(FormattingHelper.createLinkableText(entityName, false, entityId.getNamespace().equals("minecraft"), true));
-					entities.add(entityId);
+						entityEntries.add(FormattingHelper.createImageBlock(entityName) + " " + FormattingHelper.createLinkableText(entityName, false, entityId.getNamespace().equals("minecraft"), true));
+					}
 				}
 			}
 
 			lines[0] = "<code>" + id + "</code>";
 			lines[1] = "Size: " + size.getX() + "x" + size.getY() + "x" + size.getZ();
 			lines[2] = contentsBuilder.toString();
-			lines[3] = "";
+			lines[3] = FormattingHelper.createImageBlock("Image", 300);
+
+			if (!entityEntries.isEmpty())
+				lines[1] += "<br/><br/>The following entities are generated with this structure:<br/>" + FormattingHelper.listToString(entityEntries.stream().sorted().collect(Collectors.toList()), false);
 
 			File outputFile;
 			MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -130,8 +129,10 @@ public class StructuresCommand implements Command<CommandSource> {
 
 			fileName = fileName + pathName;
 
-			try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Structure piece", "Description", "Contents", "Image")) {
-				printHelper.withProperty("class", "wikitable");
+			try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "scope=\"col\" style=\"width:15%\" | Structure piece", "scope=\"col\" style=\"width:25%\" | Description", "scope=\"col\" style=\"width:30%\" | Contents", "scope=\"col\" style=\"width:30%\" | Image")) {
+				printHelper.withProperty("class", "wikitable mw-collapsible mw-collapsed");
+				printHelper.withProperty("data-expandtext", "Show");
+				printHelper.withProperty("data-collapsetest", "Hide");
 				printHelper.withClipboardOutput(clipboardContent);
 				printHelper.entry(lines);
 

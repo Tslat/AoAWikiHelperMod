@@ -57,8 +57,8 @@ public class FormattingHelper {
 		ResourceLocation tagId = new ResourceLocation(tag);
 		String tagName = StringUtil.toTitleCase(tagId.getPath());
 
-		if (tagId.getNamespace().equals("minecraft"))
-			builder.append("mcw:");
+		//if (tagId.getNamespace().equals("minecraft"))
+		//	builder.append("mcw:"); Not redirecting mcw links anymore
 
 		builder.append(tagName);
 		builder.append("|");
@@ -69,12 +69,12 @@ public class FormattingHelper {
 	}
 
 	public static String createLinkableText(String text, boolean pluralise, boolean isVanilla, boolean shouldLink) {
-		shouldLink = shouldLink | isVanilla;
+		shouldLink = shouldLink;// | isVanilla;
 
 		StringBuilder builder = new StringBuilder(shouldLink ? "[[" : "");
 		String pluralName = pluralise ? lazyPluralise(text) : text;
 
-		if (isVanilla) {
+		if (false && isVanilla) { // Not redirecting mcw links anymore
 			builder.append("mcw:");
 			builder.append(text);
 			builder.append("|");

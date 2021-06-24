@@ -32,7 +32,6 @@ public class LootTablesSkimmer extends JsonReloadListener {
 	protected void apply(Map<ResourceLocation, JsonElement> jsonMap, IResourceManager resourceManager, IProfiler profiler) {
 		TABLE_PRINTERS.clear();
 		TABLES_BY_LOOT.clear();
-		TABLES_BY_LOOT.clear();
 
 		for (Map.Entry<ResourceLocation, JsonElement> entry : jsonMap.entrySet()) {
 			ResourceLocation id = entry.getKey();

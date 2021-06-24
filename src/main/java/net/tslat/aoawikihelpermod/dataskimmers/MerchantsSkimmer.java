@@ -10,20 +10,24 @@ import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.merchant.villager.VillagerProfession;
 import net.minecraft.entity.merchant.villager.VillagerTrades;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.item.MerchantOffer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.entity.base.AoATrader;
+import net.tslat.aoa3.entity.npc.trader.UndeadHeraldEntity;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.MerchantTradePrintHandler;
 import org.apache.logging.log4j.Level;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -42,6 +46,11 @@ public class MerchantsSkimmer {
 
 		if (world == null)
 			return;
+
+		TRADES_BY_ITEM.clear();
+		TRADES_BY_ITEM.clear();
+		TRADE_PRINTERS_BY_PROFESSION.clear();
+		TRADE_PRINTERS_BY_AOA_TRADER.clear();
 
 		for (VillagerProfession profession : ForgeRegistries.PROFESSIONS.getValues()) {
 			ResourceLocation id = profession.getRegistryName();
@@ -67,7 +76,8 @@ public class MerchantsSkimmer {
 					continue;
 
 				if (entity instanceof AoATrader) {
-					Int2ObjectMap<VillagerTrades.ITrade[]> trades = ((AoATrader)entity).getTradesMap();
+					AoATrader trader = (AoATrader)entity;
+					Int2ObjectMap<VillagerTrades.ITrade[]> trades = trader.getTradesMap();
 
 					if (trades == null)
 						continue;
@@ -79,8 +89,22 @@ public class MerchantsSkimmer {
 						VillagerTrades.ITrade[] offers = trades.get(i);
 
 						for (VillagerTrades.ITrade offer : offers) {
-							mapTradeToIngredients((AoATrader)entity, i, offer);
+							mapTradeToIngredients(trader, i, offer);
 						}
+					}
+
+					if (trader instanceof UndeadHeraldEntity) {
+						try {
+							Method additionalTradeMethod = ObfuscationReflectionHelper.findMethod(UndeadHeraldEntity.class, "getAdditionalBannerTrade", World.class);
+
+							for (ServerWorld tradeWorld : server.getAllLevels()) {
+								MerchantOffer offer = (MerchantOffer)additionalTradeMethod.invoke(trader, tradeWorld);
+
+								if (offer != null)
+									mapTradeToIngredients(trader, 1, offer);
+							}
+						}
+						catch (Exception ex) {}
 					}
 				}
 
@@ -92,12 +116,7 @@ public class MerchantsSkimmer {
 		}
 	}
 
-	private static void mapTradeToIngredients(AoATrader trader, int professionLevel, VillagerTrades.ITrade trade) {
-		MerchantOffer offer = trade.getOffer(trader, new Random());
-
-		if (offer == null)
-			return;
-
+	private static void mapTradeToIngredients(AoATrader trader, int professionLevel, MerchantOffer offer) {
 		MerchantTradePrintHandler handler = new MerchantTradePrintHandler(trader, professionLevel, offer);
 		Int2ObjectMap<ArrayList<MerchantTradePrintHandler>> tradeMap = TRADE_PRINTERS_BY_AOA_TRADER.get(trader.getType().getRegistryName());
 
@@ -124,6 +143,13 @@ public class MerchantsSkimmer {
 		TRADES_BY_ITEM.put(offer.getResult().getItem().getRegistryName(), handler);
 	}
 
+	private static void mapTradeToIngredients(AoATrader trader, int professionLevel, VillagerTrades.ITrade trade) {
+		MerchantOffer offer = trade.getOffer(trader, new Random());
+
+		if (offer != null)
+			mapTradeToIngredients(trader, professionLevel, offer);
+	}
+
 	private static void mapTradeToIngredients(ServerWorld world, VillagerProfession profession, int professionLevel, VillagerTrades.ITrade trade) {
 		if (merchantInstance == null) {
 			merchantInstance = new VillagerEntity(EntityType.VILLAGER, world);
@@ -132,7 +158,16 @@ public class MerchantsSkimmer {
 
 		merchantInstance.setVillagerData(merchantInstance.getVillagerData().setProfession(profession));
 
-		MerchantOffer offer = trade.getOffer(merchantInstance, new Random());
+		MerchantOffer offer;
+
+		if (trade instanceof VillagerTrades.EmeraldForMapTrade) {
+			VillagerTrades.EmeraldForMapTrade emeraldTrade = (VillagerTrades.EmeraldForMapTrade)trade;
+
+			offer = new MerchantOffer(new ItemStack(Items.EMERALD, emeraldTrade.emeraldCost), new ItemStack(Items.COMPASS), new ItemStack(Items.FILLED_MAP), emeraldTrade.maxUses, emeraldTrade.villagerXp, 0.2f);
+		}
+		else {
+			offer = trade.getOffer(merchantInstance, new Random());
+		}
 
 		if (offer == null)
 			return;

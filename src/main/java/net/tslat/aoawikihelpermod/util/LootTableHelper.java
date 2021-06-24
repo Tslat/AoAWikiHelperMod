@@ -5,7 +5,6 @@ import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.item.PotionItem;
 import net.minecraft.loot.*;
 import net.minecraft.loot.conditions.*;
@@ -31,10 +30,7 @@ import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import org.apache.logging.log4j.Level;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class LootTableHelper {
 	private static final Field lootTablePoolsField;
@@ -288,36 +284,52 @@ public class LootTableHelper {
 			if (function instanceof ApplyBonus) {
 				Enchantment enchant = ((ApplyBonus)function).enchantment;
 
-				builder.append("This drop will vary in quantity depending on the level of ").append(FormattingHelper.createLinkableText(ObjectHelper.getEnchantmentName(enchant, 0), false, false, true)).append(" used");
+				builder.append("This ").append(target).append(" will vary in quantity depending on the level of ").append(FormattingHelper.createLinkableText(ObjectHelper.getEnchantmentName(enchant, 0), false, false, true)).append(" used");
 			}
-			else if (function instanceof EnchantRandomly || function instanceof EnchantWithLevels) {
-				builder.append("This drop will be enchanted with a random enchantment");
+			else if (function instanceof EnchantWithLevels) {
+				builder.append("This ").append(target).append(" will be enchanted with random enchantments");
+			}
+			else if (function instanceof EnchantRandomly) {
+				ArrayList<String> enchants = new ArrayList<String>();
+
+				for (Enchantment enchant : ((EnchantRandomly)function).enchantments) {
+					enchants.add(ObjectHelper.getEnchantmentName(enchant, 0));
+				}
+
+				builder.append("This ").append(target).append(" will be enchanted with:<br/>").append(FormattingHelper.listToString(enchants, false));
 			}
 			else if (function instanceof EnchantSpecific) {
-				builder.append("This drop will be enchanted with a specific set of enchantments");
+				HashMap<Enchantment, Integer> enchants = ObfuscationReflectionHelper.getPrivateValue(EnchantSpecific.class, (EnchantSpecific)function, "enchants");
+				ArrayList<String> enchantNames = new ArrayList<String>();
+
+				for (Map.Entry<Enchantment, Integer> enchant : enchants.entrySet()) {
+					enchantNames.add(ObjectHelper.getEnchantmentName(enchant.getKey(), enchant.getValue()));
+				}
+
+				builder.append("This ").append(target).append(" will be enchanted with:<br/>").append(FormattingHelper.listToString(enchantNames, false));
 			}
 			else if (function instanceof LimitCount) {
-				builder.append("This drop will have its amount capped to a specific amount");
+				builder.append("This ").append(target).append(" will have its amount capped to a specific amount");
 			}
 			else if (function instanceof GrantSkillXp) {
 				Skills skill = ObfuscationReflectionHelper.getPrivateValue(GrantSkillXp.class, (GrantSkillXp)function, "skill");
 				float xp = ObfuscationReflectionHelper.getPrivateValue(GrantSkillXp.class, (GrantSkillXp)function, "xp");
 
-				builder.append("This drop will additionally grant ").append(NumberUtil.roundToNthDecimalPlace(xp, 2)).append(" ").append(FormattingHelper.createLinkableText(StringUtil.toTitleCase(skill.toString()), false, false, true)).append(" xp");
+				builder.append("This ").append(target).append(" will additionally grant ").append(NumberUtil.roundToNthDecimalPlace(xp, 2)).append(" ").append(FormattingHelper.createLinkableText(StringUtil.toTitleCase(skill.toString()), false, false, true)).append(" xp");
 			}
 			else if (function instanceof Smelt) {
-				builder.append("This drop will be converted into its smelted/cooked version");
+				builder.append("This ").append(target).append(" will be converted into its smelted/cooked version");
 			}
 		}
 
 		if (builder.length() > 0)
 			builder.append(".");
 
-		String[] line = builder.toString().split("<br/>");
+		String[] line = builder.toString().split(", and<br/>");
 		StringBuilder reBuilder = new StringBuilder(line[0]);
 
 		for (int i = 1; i < line.length; i++) {
-			reBuilder.append("<br/>").append("and will").append(line[i].substring(line[i].indexOf("This drop will") + 14));
+			reBuilder.append("<br/>").append("and will").append(line[i].substring(line[i].indexOf("This " + target + " will") + 10 + target.length()));
 		}
 
 		return reBuilder.toString();
@@ -364,14 +376,14 @@ public class LootTableHelper {
 			if (entryNotesBuilder.length() > 0)
 				entryNotesBuilder.append("<br/>");
 
-			entryNotesBuilder.append(LootTableHelper.getConditionsDescription("drop", conditions));
+			entryNotesBuilder.append(LootTableHelper.getConditionsDescription("entry", conditions));
 		}
 
 		if (!functions.isEmpty()) {
 			if (entryNotesBuilder.length() > 0)
 				entryNotesBuilder.append("<br/>");
 
-			entryNotesBuilder.append(LootTableHelper.getFunctionsDescription("drop", functions));
+			entryNotesBuilder.append(LootTableHelper.getFunctionsDescription("entry", functions));
 		}
 
 		if (entryNotesBuilder.length() > 0)
@@ -386,8 +398,8 @@ public class LootTableHelper {
 		String looting = getLootingString(functions);
 		String itemName = ObjectHelper.getItemName(entry.item);
 
-		if (entry.item.getRegistryName().getNamespace().equals("minecraft"))
-			entryBuilder.append("mcw:");
+		//if (entry.item.getRegistryName().getNamespace().equals("minecraft"))
+		//	entryBuilder.append("mcw:"); Not redirecting mcw links anymore
 
 		if (entry.item instanceof PotionItem) {
 			for (ILootFunction function : entry.functions) {
@@ -424,18 +436,6 @@ public class LootTableHelper {
 				}
 			}
 		}
-		else if (entry.item == Items.ENCHANTED_BOOK) {
-			for (ILootFunction function : entry.functions) {
-				if (function instanceof SetNBT) {
-					ItemStack trophyStack = new ItemStack(entry.item);
-
-					((SetNBT)function).run(trophyStack, null);
-					entryBuilder.append(trophyStack.getHoverName().getString()).append("; image:").append(ObjectHelper.getItemName(entry.item)).append(".png;");
-
-					break;
-				}
-			}
-		}
 		else {
 			entryBuilder.append(itemName).append(";");
 		}
@@ -455,16 +455,22 @@ public class LootTableHelper {
 			}
 		}
 
-		if (conditions != null) {
-			entryNotesBuilder.append("<br/>").append(LootTableHelper.getConditionsDescription("drop", conditions));
+		if (!conditions.isEmpty()) {
+			if (entryNotesBuilder.length() > 0)
+				entryNotesBuilder.append("<br/>");
+
+			entryNotesBuilder.append(LootTableHelper.getConditionsDescription("entry", conditions));
 		}
 
 		if (!functions.isEmpty()) {
-			entryNotesBuilder.append("<br/>").append(LootTableHelper.getFunctionsDescription("drop", functions));
+			if (entryNotesBuilder.length() > 0)
+				entryNotesBuilder.append("<br/>");
+
+			entryNotesBuilder.append(LootTableHelper.getFunctionsDescription("entry", functions));
 		}
 
 		if (entryNotesBuilder.length() > 0)
-			entryBuilder.append(" notes:").append(entryNotesBuilder.substring(5));
+			entryBuilder.append(" notes:").append(entryNotesBuilder);
 
 		return entryBuilder.toString();
 	}
@@ -481,8 +487,8 @@ public class LootTableHelper {
 		else {
 			Item item = tagItems.get(0);
 
-			if (item.getRegistryName().getNamespace().equals("minecraft"))
-				entryBuilder.append("mcw:");
+			//if (item.getRegistryName().getNamespace().equals("minecraft"))
+			//	entryBuilder.append("mcw:"); Not redirecting mcw links anymore
 
 			entryBuilder.append(ObjectHelper.getItemName(item)).append(";");
 		}
@@ -512,18 +518,18 @@ public class LootTableHelper {
 			}
 		}
 
-		if (conditions != null) {
+		if (!conditions.isEmpty()) {
 			if (entryNotesBuilder.length() > 0)
 				entryNotesBuilder.append("<br/>");
 
-			entryNotesBuilder.append(LootTableHelper.getConditionsDescription("drop", conditions));
+			entryNotesBuilder.append(LootTableHelper.getConditionsDescription("entry", conditions));
 		}
 
 		if (!functions.isEmpty()) {
 			if (entryNotesBuilder.length() > 0)
 				entryNotesBuilder.append("<br/>");
 
-			entryNotesBuilder.append(LootTableHelper.getFunctionsDescription("drop", functions));
+			entryNotesBuilder.append(LootTableHelper.getFunctionsDescription("entry", functions));
 		}
 
 		if (entryNotesBuilder.length() > 0)
@@ -561,18 +567,18 @@ public class LootTableHelper {
 			}
 		}
 
-		if (conditions != null) {
+		if (!conditions.isEmpty()) {
 			if (entryNotesBuilder.length() > 0)
 				entryNotesBuilder.append("<br/>");
 
-			entryNotesBuilder.append(LootTableHelper.getConditionsDescription("drop", conditions));
+			entryNotesBuilder.append(LootTableHelper.getConditionsDescription("entry", conditions));
 		}
 
 		if (!functions.isEmpty()) {
 			if (entryNotesBuilder.length() > 0)
 				entryNotesBuilder.append("<br/>");
 
-			entryNotesBuilder.append(LootTableHelper.getFunctionsDescription("drop", functions));
+			entryNotesBuilder.append(LootTableHelper.getFunctionsDescription("entry", functions));
 		}
 
 		if (entryNotesBuilder.length() > 0)

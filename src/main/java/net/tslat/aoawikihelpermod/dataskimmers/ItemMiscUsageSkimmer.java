@@ -29,6 +29,11 @@ public class ItemMiscUsageSkimmer {
 	private static final HashMap<ResourceLocation, String> LOG_STRIPPING_BY_STRIPPED_BLOCK = new HashMap<ResourceLocation, String>();
 
 	public static void init() {
+		REPAIRS_BY_ITEM.clear();
+		FUEL_BY_ITEM.clear();
+		LOG_STRIPPING_BY_SOURCE.clear();
+		LOG_STRIPPING_BY_STRIPPED_BLOCK.clear();
+
 		HashMultimap<Item, Item> repairablesMap = HashMultimap.create();
 		HashMap<Item, Integer> fuelsMap = new HashMap<Item, Integer>();
 		HashMap<Block, Block> logStripMap = new HashMap<Block, Block>();
@@ -127,11 +132,12 @@ public class ItemMiscUsageSkimmer {
 			int i = 0;
 
 			for (Item repairable : repairItems) {
-				if (i > 0)
+				if (i > 0) {
 					builder.append(", ");
 
-				if (i == repairItems.size() - 1)
-					builder.append(" and ");
+					if (i == repairItems.size() - 1)
+						builder.append(" and ");
+				}
 
 				builder.append(FormattingHelper.createLinkableItem(repairable, true, true));
 
