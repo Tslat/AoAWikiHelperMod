@@ -73,8 +73,13 @@ public class WikiTemplateHelper {
 		return makeWikiTemplateObject("Smelting", false, "input=" + input, "output=" + output);
 	}
 
-	public static String makeInfusionTemplate(ArrayList<String> ingredients, String input, String output) {
-		String[] lines = new String[ingredients.size() + (input.isEmpty() ? 2 : 3)];
+	public static String makeInfusionTemplate(ArrayList<String> ingredients, String input, Triple<Integer, String, String> output) {
+		int lineCountMod = input.isEmpty() ? 2 : 3;
+
+		if (output.getLeft() > 1)
+			lineCountMod++;
+
+		String[] lines = new String[ingredients.size() + lineCountMod];
 		int i = 0;
 
 		if (!input.isEmpty()) {
@@ -87,8 +92,14 @@ public class WikiTemplateHelper {
 			i++;
 		}
 
-		lines[lines.length - 2] = "output=" + output;
-		lines[lines.length - 1] = "shapeless=1";
+		i = output.getLeft() > 1 ? 1 : 2;
+
+		lines[lines.length - i++] = "output=" + (output == null ? "Air" : output.getRight());
+
+		if (output.getLeft() > 1)
+			lines[lines.length - i++] = "amount=" + output.getLeft();
+
+		lines[lines.length - i] = "shapeless=1";
 
 		return makeWikiTemplateObject("Infusion", false, lines);
 	}
