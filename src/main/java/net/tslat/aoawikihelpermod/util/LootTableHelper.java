@@ -118,9 +118,10 @@ public class LootTableHelper {
 			else if (condition instanceof HoldingItem) {
 				builder.append("This ").append(target);
 
-				ItemPredicate predicate = ObfuscationReflectionHelper.getPrivateValue(HoldingItem.class, (HoldingItem)condition, "predicate");
-				LootContext.EntityTarget entityTarget = ObfuscationReflectionHelper.getPrivateValue(HoldingItem.class, (HoldingItem)condition, "target");
-				Hand hand = ObfuscationReflectionHelper.getPrivateValue(HoldingItem.class, (HoldingItem)condition, "hand");
+				HoldingItem holdingItemCondition = (HoldingItem)condition;
+				ItemPredicate predicate = holdingItemCondition.getPredicate();
+				LootContext.EntityTarget entityTarget = holdingItemCondition.getTarget();
+				Hand hand = holdingItemCondition.getHand();
 
 				String handParticle = hand == null ? "held item" : (hand == Hand.MAIN_HAND ? "mainhand item" : "offhand item");
 				String heldItemParticle;
@@ -181,20 +182,20 @@ public class LootTableHelper {
 				builder.append("This ").append(target).append(" will only roll if the tool used ").append(heldItemParticle2);
 			}
 			else if (condition instanceof PlayerHasLevel) {
-				Skills skill = ObfuscationReflectionHelper.getPrivateValue(PlayerHasLevel.class, (PlayerHasLevel)condition, "skill");
-				int level = ObfuscationReflectionHelper.getPrivateValue(PlayerHasLevel.class, (PlayerHasLevel)condition, "level");
+				Skills skill = ((PlayerHasLevel)condition).getSkill();
+				int level = ((PlayerHasLevel)condition).getLevel();
 
 				builder.append("This ").append(target).append(" will only roll if the player has at least level ").append(level).append(" ").append(StringUtil.toTitleCase(skill.toString()));
 			}
 			else if (condition instanceof PlayerHasResource) {
-				Resources resource = ObfuscationReflectionHelper.getPrivateValue(PlayerHasResource.class, (PlayerHasResource)condition, "resource");
-				float amount = ObfuscationReflectionHelper.getPrivateValue(PlayerHasResource.class, (PlayerHasResource)condition, "amount");
+				Resources resource = ((PlayerHasResource)condition).getResource();
+				float amount = ((PlayerHasResource)condition).getAmount();
 
 				builder.append("This ").append(target).append(" will only roll if the player has at least ").append(NumberUtil.roundToNthDecimalPlace(amount, 2)).append(" ").append(FormattingHelper.createLinkableText(StringUtil.toTitleCase(resource.toString()), false, false, true));
 			}
 			else if (condition instanceof PlayerHasTribute) {
-				Deities deity = ObfuscationReflectionHelper.getPrivateValue(PlayerHasTribute.class, (PlayerHasTribute)condition, "deity");
-				int amount = ObfuscationReflectionHelper.getPrivateValue(PlayerHasTribute.class, (PlayerHasTribute)condition, "amount");
+				Deities deity = ((PlayerHasTribute)condition).getDeity();
+				int amount = ((PlayerHasTribute)condition).getAmount();
 
 				builder.append("This ").append(target).append(" will only roll if the player has at least ").append(amount).append(" tribute for ").append(FormattingHelper.createLinkableText(StringUtil.toTitleCase(deity.toString()), false, false, true));
 			}
@@ -299,7 +300,7 @@ public class LootTableHelper {
 				builder.append("This ").append(target).append(" will be enchanted with:<br/>").append(FormattingHelper.listToString(enchants, false));
 			}
 			else if (function instanceof EnchantSpecific) {
-				HashMap<Enchantment, Integer> enchants = ObfuscationReflectionHelper.getPrivateValue(EnchantSpecific.class, (EnchantSpecific)function, "enchants");
+				Map<Enchantment, Integer> enchants = ((EnchantSpecific)function).getEnchantments();
 				ArrayList<String> enchantNames = new ArrayList<String>();
 
 				for (Map.Entry<Enchantment, Integer> enchant : enchants.entrySet()) {
@@ -312,8 +313,8 @@ public class LootTableHelper {
 				builder.append("This ").append(target).append(" will have its amount capped to a specific amount");
 			}
 			else if (function instanceof GrantSkillXp) {
-				Skills skill = ObfuscationReflectionHelper.getPrivateValue(GrantSkillXp.class, (GrantSkillXp)function, "skill");
-				float xp = ObfuscationReflectionHelper.getPrivateValue(GrantSkillXp.class, (GrantSkillXp)function, "xp");
+				Skills skill = ((GrantSkillXp)function).getSkill();
+				float xp = ((GrantSkillXp)function).getXp();
 
 				builder.append("This ").append(target).append(" will additionally grant ").append(NumberUtil.roundToNthDecimalPlace(xp, 2)).append(" ").append(FormattingHelper.createLinkableText(StringUtil.toTitleCase(skill.toString()), false, false, true)).append(" xp");
 			}
@@ -542,16 +543,20 @@ public class LootTableHelper {
 		StringBuilder entryNotesBuilder = new StringBuilder();
 		StringBuilder entryBuilder = new StringBuilder("group:" + poolIndex + "; image:none; item:");
 		String looting = getLootingString(functions);
-		String poolName = entry.name.getPath();
+		String tableName = entry.name.getPath();
 
-		if (poolName.contains("\\")) {
-			poolName = StringUtil.toTitleCase(poolName.substring(poolName.indexOf("\\") + 1));
+		if (tableName.contains("\\")) {
+			tableName = StringUtil.toTitleCase(tableName.substring(tableName.indexOf("\\") + 1));
 		}
-		else if (poolName.contains("/")) {
-			poolName = StringUtil.toTitleCase(poolName.substring(poolName.indexOf("/") + 1));
+		else if (tableName.contains("/")) {
+			tableName = StringUtil.toTitleCase(tableName.substring(tableName.indexOf("/") + 1));
 		}
 
-		entryBuilder.append(" ").append(poolName).append(" Table;");
+		entryBuilder.append(" ").append(tableName);
+
+		if (!tableName.endsWith("Table"))
+			entryBuilder.append(" Table;");
+
 		entryBuilder.append(" weight:").append(entry.weight).append(";");
 		entryBuilder.append(" quantity:").append(getQuantityString(functions)).append(";");
 

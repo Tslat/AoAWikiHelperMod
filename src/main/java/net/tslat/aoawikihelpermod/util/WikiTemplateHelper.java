@@ -92,12 +92,12 @@ public class WikiTemplateHelper {
 			i++;
 		}
 
-		i = output.getLeft() > 1 ? 1 : 2;
+		i = output.getLeft() > 1 ? 3 : 2;
 
-		lines[lines.length - i++] = "output=" + (output == null ? "Air" : output.getRight());
+		lines[lines.length - i--] = "output=" + (output == null ? "Air" : output.getRight());
 
 		if (output.getLeft() > 1)
-			lines[lines.length - i++] = "amount=" + output.getLeft();
+			lines[lines.length - i--] = "amount=" + output.getLeft();
 
 		lines[lines.length - i] = "shapeless=1";
 

@@ -27,6 +27,8 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
             taskName 'Client'
 
             mods {
@@ -58,7 +60,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
     minecraft "net.minecraftforge:forge:$project.minecraft_version-$project.forge_version"
-    implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:3345448")
+    implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:3370618")
 }
 
 jar {

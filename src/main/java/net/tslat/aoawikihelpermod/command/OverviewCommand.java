@@ -294,7 +294,7 @@ public class OverviewCommand implements Command<CommandSource> {
 	}
 
 	private static int printGuns(CommandContext<CommandSource> cmd) {
-		List<Item> guns = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseGun && !(item instanceof BaseCannon) && !(item instanceof BaseSniper) && !(item instanceof BaseShotgun));
+		List<Item> guns = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseGun && !(item instanceof BaseCannon) && !(item instanceof BaseSniper) && !(item instanceof BaseShotgun) && !(item instanceof BaseThrownWeapon));
 		String fileName = "Overview - Guns";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -568,7 +568,7 @@ public class OverviewCommand implements Command<CommandSource> {
 	}
 
 	private static int printSwords(CommandContext<CommandSource> cmd) {
-		List<Item> pickaxes = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseSword);
+		List<Item> swords = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseSword);
 		String fileName = "Overview - Swords";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -578,7 +578,7 @@ public class OverviewCommand implements Command<CommandSource> {
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
 
-			for (Item item : pickaxes) {
+			for (Item item : swords) {
 				BaseSword sword = (BaseSword)item;
 				String itemName = ObjectHelper.getItemName(item);
 				float damage = (float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_DAMAGE);

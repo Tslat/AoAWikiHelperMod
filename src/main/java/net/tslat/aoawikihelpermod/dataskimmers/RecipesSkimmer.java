@@ -11,6 +11,7 @@ import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
+import net.tslat.aoa3.common.container.recipe.InfusionRecipe;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.printers.handlers.*;
 import net.tslat.aoawikihelpermod.util.printers.handlers.recipe.*;
@@ -117,6 +118,9 @@ public class RecipesSkimmer extends JsonReloadListener {
 			for (ItemStack stack : ingredient.getItems()) {
 				RECIPES_BY_INGREDIENT.put(stack.getItem().getRegistryName(), id);
 			}
+
+			if (recipe instanceof InfusionRecipe && !((InfusionRecipe)recipe).isEnchanting())
+				RECIPES_BY_INGREDIENT.put(((InfusionRecipe)recipe).getRecipeInput().getItem().getRegistryName(), id);
 		}
 
 		RECIPES_BY_OUTPUT.put(recipe.getResultItem().getItem().getRegistryName(), id);

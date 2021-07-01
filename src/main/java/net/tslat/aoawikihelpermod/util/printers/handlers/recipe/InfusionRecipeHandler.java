@@ -68,6 +68,9 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 				ingredients.add(id);
 		}
 
+		if (!isImbuing)
+			ingredients.add(ObjectHelper.getIngredientItemId(rawRecipe.get("input")));
+
 		return ingredients.isEmpty() ? Collections.emptyList() : ingredients;
 	}
 

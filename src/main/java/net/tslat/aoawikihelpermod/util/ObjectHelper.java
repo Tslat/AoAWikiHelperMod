@@ -85,8 +85,12 @@ public class ObjectHelper {
 
 		double value = instance.getValue() - attribute.getDefaultValue(); // Remove due to the way instanceless attributes are calculated
 
-		if (attribute == Attributes.ATTACK_DAMAGE)
-			value = Math.max(0, value - 0.5d);
+		if (attribute == Attributes.ATTACK_DAMAGE) {
+			value++;
+
+			if (value < 0)
+				value++;
+		}
 
 		return value;
 	}

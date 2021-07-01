@@ -17,7 +17,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.entity.base.AoATrader;
@@ -27,7 +26,6 @@ import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.MerchantTradePrintHandler;
 import org.apache.logging.log4j.Level;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -94,17 +92,12 @@ public class MerchantsSkimmer {
 					}
 
 					if (trader instanceof UndeadHeraldEntity) {
-						try {
-							Method additionalTradeMethod = ObfuscationReflectionHelper.findMethod(UndeadHeraldEntity.class, "getAdditionalBannerTrade", World.class);
+						for (ServerWorld tradeWorld : server.getAllLevels()) {
+							MerchantOffer offer = ((UndeadHeraldEntity)trader).getAdditionalBannerTrade(tradeWorld);
 
-							for (ServerWorld tradeWorld : server.getAllLevels()) {
-								MerchantOffer offer = (MerchantOffer)additionalTradeMethod.invoke(trader, tradeWorld);
-
-								if (offer != null)
-									mapTradeToIngredients(trader, 1, offer);
-							}
+							if (offer != null)
+								mapTradeToIngredients(trader, 1, offer);
 						}
-						catch (Exception ex) {}
 					}
 				}
 
