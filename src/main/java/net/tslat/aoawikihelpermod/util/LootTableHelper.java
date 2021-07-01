@@ -552,10 +552,14 @@ public class LootTableHelper {
 			tableName = StringUtil.toTitleCase(tableName.substring(tableName.indexOf("/") + 1));
 		}
 
-		entryBuilder.append(" ").append(tableName);
+		entryBuilder.append(tableName);
 
-		if (!tableName.endsWith("Table"))
+		if (!tableName.endsWith("Table")) {
 			entryBuilder.append(" Table;");
+		}
+		else {
+			entryBuilder.append(";");
+		}
 
 		entryBuilder.append(" weight:").append(entry.weight).append(";");
 		entryBuilder.append(" quantity:").append(getQuantityString(functions)).append(";");
