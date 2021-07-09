@@ -1,4 +1,4 @@
-package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
+package net.tslat.aoawikihelpermod.util.printers.handlers;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.HorizontalBlock;
@@ -60,19 +60,19 @@ public class BlockDataPrintHandler {
 			List<ResourceLocation> fluidTags = getFluidTags();
 
 			if (blockTags != null) {
-				builder.append("Block tags:<br/>");
+				builder.append("=== Block tags: ====<br/>");
 				builder.append(FormattingHelper.listToString(blockTags.stream().map((id) -> "* " + id.toString()).collect(Collectors.toList()), false));
 				builder.append("<br/><br/>");
 			}
 
 			if (itemTags != null) {
-				builder.append("Item tags:<br/>");
+				builder.append("=== Item tags: ===<br/>");
 				builder.append(FormattingHelper.listToString(itemTags.stream().map((id) -> "* " + id.toString()).collect(Collectors.toList()), false));
 				builder.append("<br/><br/>");
 			}
 
 			if (fluidTags != null) {
-				builder.append("Fluid tags:<br/>");
+				builder.append("=== Fluid tags: ===<br/>");
 				builder.append(FormattingHelper.listToString(fluidTags.stream().map((id) -> "* " + id.toString()).collect(Collectors.toList()), false));
 			}
 

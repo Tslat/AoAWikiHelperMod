@@ -22,7 +22,7 @@ import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.TablePrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.recipe.BlockDataPrintHandler;
+import net.tslat.aoawikihelpermod.util.printers.handlers.BlockDataPrintHandler;
 
 import java.io.File;
 import java.util.Arrays;

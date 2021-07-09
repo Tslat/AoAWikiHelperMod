@@ -3,7 +3,7 @@ package net.tslat.aoawikihelpermod.dataskimmers;
 import net.minecraft.block.Block;
 import net.minecraft.util.ResourceLocation;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.recipe.BlockDataPrintHandler;
+import net.tslat.aoawikihelpermod.util.printers.handlers.BlockDataPrintHandler;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
