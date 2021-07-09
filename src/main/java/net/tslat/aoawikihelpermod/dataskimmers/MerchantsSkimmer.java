@@ -68,7 +68,7 @@ public class MerchantsSkimmer {
 
 		for (EntityType<?> entityType : ObjectHelper.scrapeRegistryForEntities(type -> type.getRegistryName().getNamespace().equals(AdventOfAscension.MOD_ID))) {
 			try {
-				Entity entity = entityType.create(world, null, null, null, new BlockPos(0, 0, 0), SpawnReason.TRIGGERED, false, false);
+				Entity entity = entityType.create(world, null, null, null, new BlockPos(0, 100, 0), SpawnReason.TRIGGERED, false, false);
 
 				if (entity == null)
 					continue;
@@ -101,7 +101,7 @@ public class MerchantsSkimmer {
 					}
 				}
 
-				entity.kill();
+				entity.remove();
 			}
 			catch (Exception ex) {
 				AoAWikiHelperMod.LOGGER.log(Level.ERROR, "Unable to instantiate entity, skipping", ex);

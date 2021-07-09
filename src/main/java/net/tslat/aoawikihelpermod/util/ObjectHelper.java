@@ -16,6 +16,7 @@ import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
@@ -146,6 +147,13 @@ public class ObjectHelper {
 
 	public static String getItemName(IItemProvider item) {
 		return new ItemStack(item).getHoverName().getString();
+	}
+
+	public static String getBlockName(Block block) {
+		if (block.asItem() != Items.AIR)
+			return getItemName(block);
+
+		return StringUtil.toTitleCase(block.getRegistryName().getPath());
 	}
 
 	public static String getEnchantmentName(Enchantment enchant, int level) {

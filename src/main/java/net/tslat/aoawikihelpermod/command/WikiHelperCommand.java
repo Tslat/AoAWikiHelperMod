@@ -19,7 +19,8 @@ public class WikiHelperCommand {
 					.then(RecipeCommand.register())
 					.then(LootTableCommand.register())
 					.then(TradesCommand.register())
-					.then(StructuresCommand.register());
+					.then(StructuresCommand.register())
+					.then(BlocksCommand.register());
 		}
 		else {
 			cmd.executes(WikiHelperCommand::outdatedCommand);
