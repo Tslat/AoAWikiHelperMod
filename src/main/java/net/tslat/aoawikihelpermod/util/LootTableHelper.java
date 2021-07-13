@@ -399,9 +399,6 @@ public class LootTableHelper {
 		String looting = getLootingString(functions);
 		String itemName = ObjectHelper.getItemName(entry.item);
 
-		//if (entry.item.getRegistryName().getNamespace().equals("minecraft"))
-		//	entryBuilder.append("mcw:"); Not redirecting mcw links anymore
-
 		if (entry.item instanceof PotionItem) {
 			for (ILootFunction function : entry.functions) {
 				if (function instanceof SetNBT) {
@@ -448,11 +445,14 @@ public class LootTableHelper {
 			entryBuilder.append(" looting:").append(looting).append(";");
 
 		if (entry.quality != 0) {
+			if (entryNotesBuilder.length() > 0)
+				entryNotesBuilder.append("<br/>");
+
 			if (entry.quality > 0) {
-				entryNotesBuilder.append("<br/>").append("Chance is increased with each level of luck");
+				entryNotesBuilder.append("Chance is increased with each level of luck");
 			}
 			else {
-				entryNotesBuilder.append("<br/>").append("Chance is decreased with each level of luck");
+				entryNotesBuilder.append("Chance is decreased with each level of luck");
 			}
 		}
 
