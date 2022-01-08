@@ -9,5 +9,3 @@ The idea being that if we can have this tool automatically print out information
 It should also help with consistent formatting and editing standards.
 
 All actions in-game are handled via the **/wikihelper** command and its subcommands.
-
-The mod can be downloaded here: http://tslat.net/Hosting/Tslat-AoA/aoawikihelpermod-2.4.2.jar
