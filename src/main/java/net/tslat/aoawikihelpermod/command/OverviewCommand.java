@@ -10,22 +10,21 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.item.*;
 import net.tslat.aoa3.common.registration.AoATools;
 import net.tslat.aoa3.common.registration.AoAWeapons;
-import net.tslat.aoa3.item.misc.RuneItem;
-import net.tslat.aoa3.item.tool.axe.BaseAxe;
-import net.tslat.aoa3.item.tool.pickaxe.BasePickaxe;
-import net.tslat.aoa3.item.tool.shovel.BaseShovel;
-import net.tslat.aoa3.item.weapon.blaster.BaseBlaster;
-import net.tslat.aoa3.item.weapon.bow.BaseBow;
-import net.tslat.aoa3.item.weapon.cannon.BaseCannon;
-import net.tslat.aoa3.item.weapon.crossbow.BaseCrossbow;
-import net.tslat.aoa3.item.weapon.greatblade.BaseGreatblade;
-import net.tslat.aoa3.item.weapon.gun.BaseGun;
-import net.tslat.aoa3.item.weapon.maul.BaseMaul;
-import net.tslat.aoa3.item.weapon.shotgun.BaseShotgun;
-import net.tslat.aoa3.item.weapon.sniper.BaseSniper;
-import net.tslat.aoa3.item.weapon.staff.BaseStaff;
-import net.tslat.aoa3.item.weapon.sword.BaseSword;
-import net.tslat.aoa3.item.weapon.thrown.BaseThrownWeapon;
+import net.tslat.aoa3.object.item.tool.axe.BaseAxe;
+import net.tslat.aoa3.object.item.tool.pickaxe.BasePickaxe;
+import net.tslat.aoa3.object.item.tool.shovel.BaseShovel;
+import net.tslat.aoa3.object.item.weapon.blaster.BaseBlaster;
+import net.tslat.aoa3.object.item.weapon.bow.BaseBow;
+import net.tslat.aoa3.object.item.weapon.cannon.BaseCannon;
+import net.tslat.aoa3.object.item.weapon.crossbow.BaseCrossbow;
+import net.tslat.aoa3.object.item.weapon.greatblade.BaseGreatblade;
+import net.tslat.aoa3.object.item.weapon.gun.BaseGun;
+import net.tslat.aoa3.object.item.weapon.maul.BaseMaul;
+import net.tslat.aoa3.object.item.weapon.shotgun.BaseShotgun;
+import net.tslat.aoa3.object.item.weapon.sniper.BaseSniper;
+import net.tslat.aoa3.object.item.weapon.staff.BaseStaff;
+import net.tslat.aoa3.object.item.weapon.sword.BaseSword;
+import net.tslat.aoa3.object.item.weapon.thrown.BaseThrownWeapon;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.misc.MutableSupplier;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -203,7 +202,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String damage = FormattingHelper.healthValue((float)cannon.getDamage());
 				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(cannon, Attributes.ATTACK_SPEED) + 4), 2) + "s";
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)cannon.getFiringDelay(), 2) + "/sec";
-				String recoil = NumberUtil.roundToNthDecimalPlace(cannon.getRecoil(), 2);
+				String recoil = NumberUtil.roundToNthDecimalPlace(cannon.getRecoilModifier(), 2);
 				String durability = String.valueOf(cannon.getMaxDamage(new ItemStack(cannon)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(cannon, AoAWeapons.MINI_CANNON.get());
 
@@ -272,7 +271,7 @@ public class OverviewCommand implements Command<CommandSource> {
 			for (Item item : greatblades) {
 				BaseGreatblade greatblade = (BaseGreatblade)item;
 				String itemName = ObjectHelper.getItemName(greatblade);
-				String damage = FormattingHelper.healthValue((float)greatblade.getAttackDamage());
+				String damage = FormattingHelper.healthValue((float)greatblade.getDamage());
 				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeFromItem(greatblade, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
 				String durability = String.valueOf(greatblade.getMaxDamage(new ItemStack(greatblade)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(greatblade, AoAWeapons.ROYAL_GREATBLADE.get());
@@ -310,7 +309,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String damage = FormattingHelper.healthValue((float)gun.getDamage());
 				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(gun, Attributes.ATTACK_SPEED) + 4), 2) + "s";
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)gun.getFiringDelay(), 2) + "/sec";
-				String recoil = NumberUtil.roundToNthDecimalPlace(gun.getRecoil(), 2);
+				String recoil = NumberUtil.roundToNthDecimalPlace(gun.getRecoilModifier(), 2);
 				String durability = String.valueOf(gun.getMaxDamage(new ItemStack(gun)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(gun, AoAWeapons.SQUAD_GUN.get());
 
@@ -426,7 +425,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String pellets = String.valueOf(shotgun.getPelletCount());
 				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(shotgun, Attributes.ATTACK_SPEED) + 4), 2) + "s";
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)shotgun.getFiringDelay(), 2) + "/sec";
-				String recoil = NumberUtil.roundToNthDecimalPlace(shotgun.getRecoil(), 2);
+				String recoil = NumberUtil.roundToNthDecimalPlace(shotgun.getRecoilModifier(), 2);
 				String durability = String.valueOf(shotgun.getMaxDamage(new ItemStack(shotgun)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(shotgun, AoAWeapons.MINI_CANNON.get());
 
@@ -505,7 +504,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String damage = FormattingHelper.healthValue((float)sniper.getDamage());
 				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(sniper, Attributes.ATTACK_SPEED) + 4), 2) + "s";
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)sniper.getFiringDelay(), 2) + "/sec";
-				String recoil = NumberUtil.roundToNthDecimalPlace(sniper.getRecoil(), 2);
+				String recoil = NumberUtil.roundToNthDecimalPlace(sniper.getRecoilModifier(), 2);
 				String durability = String.valueOf(sniper.getMaxDamage(new ItemStack(sniper)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(sniper, AoAWeapons.MINI_CANNON.get());
 
@@ -546,7 +545,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(staff, AoAWeapons.MINI_CANNON.get());
 
 
-				for (Map.Entry<RuneItem, Integer> runeEntry : staff.getRunes().entrySet()) {
+				for (Map.Entry<Item, Integer> runeEntry : staff.getRunes().entrySet()) {
 					String name = ObjectHelper.getItemName(runeEntry.getKey());
 
 					runeArray.add(runeEntry.getValue() + "x " + FormattingHelper.createImageBlock(name) + " " + FormattingHelper.createLinkableText(name, runeEntry.getValue() > 1 , false, true));

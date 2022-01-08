@@ -15,17 +15,15 @@ import net.minecraft.tags.ITag;
 import net.minecraft.util.Hand;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.tslat.aoa3.common.registration.AoABlocks;
-import net.tslat.aoa3.loottable.condition.HoldingItem;
-import net.tslat.aoa3.loottable.condition.PlayerHasLevel;
-import net.tslat.aoa3.loottable.condition.PlayerHasResource;
-import net.tslat.aoa3.loottable.condition.PlayerHasTribute;
-import net.tslat.aoa3.loottable.function.EnchantSpecific;
-import net.tslat.aoa3.loottable.function.GrantSkillXp;
+import net.tslat.aoa3.object.loottable.condition.HoldingItem;
+import net.tslat.aoa3.object.loottable.condition.PlayerHasLevel;
+import net.tslat.aoa3.object.loottable.condition.PlayerHasResource;
+import net.tslat.aoa3.object.loottable.function.EnchantSpecific;
+import net.tslat.aoa3.object.loottable.function.GrantSkillXp;
+import net.tslat.aoa3.player.resource.AoAResource;
+import net.tslat.aoa3.player.skill.AoASkill;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.StringUtil;
-import net.tslat.aoa3.util.constant.Deities;
-import net.tslat.aoa3.util.constant.Resources;
-import net.tslat.aoa3.util.constant.Skills;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import org.apache.logging.log4j.Level;
 
@@ -182,22 +180,16 @@ public class LootTableHelper {
 				builder.append("This ").append(target).append(" will only roll if the tool used ").append(heldItemParticle2);
 			}
 			else if (condition instanceof PlayerHasLevel) {
-				Skills skill = ((PlayerHasLevel)condition).getSkill();
+				AoASkill skill = ((PlayerHasLevel)condition).getSkill();
 				int level = ((PlayerHasLevel)condition).getLevel();
 
-				builder.append("This ").append(target).append(" will only roll if the player has at least level ").append(level).append(" ").append(StringUtil.toTitleCase(skill.toString()));
+				builder.append("This ").append(target).append(" will only roll if the player has at least level ").append(level).append(" ").append(skill.getName().getString());
 			}
 			else if (condition instanceof PlayerHasResource) {
-				Resources resource = ((PlayerHasResource)condition).getResource();
+				AoAResource resource = ((PlayerHasResource)condition).getResource();
 				float amount = ((PlayerHasResource)condition).getAmount();
 
-				builder.append("This ").append(target).append(" will only roll if the player has at least ").append(NumberUtil.roundToNthDecimalPlace(amount, 2)).append(" ").append(FormattingHelper.createLinkableText(StringUtil.toTitleCase(resource.toString()), false, false, true));
-			}
-			else if (condition instanceof PlayerHasTribute) {
-				Deities deity = ((PlayerHasTribute)condition).getDeity();
-				int amount = ((PlayerHasTribute)condition).getAmount();
-
-				builder.append("This ").append(target).append(" will only roll if the player has at least ").append(amount).append(" tribute for ").append(FormattingHelper.createLinkableText(StringUtil.toTitleCase(deity.toString()), false, false, true));
+				builder.append("This ").append(target).append(" will only roll if the player has at least ").append(NumberUtil.roundToNthDecimalPlace(amount, 2)).append(" ").append(FormattingHelper.createLinkableText(resource.getName().getString(), false, false, true));
 			}
 			else if (condition instanceof RandomChance) {
 				float chance = ((RandomChance)condition).probability;
@@ -313,13 +305,13 @@ public class LootTableHelper {
 				builder.append("This ").append(target).append(" will have its amount capped to a specific amount");
 			}
 			else if (function instanceof GrantSkillXp) {
-				Skills skill = ((GrantSkillXp)function).getSkill();
+				AoASkill skill = ((GrantSkillXp)function).getSkill();
 				float xp = ((GrantSkillXp)function).getXp();
 
-				builder.append("This ").append(target).append(" will additionally grant ").append(NumberUtil.roundToNthDecimalPlace(xp, 2)).append(" ").append(FormattingHelper.createLinkableText(StringUtil.toTitleCase(skill.toString()), false, false, true)).append(" xp");
+				builder.append("This ").append(target).append(" will additionally grant ").append(NumberUtil.roundToNthDecimalPlace(xp, 2)).append(" ").append(FormattingHelper.createLinkableText(skill.getName().getString(), false, false, true)).append(" xp");
 			}
 			else if (function instanceof Smelt) {
-				builder.append("This ").append(target).append(" will be converted into its smelted/cooked version");
+				builder.append("This ").append(target).append(" can be converted into its smelted/cooked version on drop");
 			}
 		}
 

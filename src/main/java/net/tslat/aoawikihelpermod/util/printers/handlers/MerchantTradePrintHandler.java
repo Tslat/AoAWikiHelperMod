@@ -5,7 +5,7 @@ import net.minecraft.entity.merchant.villager.VillagerProfession;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.MerchantOffer;
-import net.tslat.aoa3.entity.base.AoATrader;
+import net.tslat.aoa3.object.entity.base.AoATrader;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
