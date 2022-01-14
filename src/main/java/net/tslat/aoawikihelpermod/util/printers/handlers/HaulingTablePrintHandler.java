@@ -45,6 +45,7 @@ public class HaulingTablePrintHandler {
 			float quality = 0;
 
 			if (entry.isJsonPrimitive()) {
+				type = "item";
 				name = ObjectHelper.getItemName(ForgeRegistries.ITEMS.getValue(new ResourceLocation(entry.getAsString()))); // TODO remove
 			}
 			else if (entry.isJsonObject()) {
