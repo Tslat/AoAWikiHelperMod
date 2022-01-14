@@ -164,7 +164,7 @@ public class ObjectHelper {
 
 	public static String getItemName(IItemProvider item) {
 		ResourceLocation itemId = item.asItem().getRegistryName();
-		String suffix = isEntity(itemId) ? " (Item)" : "";
+		String suffix = isEntity(itemId) ? " (item)" : "";
 
 		return new ItemStack(item).getHoverName().getString() + suffix;
 	}
@@ -187,7 +187,7 @@ public class ObjectHelper {
 
 	public static String getEntityName(EntityType<?> entityType) {
 		ResourceLocation id = entityType.getRegistryName();
-		String suffix = isItem(id) ? " (Entity)" : "";
+		String suffix = isItem(id) ? " (entity)" : "";
 
 		return LocaleUtil.getLocaleMessage("entity." + id.getNamespace() + "." + id.getPath()).getString() + suffix;
 	}
