@@ -1,8 +1,6 @@
 package net.tslat.aoawikihelpermod.util;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.advancements.criterion.ItemPredicate;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.PotionItem;
@@ -12,7 +10,6 @@ import net.minecraft.loot.functions.*;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.tags.ITag;
-import net.minecraft.util.Hand;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.tslat.aoa3.common.registration.AoABlocks;
 import net.tslat.aoa3.object.loottable.condition.HoldingItem;
@@ -20,17 +17,22 @@ import net.tslat.aoa3.object.loottable.condition.PlayerHasLevel;
 import net.tslat.aoa3.object.loottable.condition.PlayerHasResource;
 import net.tslat.aoa3.object.loottable.function.EnchantSpecific;
 import net.tslat.aoa3.object.loottable.function.GrantSkillXp;
-import net.tslat.aoa3.player.resource.AoAResource;
-import net.tslat.aoa3.player.skill.AoASkill;
-import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
+import net.tslat.aoawikihelpermod.util.loottable.condition.*;
+import net.tslat.aoawikihelpermod.util.loottable.function.*;
 import org.apache.logging.log4j.Level;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 public class LootTableHelper {
+	private static final HashMap<Class<? extends ILootCondition>, LootConditionHelper<? extends ILootCondition>> CONDITION_DESCRIPTORS = new HashMap<Class<? extends ILootCondition>, LootConditionHelper<? extends ILootCondition>>();
+	private static final HashMap<Class<? extends ILootFunction>, LootFunctionHelper<? extends ILootFunction>> FUNCTION_DESCRIPTORS = new HashMap<Class<? extends ILootFunction>, LootFunctionHelper<? extends ILootFunction>>();
 	private static final Field lootTablePoolsField;
 	private static final Field lootPoolEntriesField;
 	private static final Field lootPoolConditionsField;
@@ -39,6 +41,33 @@ public class LootTableHelper {
 		lootTablePoolsField = ObfuscationReflectionHelper.findField(LootTable.class, "field_186466_c");
 		lootPoolEntriesField = ObfuscationReflectionHelper.findField(LootPool.class, "field_186453_a");
 		lootPoolConditionsField = ObfuscationReflectionHelper.findField(LootPool.class, "field_186454_b");
+	}
+
+	public static void init() {
+		CONDITION_DESCRIPTORS.put(Alternative.class, new AlternativeConditionHelper());
+		CONDITION_DESCRIPTORS.put(BlockStateProperty.class, new BlockStatePropertyConditionHelper());
+		CONDITION_DESCRIPTORS.put(DamageSourceProperties.class, new DamageSourcePropertiesConditionHelper());
+		CONDITION_DESCRIPTORS.put(EntityHasProperty.class, new EntityHasPropertyConditionHelper());
+		CONDITION_DESCRIPTORS.put(EntityHasScore.class, new EntityHasScoreConditionHelper());
+		CONDITION_DESCRIPTORS.put(HoldingItem.class, new HoldingItemConditionHelper());
+		CONDITION_DESCRIPTORS.put(Inverted.class, new InvertedConditionHelper());
+		CONDITION_DESCRIPTORS.put(KilledByPlayer.class, new KilledByPlayerConditionHelper());
+		CONDITION_DESCRIPTORS.put(LocationCheck.class, new LocationCheckConditionHelper());
+		CONDITION_DESCRIPTORS.put(MatchTool.class, new MatchToolConditionHelper());
+		CONDITION_DESCRIPTORS.put(PlayerHasLevel.class, new PlayerHasLevelConditionHelper());
+		CONDITION_DESCRIPTORS.put(PlayerHasResource.class, new PlayerHasResourceConditionHelper());
+		CONDITION_DESCRIPTORS.put(RandomChance.class, new RandomChanceConditionHelper());
+		CONDITION_DESCRIPTORS.put(RandomChanceWithLooting.class, new RandomChanceWithLootingConditionHelper());
+		CONDITION_DESCRIPTORS.put(TableBonus.class, new TableBonusConditionHelper());
+		CONDITION_DESCRIPTORS.put(WeatherCheck.class, new WeatherCheckConditionHelper());
+
+		FUNCTION_DESCRIPTORS.put(ApplyBonus.class, new ApplyBonusFunctionHelper());
+		FUNCTION_DESCRIPTORS.put(EnchantWithLevels.class, new EnchantWithLevelsFunctionHelper());
+		FUNCTION_DESCRIPTORS.put(EnchantRandomly.class, new EnchantRandomlyFunctionHelper());
+		FUNCTION_DESCRIPTORS.put(EnchantSpecific.class, new EnchantSpecificFunctionHelper());
+		FUNCTION_DESCRIPTORS.put(LimitCount.class, new LimitCountFunctionHelper());
+		FUNCTION_DESCRIPTORS.put(GrantSkillXp.class, new GrantSkillXpFunctionHelper());
+		FUNCTION_DESCRIPTORS.put(Smelt.class, new SmeltFunctionHelper());
 	}
 
 	public static List<LootPool> getPools(LootTable table) {
@@ -74,258 +103,91 @@ public class LootTableHelper {
 		return ImmutableList.of();
 	}
 
-	// This could easily have its descriptions expanded, depending on how in-detail you want to go
+	@Nonnull
+	public static String getConditionDescription(ILootCondition lootCondition) {
+		if (!CONDITION_DESCRIPTORS.containsKey(lootCondition.getClass()))
+			return "";
+
+		return CONDITION_DESCRIPTORS.get(lootCondition.getClass()).getDescriptor(lootCondition);
+	}
+
+	@Nonnull
+	public static String getFunctionDescription(ILootFunction lootFunction) {
+		if (!FUNCTION_DESCRIPTORS.containsKey(lootFunction.getClass()))
+			return "";
+
+		return FUNCTION_DESCRIPTORS.get(lootFunction.getClass()).getDescriptor(lootFunction);
+	}
+
 	public static String getConditionsDescription(String target, Collection<ILootCondition> conditions) {
 		if (conditions.isEmpty())
 			return "";
 
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder("This ").append(target).append(" will only roll ");
+		int initialLength = builder.length();
+		ILootCondition[] conditionArray = conditions.toArray(new ILootCondition[0]);
 
-		for (ILootCondition condition : conditions) {
-			if (builder.length() > 0)
-				builder.append(", and<br/>");
+		for (int i = 0; i < conditionArray.length; i++) {
+			String conditionDescription = getConditionDescription(conditionArray[i]);
 
-			if (condition instanceof BlockStateProperty) {
-				builder.append("This ").append(target).append(" will only roll if the target block meets certain conditions");
-			}
-			else if (condition instanceof DamageSourceProperties) {
-				builder.append("This ").append(target).append(" will only roll if the damage source meets certain conditions");
-			}
-			else if (condition instanceof EntityHasProperty || condition instanceof EntityHasScore) {
-				LootContext.EntityTarget entityTarget = condition instanceof EntityHasProperty ? ((EntityHasProperty)condition).entityTarget : ((EntityHasScore)condition).entityTarget;
+			if (conditionDescription.isEmpty())
+				continue;
 
-				builder.append("This ").append(target);
-
-				switch (entityTarget) {
-					case THIS:
-						builder.append(" will only roll if the target entity meets certain conditions");
-						break;
-					case KILLER:
-						builder.append(" will only roll if the attacking entity meets certain conditions");
-						break;
-					case DIRECT_KILLER:
-						builder.append(" will only roll if the directly killing entity meets certain conditions");
-						break;
-					case KILLER_PLAYER:
-						builder.append(" will only roll if the killer is a player, and meets certain conditions");
-						break;
-					default:
-						break;
-				}
-			}
-			else if (condition instanceof HoldingItem) {
-				builder.append("This ").append(target);
-
-				HoldingItem holdingItemCondition = (HoldingItem)condition;
-				ItemPredicate predicate = holdingItemCondition.getPredicate();
-				LootContext.EntityTarget entityTarget = holdingItemCondition.getTarget();
-				Hand hand = holdingItemCondition.getHand();
-
-				String handParticle = hand == null ? "held item" : (hand == Hand.MAIN_HAND ? "mainhand item" : "offhand item");
-				String heldItemParticle;
-
-				if (predicate.item != null) {
-					heldItemParticle = "is " + FormattingHelper.createLinkableItem(predicate.item, false, true);
-				}
-				else if (predicate.tag instanceof ITag.INamedTag) {
-					heldItemParticle = "is anything tagged as " + FormattingHelper.createLinkableTag(((ITag.INamedTag<?>)predicate.tag).getName().toString());
+			if (i > 0) {
+				if (builder.charAt(builder.length() - 1) == '\n') {
+					builder.append("and ");
 				}
 				else {
-					heldItemParticle = "meets certain conditions";
-				}
-
-				switch (entityTarget) {
-					case THIS:
-						builder.append(" will only roll if the target entity's ").append(handParticle).append(" ").append(heldItemParticle);
-						break;
-					case KILLER:
-						builder.append(" will only roll if the attacking entity's ").append(handParticle).append(" ").append(heldItemParticle);
-						break;
-					case DIRECT_KILLER:
-						builder.append(" will only roll if the directly killing entity's ").append(handParticle).append(" ").append(heldItemParticle);
-						break;
-					case KILLER_PLAYER:
-						builder.append(" will only roll if the killer is a player, and if their ").append(handParticle).append(" ").append(heldItemParticle);
-						break;
-					default:
-						break;
+					builder.append(", and<br/>");
 				}
 			}
-			else if (condition instanceof Inverted) {
-				String conditionLine = getConditionsDescription(target, Collections.singletonList(((Inverted)condition).term)).replace(".", "");
 
-				builder.append(conditionLine.replace("will only roll", "won't roll"));
-			}
-			else if (condition instanceof KilledByPlayer) {
-				builder.append("This ").append(target).append(" will only roll if the target was killed by a player");
-			}
-			else if (condition instanceof LocationCheck) {
-				builder.append("This ").append(target).append(" will only roll if the source of the drops is from a specific position");
-			}
-			else if (condition instanceof MatchTool) {
-				ItemPredicate predicate = ((MatchTool)condition).predicate;
-
-				String heldItemParticle2;
-
-				if (predicate.item != null) {
-					heldItemParticle2 = "is " + FormattingHelper.createLinkableItem(predicate.item, false, true);
-				}
-				else if (predicate.tag instanceof ITag.INamedTag) {
-					heldItemParticle2 = "is anything tagged as " + FormattingHelper.createLinkableTag(((ITag.INamedTag<?>)predicate.tag).getName().toString());
-				}
-				else {
-					heldItemParticle2 = "meets certain conditions";
-				}
-
-				builder.append("This ").append(target).append(" will only roll if the tool used ").append(heldItemParticle2);
-			}
-			else if (condition instanceof PlayerHasLevel) {
-				AoASkill skill = ((PlayerHasLevel)condition).getSkill();
-				int level = ((PlayerHasLevel)condition).getLevel();
-
-				builder.append("This ").append(target).append(" will only roll if the player has at least level ").append(level).append(" ").append(skill.getName().getString());
-			}
-			else if (condition instanceof PlayerHasResource) {
-				AoAResource resource = ((PlayerHasResource)condition).getResource();
-				float amount = ((PlayerHasResource)condition).getAmount();
-
-				builder.append("This ").append(target).append(" will only roll if the player has at least ").append(NumberUtil.roundToNthDecimalPlace(amount, 2)).append(" ").append(FormattingHelper.createLinkableText(resource.getName().getString(), false, false, true));
-			}
-			else if (condition instanceof RandomChance) {
-				float chance = ((RandomChance)condition).probability;
-
-				builder.append("This ").append(target).append(" will only roll if a fixed random chance check is passed, with a chance of ").append(NumberUtil.roundToNthDecimalPlace(chance, 3)).append("%");
-			}
-			else if (condition instanceof RandomChanceWithLooting) {
-				float chance = ((RandomChanceWithLooting)condition).percent;
-				float lootingMod = ((RandomChanceWithLooting)condition).lootingMultiplier;
-
-				builder.append("This ").append(target).append(" will only roll if a fixed random chance check is passed, with a chance of ").append(NumberUtil.roundToNthDecimalPlace(chance, 3)).append("%")
-						.append(", with an extra ").append(NumberUtil.roundToNthDecimalPlace(chance, 3)).append(" per looting level");
-			}
-			else if (condition instanceof TableBonus) {
-				Enchantment enchant = ((TableBonus)condition).enchantment;
-
-				builder.append("This ").append(target).append(" will only roll if a chance check is passed, depending on the level of ").append(FormattingHelper.createLinkableText(ObjectHelper.getEnchantmentName(enchant, 0), false, enchant.getRegistryName().getNamespace().equals("minecraft"), true)).append(" used");
-			}
-			else if (condition instanceof WeatherCheck) {
-				Boolean isRaining = ((WeatherCheck)condition).isRaining;
-				Boolean isThundering = ((WeatherCheck)condition).isThundering;
-
-				if (isRaining != null || isThundering != null) {
-					builder.append("This ").append(target).append(" will only roll if ");
-
-					if (isRaining != null) {
-						if (isRaining) {
-							builder.append("it is raining");
-						}
-						else {
-							builder.append("it isn't raining");
-						}
-					}
-
-					if (isThundering != null) {
-						if (isThundering) {
-							if (isRaining != null) {
-								builder.append(", and it is thundering");
-							}
-							else {
-								builder.append("is it thundering");
-							}
-						}
-						else {
-							if (isRaining != null) {
-								builder.append(", and it isn't thundering");
-							}
-							else {
-								builder.append("it isn't thundering");
-							}
-						}
-					}
-				}
-			}
+			builder.append(conditionDescription);
 		}
 
-		if (builder.length() > 0)
+		if (builder.length() > initialLength) {
 			builder.append(".");
-
-		String[] line = builder.toString().split("<br/>");
-		StringBuilder reBuilder = new StringBuilder(line[0]);
-
-		for (int i = 1; i < line.length; i++) {
-			reBuilder.append("<br/>").append("and if").append(line[i].substring(line[i].indexOf("will only roll if") + 17));
+		}
+		else {
+			builder.setLength(0);
 		}
 
-		return reBuilder.toString();
+		return builder.toString();
 	}
 
-	// This could easily have its descriptions expanded, depending on how in-detail you want to go
 	public static String getFunctionsDescription(String target, Collection<ILootFunction> functions) {
 		if (functions.isEmpty())
 			return "";
 
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder("This ").append(target).append(" ");
+		int initialLength = builder.length();
+		ILootFunction[] functionsArray = functions.toArray(new ILootFunction[0]);
 
-		for (ILootFunction function : functions) {
-			if (function instanceof SetCount || function instanceof LootingEnchantBonus) {
+		for (int i = 0; i < functionsArray.length; i++) {
+			ILootFunction function = functionsArray[i];
+
+			if (function instanceof SetCount || function instanceof LootingEnchantBonus)
 				continue;
-			}
 
-			if (builder.length() > 0)
+			String functionDescription = getFunctionDescription(function);
+
+			if (functionDescription.isEmpty())
+				continue;
+
+			if (i > 0)
 				builder.append(", and<br/>");
 
-			if (function instanceof ApplyBonus) {
-				Enchantment enchant = ((ApplyBonus)function).enchantment;
-
-				builder.append("This ").append(target).append(" will vary in quantity depending on the level of ").append(FormattingHelper.createLinkableText(ObjectHelper.getEnchantmentName(enchant, 0), false, false, true)).append(" used");
-			}
-			else if (function instanceof EnchantWithLevels) {
-				builder.append("This ").append(target).append(" will be enchanted with random enchantments");
-			}
-			else if (function instanceof EnchantRandomly) {
-				ArrayList<String> enchants = new ArrayList<String>();
-
-				for (Enchantment enchant : ((EnchantRandomly)function).enchantments) {
-					enchants.add(ObjectHelper.getEnchantmentName(enchant, 0));
-				}
-
-				builder.append("This ").append(target).append(" will be enchanted with:<br/>").append(FormattingHelper.listToString(enchants, false));
-			}
-			else if (function instanceof EnchantSpecific) {
-				Map<Enchantment, Integer> enchants = ((EnchantSpecific)function).getEnchantments();
-				ArrayList<String> enchantNames = new ArrayList<String>();
-
-				for (Map.Entry<Enchantment, Integer> enchant : enchants.entrySet()) {
-					enchantNames.add(ObjectHelper.getEnchantmentName(enchant.getKey(), enchant.getValue()));
-				}
-
-				builder.append("This ").append(target).append(" will be enchanted with:<br/>").append(FormattingHelper.listToString(enchantNames, false));
-			}
-			else if (function instanceof LimitCount) {
-				builder.append("This ").append(target).append(" will have its amount capped to a specific amount");
-			}
-			else if (function instanceof GrantSkillXp) {
-				AoASkill skill = ((GrantSkillXp)function).getSkill();
-				float xp = ((GrantSkillXp)function).getXp();
-
-				builder.append("This ").append(target).append(" will additionally grant ").append(NumberUtil.roundToNthDecimalPlace(xp, 2)).append(" ").append(FormattingHelper.createLinkableText(skill.getName().getString(), false, false, true)).append(" xp");
-			}
-			else if (function instanceof Smelt) {
-				builder.append("This ").append(target).append(" can be converted into its smelted/cooked version on drop");
-			}
+			builder.append(functionDescription);
 		}
 
-		if (builder.length() > 0)
+		if (builder.length() > initialLength) {
 			builder.append(".");
-
-		String[] line = builder.toString().split(", and<br/>");
-		StringBuilder reBuilder = new StringBuilder(line[0]);
-
-		for (int i = 1; i < line.length; i++) {
-			reBuilder.append("<br/>").append("and will").append(line[i].substring(line[i].indexOf("This " + target + " will") + 10 + target.length()));
+		}
+		else {
+			builder.setLength(0);
 		}
 
-		return reBuilder.toString();
+		return builder.toString();
 	}
 
 	public static String getLootEntryLine(int poolIndex, LootEntry entry, List<ILootCondition> conditions) {
@@ -479,9 +341,6 @@ public class LootTableHelper {
 		}
 		else {
 			Item item = tagItems.get(0);
-
-			//if (item.getRegistryName().getNamespace().equals("minecraft"))
-			//	entryBuilder.append("mcw:"); Not redirecting mcw links anymore
 
 			entryBuilder.append(ObjectHelper.getItemName(item)).append(";");
 		}

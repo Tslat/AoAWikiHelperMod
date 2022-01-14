@@ -12,7 +12,7 @@ public class BlockDataSkimmer {
 	private static final HashMap<ResourceLocation, BlockDataPrintHandler> DATA_BY_BLOCK = new HashMap<ResourceLocation, BlockDataPrintHandler>();
 
 	public static void init() {
-		for (Block block : ObjectHelper.scrapeRegistryForBlocks((bl) -> true)) {
+		for (Block block : ObjectHelper.scrapeRegistryForBlocks(bl -> true)) {
 			DATA_BY_BLOCK.put(block.getRegistryName(), new BlockDataPrintHandler(block));
 		}
 	}

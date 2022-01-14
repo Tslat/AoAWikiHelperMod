@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
@@ -19,12 +20,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.JSONUtils;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoa3.advent.AdventOfAscension;
+import net.tslat.aoa3.util.LocaleUtil;
 import net.tslat.aoa3.util.StringUtil;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -145,8 +150,23 @@ public class ObjectHelper {
 		}
 	}
 
+	public static boolean isItem(ResourceLocation id) {
+		return ForgeRegistries.ITEMS.getValue(id) != Items.AIR;
+	}
+
+	public static boolean isBlock(ResourceLocation id) {
+		return ForgeRegistries.BLOCKS.getValue(id) != Blocks.AIR;
+	}
+
+	public static boolean isEntity(ResourceLocation id) {
+		return ForgeRegistries.ENTITIES.getValue(id) != EntityType.PIG;
+	}
+
 	public static String getItemName(IItemProvider item) {
-		return new ItemStack(item).getHoverName().getString();
+		ResourceLocation itemId = item.asItem().getRegistryName();
+		String suffix = isEntity(itemId) ? " (Item)" : "";
+
+		return new ItemStack(item).getHoverName().getString() + suffix;
 	}
 
 	public static String getBlockName(Block block) {
@@ -154,6 +174,26 @@ public class ObjectHelper {
 			return getItemName(block);
 
 		return StringUtil.toTitleCase(block.getRegistryName().getPath());
+	}
+
+	public static String getBiomeName(RegistryKey<Biome> biome) {
+		ResourceLocation biomeId = biome.location();
+
+		if (biomeId.getNamespace().equals(AdventOfAscension.MOD_ID))
+			return StringUtil.toTitleCase(biomeId.getPath());
+
+		return biomeId.toString();
+	}
+
+	public static String getEntityName(EntityType<?> entityType) {
+		ResourceLocation id = entityType.getRegistryName();
+		String suffix = isItem(id) ? " (Entity)" : "";
+
+		return LocaleUtil.getLocaleMessage("entity." + id.getNamespace() + "." + id.getPath()).getString() + suffix;
+	}
+
+	public static String getBiomeCategoryName(Biome.Category category) {
+		return StringUtil.toTitleCase(category.getName());
 	}
 
 	public static String getEnchantmentName(Enchantment enchant, int level) {

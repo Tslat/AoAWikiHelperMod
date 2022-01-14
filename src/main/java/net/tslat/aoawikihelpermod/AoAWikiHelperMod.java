@@ -19,6 +19,7 @@ import net.minecraftforge.fml.loading.FileUtils;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.dataskimmers.*;
+import net.tslat.aoawikihelpermod.util.LootTableHelper;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,7 +32,7 @@ import static net.tslat.aoawikihelpermod.AoAWikiHelperMod.MOD_ID;
 
 @Mod(MOD_ID)
 public class AoAWikiHelperMod {
-	public static final String VERSION = "2.4.2";
+	public static final String VERSION = "2.5";
 	public static final String MOD_ID = "aoawikihelpermod";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
@@ -60,13 +61,16 @@ public class AoAWikiHelperMod {
 	public void registerRecipeSkimmer(AddReloadListenerEvent ev) {
 		ev.addListener(new RecipesSkimmer());
 		ev.addListener(new LootTablesSkimmer());
+		ev.addListener(new HaulingFishTableSkimmer());
 	}
 
 	@SubscribeEvent
 	public void serverStarted(FMLServerStartedEvent ev) {
-		MerchantsSkimmer.init(ev.getServer());
-		ItemMiscUsageSkimmer.init();
 		BlockDataSkimmer.init();
+		ItemDataSkimmer.init();
+		MerchantsSkimmer.init(ev.getServer());
+		LootTableHelper.init();
+		ItemMiscUsageSkimmer.init();
 	}
 
 	@SubscribeEvent

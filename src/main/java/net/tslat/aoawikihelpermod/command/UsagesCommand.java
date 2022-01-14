@@ -8,12 +8,11 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.ItemArgument;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.tslat.aoa3.util.misc.MutableSupplier;
-import net.tslat.aoawikihelpermod.dataskimmers.MerchantsSkimmer;
-import net.tslat.aoawikihelpermod.dataskimmers.RecipesSkimmer;
-import net.tslat.aoawikihelpermod.dataskimmers.ItemMiscUsageSkimmer;
+import net.tslat.aoawikihelpermod.dataskimmers.*;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
@@ -105,7 +104,7 @@ public class UsagesCommand implements Command<CommandSource> {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		String repairInfo = ItemMiscUsageSkimmer.getRepairDescription(item.getRegistryName());
+		String repairInfo = ItemDataSkimmer.get(item).getRepairIngredientPrintout();
 
 		if (repairInfo != null) {
 			String fileName = "Usages - " + itemName + " - Repairing";
@@ -128,7 +127,7 @@ public class UsagesCommand implements Command<CommandSource> {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		String fuelInfo = ItemMiscUsageSkimmer.getFuelDescription(item.getRegistryName());
+		String fuelInfo = ItemDataSkimmer.get(item).getFuelPrintout();
 
 		if (fuelInfo != null) {
 			String fileName = "Usages - " + itemName + " - Fuels";
@@ -151,7 +150,7 @@ public class UsagesCommand implements Command<CommandSource> {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		String strippingInfo = ItemMiscUsageSkimmer.getStrippableBlockDescription(item.getRegistryName());
+		String strippingInfo = item instanceof BlockItem ? BlockDataSkimmer.get(((BlockItem)item).getBlock()).getStrippedBlockDescription() : null;
 
 		if (strippingInfo != null) {
 			String fileName = "Usages - " + itemName + " - Log Stripping";
@@ -160,6 +159,29 @@ public class UsagesCommand implements Command<CommandSource> {
 				printHelper.withClipboardOutput(clipboardContent);
 				printHelper.write(strippingInfo);
 
+				outputFile = printHelper.getOutputFile();
+			}
+
+			WikiHelperCommand.success(commandSource, "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+
+			return true;
+		}
+
+		return false;
+	}
+
+	private static boolean checkComposterUsages(Item item, CommandSource commandSource) {
+		String itemName = ObjectHelper.getItemName(item);
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+		File outputFile;
+		String composterInfo = ItemDataSkimmer.get(item).getComposterPrintout();
+
+		if (composterInfo != null) {
+			String fileName = "Usages - " + itemName + " - Composter";
+
+			try (PrintHelper printHelper = PrintHelper.open(fileName)) {
+				printHelper.withClipboardOutput(clipboardContent);
+				printHelper.write(composterInfo);
 				outputFile = printHelper.getOutputFile();
 			}
 
@@ -208,6 +230,7 @@ public class UsagesCommand implements Command<CommandSource> {
 		success |= checkTradeUsages(item, source);
 		success |= checkFuelUsages(item, source);
 		success |= checkLogStrippingUsages(item, source);
+		success |= checkComposterUsages(item, source);
 
 		// TODO further usages
 

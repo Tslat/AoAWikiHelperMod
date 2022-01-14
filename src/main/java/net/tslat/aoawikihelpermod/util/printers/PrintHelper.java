@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.function.Function;
 
 public class PrintHelper implements AutoCloseable {
-	private static File configDir = null;
+	public static File configDir = null;
 
 	private final PrintWriter writer;
 	private final File outputFile;

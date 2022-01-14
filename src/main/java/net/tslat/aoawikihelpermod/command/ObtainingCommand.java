@@ -8,19 +8,15 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.ItemArgument;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.tslat.aoa3.util.misc.MutableSupplier;
-import net.tslat.aoawikihelpermod.dataskimmers.ItemMiscUsageSkimmer;
-import net.tslat.aoawikihelpermod.dataskimmers.LootTablesSkimmer;
-import net.tslat.aoawikihelpermod.dataskimmers.MerchantsSkimmer;
-import net.tslat.aoawikihelpermod.dataskimmers.RecipesSkimmer;
+import net.tslat.aoawikihelpermod.dataskimmers.*;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
-import net.tslat.aoawikihelpermod.util.printers.LootTablePrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.RecipePrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.TradesPrintHelper;
+import net.tslat.aoawikihelpermod.util.printers.*;
+import net.tslat.aoawikihelpermod.util.printers.handlers.HaulingTablePrintHandler;
 import net.tslat.aoawikihelpermod.util.printers.handlers.MerchantTradePrintHandler;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
@@ -131,7 +127,7 @@ public class ObtainingCommand implements Command<CommandSource> {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		String stripInfo = ItemMiscUsageSkimmer.getStrippedBlockDescription(item.getRegistryName());
+		String stripInfo = item instanceof BlockItem ? BlockDataSkimmer.get(((BlockItem)item).getBlock()).getStrippableBlockDescription() : null;
 
 		if (stripInfo != null) {
 			String fileName = "Obtaining - " + itemName + " - Log Stripping";
@@ -139,6 +135,42 @@ public class ObtainingCommand implements Command<CommandSource> {
 			try (PrintHelper printHelper = PrintHelper.open(fileName)) {
 				printHelper.withClipboardOutput(clipboardContent);
 				printHelper.write(stripInfo);
+
+				outputFile = printHelper.getOutputFile();
+			}
+
+			WikiHelperCommand.success(commandSource, "Obtaining", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+
+			return true;
+		}
+
+		return false;
+	}
+
+	private static boolean checkHaulingSources(Item item, CommandSource commandSource) {
+		String itemName = ObjectHelper.getItemName(item);
+		File outputFile;
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+		String fileName = "Obtaining - " + itemName + " - Hauling";
+		Collection<ResourceLocation> haulingTables = HaulingFishTableSkimmer.TABLES_BY_LOOT.get(item.getRegistryName());
+
+		if (!haulingTables.isEmpty()) {
+			ArrayList<HaulingTablePrintHandler> sortedTables = new ArrayList<HaulingTablePrintHandler>();
+
+			for (ResourceLocation id : haulingTables) {
+				HaulingTablePrintHandler handler = HaulingFishTableSkimmer.TABLE_PRINTERS.get(id);
+
+				sortedTables.add(handler);
+			}
+
+			sortedTables.sort(Comparator.comparing(handler -> handler.getTableId().toString()));
+
+			try (HaulingTablePrintHelper printHelper = HaulingTablePrintHelper.open(fileName, false)) {
+				printHelper.withClipboardOutput(clipboardContent);
+
+				for (ResourceLocation id : haulingTables) {
+					printHelper.printTable(id, HaulingFishTableSkimmer.TABLE_PRINTERS.get(id));
+				}
 
 				outputFile = printHelper.getOutputFile();
 			}
@@ -190,6 +222,7 @@ public class ObtainingCommand implements Command<CommandSource> {
 		success |= checkLootTableSources(item, source);
 		success |= checkTradeSources(item, source);
 		success |= checkLogStrippingSources(item, source);
+		success |= checkHaulingSources(item, source);
 
 		// TODO further usages
 

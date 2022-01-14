@@ -48,7 +48,7 @@ public class TEChillerRecipeHandler extends RecipePrintHandler {
 	@Override
 	public List<ResourceLocation> getIngredientsForLookup() {
 		if (this.rawRecipe.has("input")) {
-			ResourceLocation input = ObjectHelper.getIngredientItemId(this.rawRecipe.get("input"));
+			ResourceLocation input = ObjectHelper.getIngredientItemId(this.rawRecipe.get("ingredient"));
 
 			if (input == null)
 				return Collections.emptyList();

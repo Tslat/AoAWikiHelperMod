@@ -1,8 +1,10 @@
 package net.tslat.aoawikihelpermod.util.printers.handlers;
 
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.block.HorizontalBlock;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.item.AxeItem;
 import net.minecraft.item.Items;
 import net.minecraft.state.Property;
 import net.minecraft.state.properties.BlockStateProperties;
@@ -15,6 +17,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class BlockDataPrintHandler {
@@ -22,6 +25,7 @@ public class BlockDataPrintHandler {
 
 	private String[][] statePrintout = null;
 	private String[] tagsPrintout = null;
+	private Pair<String, String> logStripPrintout = null;
 
 	public BlockDataPrintHandler(Block block) {
 		this.block = block;
@@ -85,6 +89,74 @@ public class BlockDataPrintHandler {
 		}
 
 		return this.tagsPrintout;
+	}
+
+	@Nullable
+	public String getStrippableBlockDescription() {
+		if (logStripPrintout != null)
+			return logStripPrintout.getFirst();
+
+		prepLogStripDescription();
+
+		return logStripPrintout.getFirst();
+	}
+
+	@Nullable
+	public String getStrippedBlockDescription() {
+		if (logStripPrintout != null)
+			return logStripPrintout.getSecond();
+
+		prepLogStripDescription();
+
+		return logStripPrintout.getSecond();
+	}
+
+	public void prepLogStripDescription() {
+		ArrayList<Block> strippableBlocks = new ArrayList<Block>(1);
+		Block stripsTo = AxeItem.STRIPABLES.get(this.block);
+
+		for (Map.Entry<Block, Block> entry : AxeItem.STRIPABLES.entrySet()) {
+			if (entry.getValue() == this.block)
+				strippableBlocks.add(entry.getKey());
+		}
+
+		String strippableDescription = null;
+		String strippedDescription = null;
+
+		if (!strippableBlocks.isEmpty()) {
+			StringBuilder builder = new StringBuilder();
+
+			if (strippableBlocks.size() == 1) {
+				builder.append(block);
+				builder.append(" can be made by stripping a ");
+				builder.append(FormattingHelper.createLinkableText(strippableBlocks.get(0).getName().getString(), false, strippableBlocks.get(0).getRegistryName().getNamespace().equals("minecraft"), true));
+				builder.append(" by using an axe on it");
+			}
+			else {
+				builder.append(block);
+				builder.append(" can be made by stripping any of the following blocks by using an axe on them:\n");
+
+				for (Block strippableBlock : strippableBlocks) {
+					builder.append("* ");
+					builder.append(FormattingHelper.createLinkableText(strippableBlock.getName().getString(), false, strippableBlock.getRegistryName().getNamespace().equals("minecraft"), true));
+				}
+			}
+
+			strippableDescription = builder.toString();
+		}
+
+		if (stripsTo != null) {
+			StringBuilder builder = new StringBuilder();
+
+			builder.append(FormattingHelper.lazyPluralise(block.getName().getString()));
+			builder.append(" can be stripped into a ");
+			builder.append(FormattingHelper.createLinkableText(stripsTo.getName().getString(), false, stripsTo.getRegistryName().getNamespace().equals("minecraft"), true));
+			builder.append(" by using an axe on it.");
+
+			strippedDescription = builder.toString();
+		}
+
+		this.logStripPrintout = Pair.of(strippableDescription, strippedDescription);
 	}
 
 	public boolean hasHasStateProperties() {

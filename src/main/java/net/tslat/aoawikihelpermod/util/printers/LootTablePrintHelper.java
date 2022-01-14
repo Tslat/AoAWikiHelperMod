@@ -65,9 +65,4 @@ public class LootTablePrintHelper extends PrintHelper {
 
 		tableCount++;
 	}
-
-	@Override
-	public void close() {
-		super.close();
-	}
 }

@@ -185,8 +185,6 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 				return "Guns,<br/>Archerguns,<br/>Shotguns";
 			case "aoa3:control":
 				return "Guns,<br/>Archerguns,<br/>Shotguns,<br/>Snipers,<br/>Cannons";
-			case "aoa3:crush":
-				return "Mauls";
 			case "aoa3:form":
 				return "Shotguns";
 			case "aoa3:greed":
@@ -222,7 +220,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 			case "minecraft:fire_aspect":
 			case "minecraft:looting":
 			case "minecraft:sweeping":
-				return "Swords,<br/>Axes";
+				return "Swords,<br/>Axes,<br/>Greatblades";
 			case "minecraft:efficiency":
 			case "minecraft:silk_touch":
 			case "minecraft:fortune":

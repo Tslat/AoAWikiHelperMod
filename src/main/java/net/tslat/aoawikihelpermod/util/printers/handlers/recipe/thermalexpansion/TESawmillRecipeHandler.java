@@ -47,7 +47,7 @@ public class TESawmillRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public List<ResourceLocation> getIngredientsForLookup() {
-		return Collections.singletonList(ObjectHelper.getIngredientItemId(this.rawRecipe.get("input")));
+		return Collections.singletonList(ObjectHelper.getIngredientItemId(this.rawRecipe.get("ingredient")));
 	}
 
 	@Override

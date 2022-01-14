@@ -33,7 +33,7 @@ public class LootTableCommand implements Command<CommandSource> {
 
 		builder.then(Commands.literal("table").then(Commands.argument("loot_table", ResourceLocationArgument.id()).suggests(SUGGESTION_PROVIDER).executes(cmd -> printTable(cmd, ResourceLocationArgument.getId(cmd, "loot_table")))));
 		builder.then(Commands.literal("entity").then(Commands.argument("entity", ResourceLocationArgument.id()).suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(LootTableCommand::printEntityTable)));
-		builder.then(Commands.literal("block").then(Commands.argument("block", ResourceLocationArgument.id()).executes(LootTableCommand::printBlockTable)));
+		builder.then(Commands.literal("block").then(Commands.argument("block", BlocksCommand.BlockArgument.block()).executes(LootTableCommand::printBlockTable)));
 
 		return builder;
 	}
@@ -43,15 +43,9 @@ public class LootTableCommand implements Command<CommandSource> {
 	}
 
 	private static int printBlockTable(CommandContext<CommandSource> cmd) {
-		ResourceLocation id = ResourceLocationArgument.getId(cmd, "block");
-		Block block = ForgeRegistries.BLOCKS.getValue(id);
+		Block block = BlocksCommand.BlockArgument.getBlock(cmd, "block").getBlock();
 
-		if (block == null) {
-			WikiHelperCommand.warn(cmd.getSource(), "LootTable", "Invalid block ID '" + id + "'");
-
-			return 1;
-		}
-		else if (block.getLootTable() == null) {
+		if (block.getLootTable() == null) {
 			WikiHelperCommand.warn(cmd.getSource(), "LootTable", "Block '" + block.getRegistryName() + "' has no attached loot table");
 
 			return 1;
