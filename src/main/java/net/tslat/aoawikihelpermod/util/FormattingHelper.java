@@ -10,12 +10,12 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.StringUtil;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.List;
 
@@ -96,17 +96,22 @@ public class FormattingHelper {
 		return !text.endsWith("s") && !text.endsWith("y") ? text.endsWith("x") || text.endsWith("o") ? text + "es" : text + "s" : text;
 	}
 
-	public static IFormattableTextComponent generateResultMessage(File file, String linkName, String clipboardContent) {
+	public static IFormattableTextComponent generateResultMessage(File file, String linkName, @Nullable String clipboardContent) {
 		String fileUrl = file.getAbsolutePath().replace("\\", "/");
-
-		return new TranslationTextComponent("Generated data file: ")
+		IFormattableTextComponent component = new StringTextComponent("Generated data file: ")
 				.append(new StringTextComponent(linkName).withStyle(style -> style.withColor(TextFormatting.BLUE)
 						.setUnderlined(true)
-						.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, fileUrl))))
-				.append(new StringTextComponent(" "))
-				.append(new StringTextComponent("(Copy)").withStyle(style -> style.withColor(TextFormatting.BLUE)
-						.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, clipboardContent))
-						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Copy contents of file to clipboard")))));
+						.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, fileUrl))));
+
+		if (clipboardContent != null) {
+				component
+						.append(new StringTextComponent(" "))
+						.append(new StringTextComponent("(Copy)").withStyle(style -> style.withColor(TextFormatting.BLUE)
+								.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, clipboardContent))
+								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Copy contents of file to clipboard")))));
+		}
+
+		return component;
 	}
 
 	public static String listToString(List<String> list, boolean nativeLineBreaks) {

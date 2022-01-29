@@ -48,7 +48,7 @@ public class WikiHelperCommand {
 	}
 
 	protected static void error(CommandSource source, String subcommand, IFormattableTextComponent message, ITextComponent... args) {
-		source.sendFailure(getCmdPrefix(subcommand).append(message.setStyle(Style.EMPTY.applyFormat(TextFormatting.DARK_RED))));
+		source.sendFailure(getCmdPrefix(subcommand).append(message.withStyle(TextFormatting.DARK_RED)));
 	}
 
 	protected static void info(CommandSource source, String subcommand, String message, ITextComponent... args) {
@@ -56,7 +56,7 @@ public class WikiHelperCommand {
 	}
 
 	protected static void info(CommandSource source, String subcommand, IFormattableTextComponent message, ITextComponent... args) {
-		source.sendSuccess(getCmdPrefix(subcommand).append(message.setStyle(Style.EMPTY.applyFormat(TextFormatting.GRAY))), true);
+		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(TextFormatting.GRAY)), true);
 	}
 
 	protected static void success(CommandSource source, String subcommand, String message, ITextComponent... args) {
@@ -64,7 +64,7 @@ public class WikiHelperCommand {
 	}
 
 	protected static void success(CommandSource source, String subcommand, IFormattableTextComponent message) {
-		source.sendSuccess(getCmdPrefix(subcommand).append(message.setStyle(Style.EMPTY.applyFormat(TextFormatting.GREEN))), true);
+		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(TextFormatting.GREEN)), true);
 	}
 
 	protected static void warn(CommandSource source, String subcommand, String message, ITextComponent... args) {
@@ -72,6 +72,6 @@ public class WikiHelperCommand {
 	}
 
 	protected static void warn(CommandSource source, String subcommand, IFormattableTextComponent message) {
-		source.sendSuccess(getCmdPrefix(subcommand).append(message.setStyle(Style.EMPTY.applyFormat(TextFormatting.RED))), true);
+		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(TextFormatting.RED)), true);
 	}
 }

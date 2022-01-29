@@ -1,11 +1,11 @@
 package net.tslat.aoawikihelpermod.command;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
@@ -16,7 +16,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.tslat.aoawikihelpermod.screen.IsoRenderScreen;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoawikihelpermod.render.EntityIsoPrinter;
+import net.tslat.aoawikihelpermod.util.FormattingHelper;
 
 public class IsometricCommand implements Command<CommandSource> {
 	private static final IsometricCommand CMD = new IsometricCommand();
@@ -25,7 +27,8 @@ public class IsometricCommand implements Command<CommandSource> {
 	public static ArgumentBuilder<CommandSource, ?> register() {
 		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("iso").executes(CMD);
 
-		builder.then(Commands.argument("entity_id", ResourceLocationArgument.id()).suggests(ENTITY_ID_SUGGESTIONS).executes(IsometricCommand::printEntityIso));
+		builder.then(Commands.argument("entity_id", ResourceLocationArgument.id()).suggests(ENTITY_ID_SUGGESTIONS).executes(IsometricCommand::printEntityIso)
+				.then(Commands.argument("image_size", IntegerArgumentType.integer()).executes(context -> IsometricCommand.printEntityIso(context, IntegerArgumentType.getInteger(context, "image_size")))));
 
 		return builder;
 	}
@@ -41,10 +44,31 @@ public class IsometricCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printEntityIso(CommandContext<CommandSource> cmd) {
-		ResourceLocation entityId = ResourceLocationArgument.getId(cmd, "entity_id");
+	private static int printEntityIso(CommandContext<CommandSource> context) {
+		return printEntityIso(context, 0);
+	}
 
-		Minecraft.getInstance().setScreen(new IsoRenderScreen());
+	private static int printEntityIso(CommandContext<CommandSource> context, int imageSize) {
+		EntityIsoPrinter.queuePrintEntity(() -> {
+			ResourceLocation entityId = ResourceLocationArgument.getId(context, "entity_id");
+
+			if (!ForgeRegistries.ENTITIES.containsKey(entityId)) {
+				WikiHelperCommand.error(context.getSource(), CMD.commandName(), "Invalid entity ID '" + entityId + "'");
+
+				return;
+			}
+
+			EntityIsoPrinter.printEntity(entityId, imageSize, file -> {
+				if (file == null) {
+					WikiHelperCommand.error(context.getSource(), CMD.commandName(), "Error while printing out entity, check the log. '" + entityId + "'");
+
+					return;
+				}
+
+				WikiHelperCommand.success(context.getSource(), "Iso", FormattingHelper.generateResultMessage(file, file.getName(), null));
+			});
+		});
+
 		return 1;
 	}
 }
