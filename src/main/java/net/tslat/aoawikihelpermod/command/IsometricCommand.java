@@ -27,8 +27,9 @@ public class IsometricCommand implements Command<CommandSource> {
 	public static ArgumentBuilder<CommandSource, ?> register() {
 		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("iso").executes(CMD);
 
-		builder.then(Commands.argument("entity_id", ResourceLocationArgument.id()).suggests(ENTITY_ID_SUGGESTIONS).executes(IsometricCommand::printEntityIso)
-				.then(Commands.argument("image_size", IntegerArgumentType.integer()).executes(context -> IsometricCommand.printEntityIso(context, IntegerArgumentType.getInteger(context, "image_size")))));
+		builder.then(Commands.argument("entity_id", ResourceLocationArgument.id()).suggests(ENTITY_ID_SUGGESTIONS)
+						.then(Commands.argument("image_size", IntegerArgumentType.integer())
+								.executes(IsometricCommand::printEntityIso)));
 
 		return builder;
 	}
@@ -45,12 +46,9 @@ public class IsometricCommand implements Command<CommandSource> {
 	}
 
 	private static int printEntityIso(CommandContext<CommandSource> context) {
-		return printEntityIso(context, 0);
-	}
-
-	private static int printEntityIso(CommandContext<CommandSource> context, int imageSize) {
 		EntityIsoPrinter.queuePrintEntity(() -> {
 			ResourceLocation entityId = ResourceLocationArgument.getId(context, "entity_id");
+			int imageSize = IntegerArgumentType.getInteger(context, "image_size");
 
 			if (!ForgeRegistries.ENTITIES.containsKey(entityId)) {
 				WikiHelperCommand.error(context.getSource(), CMD.commandName(), "Invalid entity ID '" + entityId + "'");

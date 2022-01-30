@@ -10,13 +10,16 @@ import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
+import org.apache.logging.log4j.Level;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -45,6 +48,15 @@ public final class EntityIsoPrinter extends Screen {
 		this.entityToRender.xRotO = 0;
 		this.entityToRender.yRot = 0;
 		this.entityToRender.yRotO = 0;
+
+		if (entityToRender instanceof LivingEntity) {
+			LivingEntity living = (LivingEntity)entityToRender;
+
+			living.yBodyRot = 0;
+			living.yBodyRotO = 0;
+			living.yHeadRot = 0;
+			living.yHeadRotO = 0;
+		}
 
 		MainWindow window = Minecraft.getInstance().getWindow();
 		this.windowWidth = window.getScreenWidth();
@@ -79,7 +91,16 @@ public final class EntityIsoPrinter extends Screen {
 		if (Minecraft.getInstance().level == null)
 			return;
 
-		Minecraft.getInstance().setScreen(new EntityIsoPrinter(ForgeRegistries.ENTITIES.getValue(entityId).create(Minecraft.getInstance().level), imageSize, fileConsumer));
+		Entity instance = ForgeRegistries.ENTITIES.getValue(entityId).create(Minecraft.getInstance().level);
+
+		if (instance == null) {
+			AoAWikiHelperMod.LOGGER.log(Level.ERROR, "Unable to instantiate entity of type: '" + entityId + "', skipping.");
+
+			fileConsumer.accept(null);
+			return;
+		}
+
+		Minecraft.getInstance().setScreen(new EntityIsoPrinter(instance, imageSize, fileConsumer));
 	}
 
 	@Override
@@ -90,6 +111,7 @@ public final class EntityIsoPrinter extends Screen {
 		renderEntity();
 
 		NativeImage image = extractSubRange(captureImage());
+
 		fileConsumer.accept(saveImage(image));
 		Minecraft.getInstance().setScreen(null);
 	}
@@ -111,6 +133,13 @@ public final class EntityIsoPrinter extends Screen {
 
 		try {
 			Vector4f bounds = getBoundsForRenderedImage(source);
+
+			if (bounds == null) {
+				AoAWikiHelperMod.LOGGER.log(Level.WARN, "Unable to detect rendered entity, safely exiting rendering operation");
+
+				return null;
+			}
+
 			int minX = (int)bounds.x();
 			int minY = (int)bounds.y();
 			int xOffset = (int)((targetSize - (bounds.z() - minX)) / 2f);
@@ -123,7 +152,7 @@ public final class EntityIsoPrinter extends Screen {
 			}
 		}
 		catch (Exception ex) {
-			System.out.println("Encountered an error while trying to process an entity Isometric: '" + entityToRender.getType().getRegistryName() + "' (" + targetSize + "px)");
+			AoAWikiHelperMod.LOGGER.log(Level.ERROR, "Encountered an error while trying to process an entity Isometric: '" + entityToRender.getType().getRegistryName() + "' (" + targetSize + "px)");
 			ex.printStackTrace();
 			source.close();
 
@@ -140,13 +169,17 @@ public final class EntityIsoPrinter extends Screen {
 		if (image == null)
 			return null;
 
-		File outputFile = PrintHelper.configDir.toPath().resolve(entityToRender.getDisplayName().getString() + " - " + targetSize + "px.png").toFile();
+		File outputFile = PrintHelper.configDir.toPath().resolve("Entity Renders").resolve(entityToRender.getType().getRegistryName().getNamespace()).resolve(entityToRender.getDisplayName().getString() + " - " + targetSize + "px.png").toFile();
 		AtomicBoolean succeeded = new AtomicBoolean(true);
 
 		Util.ioPool().execute(() -> {
 			try {
-				if (outputFile.exists())
+				if (outputFile.exists()) {
 					outputFile.delete();
+				}
+				else {
+					outputFile.getParentFile().mkdirs();
+				}
 
 				image.writeToFile(outputFile);
 			}
@@ -177,6 +210,14 @@ public final class EntityIsoPrinter extends Screen {
 
 			capture = captureImage();
 			firstBounds = getBoundsForRenderedImage(capture);
+
+			if (firstBounds == null) {
+				AoAWikiHelperMod.LOGGER.log(Level.WARN, "Unable to detect rendered entity, safely exiting rendering operation");
+				capture.close();
+
+				return;
+			}
+
 			capture.close();
 
 			if (firstBounds.x() > 0 && firstBounds.y() > 0)
@@ -192,6 +233,13 @@ public final class EntityIsoPrinter extends Screen {
 
 			capture = captureImage();
 			secondBounds = getBoundsForRenderedImage(capture);
+
+			if (secondBounds == null) {
+				AoAWikiHelperMod.LOGGER.log(Level.WARN, "Unable to detect rendered entity, safely exiting rendering operation");
+				capture.close();
+
+				return;
+			}
 			capture.close();
 
 			if (secondBounds.x() > 0 && secondBounds.y() > 0)
@@ -218,8 +266,17 @@ public final class EntityIsoPrinter extends Screen {
 
 			clearRenderBuffer();
 			renderEntity();
+
 			capture = captureImage();
 			Vector4f thirdBounds = getBoundsForRenderedImage(capture);
+
+			if (thirdBounds == null) {
+				AoAWikiHelperMod.LOGGER.log(Level.WARN, "Unable to detect rendered entity, safely exiting rendering operation");
+				capture.close();
+
+				return;
+			}
+
 			capture.close();
 
 			if (thirdBounds.x() > 0 && thirdBounds.y() > 0 && thirdBounds.z() < thirdBounds.x() + targetSize && thirdBounds.w() < thirdBounds.y() + targetSize)
@@ -229,6 +286,7 @@ public final class EntityIsoPrinter extends Screen {
 		}
 	}
 
+	@Nullable
 	private Vector4f getBoundsForRenderedImage(NativeImage image) {
 		int minX = windowWidth;
 		int minY = windowHeight;
@@ -245,6 +303,9 @@ public final class EntityIsoPrinter extends Screen {
 				}
 			}
 		}
+
+		if (minX == windowWidth && minY == windowHeight && maxX == 0 && maxY == 0)
+			return null;
 
 		return new Vector4f(minX, minY, maxX, maxY);
 	}
@@ -274,7 +335,15 @@ public final class EntityIsoPrinter extends Screen {
 		IRenderTypeBuffer.Impl renderBuffer = mc.renderBuffers().bufferSource();
 
 		renderManager.setRenderShadow(false);
-		renderManager.render(entityToRender, 0, 0, 0, 0, 1, matrix, renderBuffer, 15728880);
+
+		try {
+			renderManager.render(entityToRender, 0, 0, 0, 0, 1, matrix, renderBuffer, 15728880);
+		}
+		catch (Exception ex) {
+			AoAWikiHelperMod.LOGGER.log(Level.ERROR, "Error while rendering entity. Likely a non-standard entity of some sort.");
+			ex.printStackTrace();
+		}
+
 		renderBuffer.endBatch();
 		renderManager.setRenderShadow(true);
 
