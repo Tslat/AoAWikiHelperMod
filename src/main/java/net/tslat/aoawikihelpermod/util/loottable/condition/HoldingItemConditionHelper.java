@@ -4,7 +4,7 @@ import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.loot.LootContext;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.Hand;
-import net.tslat.aoa3.object.loottable.condition.HoldingItem;
+import net.tslat.aoa3.content.loottable.condition.HoldingItem;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 
 import javax.annotation.Nonnull;

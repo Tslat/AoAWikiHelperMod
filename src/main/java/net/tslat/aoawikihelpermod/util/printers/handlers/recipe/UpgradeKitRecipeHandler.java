@@ -6,7 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.ResourceLocation;
 import net.tslat.aoa3.common.registration.AoABlocks;
-import net.tslat.aoa3.object.recipe.UpgradeKitRecipe;
+import net.tslat.aoa3.content.recipe.UpgradeKitRecipe;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;

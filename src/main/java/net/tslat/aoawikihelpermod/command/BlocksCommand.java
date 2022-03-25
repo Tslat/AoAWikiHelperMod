@@ -16,7 +16,7 @@ import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.ItemParser;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
-import net.tslat.aoa3.util.misc.MutableSupplier;
+import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.dataskimmers.BlockDataSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;

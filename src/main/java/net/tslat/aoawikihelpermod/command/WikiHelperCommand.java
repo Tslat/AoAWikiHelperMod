@@ -6,6 +6,8 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.util.text.*;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 
 public class WikiHelperCommand {
@@ -22,8 +24,10 @@ public class WikiHelperCommand {
 					.then(TradesCommand.register())
 					.then(StructuresCommand.register())
 					.then(BlocksCommand.register())
-					.then(ItemsCommand.register())
-					.then(IsometricCommand.register());
+					.then(ItemsCommand.register());
+
+			if (FMLEnvironment.dist != Dist.DEDICATED_SERVER)
+				cmd.then(IsometricCommand.register());
 		}
 		else {
 			cmd.executes(WikiHelperCommand::outdatedCommand);
@@ -39,39 +43,39 @@ public class WikiHelperCommand {
 		return 1;
 	}
 
-	protected static StringTextComponent getCmdPrefix(String subcommand) {
+	public static StringTextComponent getCmdPrefix(String subcommand) {
 		return new StringTextComponent(TextFormatting.DARK_RED + "[AoAWikiHelper|" + TextFormatting.GOLD + subcommand + TextFormatting.DARK_RED + "] ");
 	}
 
-	protected static void error(CommandSource source, String subcommand, String message, ITextComponent... args) {
+	public static void error(CommandSource source, String subcommand, String message, ITextComponent... args) {
 		error(source, subcommand, new TranslationTextComponent(message, args));
 	}
 
-	protected static void error(CommandSource source, String subcommand, IFormattableTextComponent message, ITextComponent... args) {
+	public static void error(CommandSource source, String subcommand, IFormattableTextComponent message, ITextComponent... args) {
 		source.sendFailure(getCmdPrefix(subcommand).append(message.withStyle(TextFormatting.DARK_RED)));
 	}
 
-	protected static void info(CommandSource source, String subcommand, String message, ITextComponent... args) {
+	public static void info(CommandSource source, String subcommand, String message, ITextComponent... args) {
 		info(source, subcommand, new TranslationTextComponent(message, args));
 	}
 
-	protected static void info(CommandSource source, String subcommand, IFormattableTextComponent message, ITextComponent... args) {
+	public static void info(CommandSource source, String subcommand, IFormattableTextComponent message, ITextComponent... args) {
 		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(TextFormatting.GRAY)), true);
 	}
 
-	protected static void success(CommandSource source, String subcommand, String message, ITextComponent... args) {
+	public static void success(CommandSource source, String subcommand, String message, ITextComponent... args) {
 		success(source, subcommand, new TranslationTextComponent(message, args));
 	}
 
-	protected static void success(CommandSource source, String subcommand, IFormattableTextComponent message) {
+	public static void success(CommandSource source, String subcommand, IFormattableTextComponent message) {
 		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(TextFormatting.GREEN)), true);
 	}
 
-	protected static void warn(CommandSource source, String subcommand, String message, ITextComponent... args) {
+	public static void warn(CommandSource source, String subcommand, String message, ITextComponent... args) {
 		warn(source, subcommand, new TranslationTextComponent(message, args));
 	}
 
-	protected static void warn(CommandSource source, String subcommand, IFormattableTextComponent message) {
+	public static void warn(CommandSource source, String subcommand, IFormattableTextComponent message) {
 		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(TextFormatting.RED)), true);
 	}
 }

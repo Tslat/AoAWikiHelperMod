@@ -1,6 +1,6 @@
 package net.tslat.aoawikihelpermod.util.loottable.condition;
 
-import net.tslat.aoa3.object.loottable.condition.PlayerHasResource;
+import net.tslat.aoa3.content.loottable.condition.PlayerHasResource;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 

@@ -1,7 +1,7 @@
 package net.tslat.aoawikihelpermod.util.loottable.function;
 
 import net.minecraft.enchantment.Enchantment;
-import net.tslat.aoa3.object.loottable.function.EnchantSpecific;
+import net.tslat.aoa3.content.loottable.function.EnchantSpecific;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 

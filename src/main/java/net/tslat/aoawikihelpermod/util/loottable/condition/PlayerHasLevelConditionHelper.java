@@ -1,6 +1,6 @@
 package net.tslat.aoawikihelpermod.util.loottable.condition;
 
-import net.tslat.aoa3.object.loottable.condition.PlayerHasLevel;
+import net.tslat.aoa3.content.loottable.condition.PlayerHasLevel;
 
 import javax.annotation.Nonnull;
 

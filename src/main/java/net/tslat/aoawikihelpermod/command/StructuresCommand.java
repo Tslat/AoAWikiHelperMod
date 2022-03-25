@@ -1,26 +1,33 @@
 package net.tslat.aoawikihelpermod.command;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.gen.feature.template.Template;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoa3.util.StringUtil;
-import net.tslat.aoa3.util.misc.MutableSupplier;
+import net.tslat.aoawikihelpermod.dataskimmers.StructureTemplateSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.printers.TablePrintHelper;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class StructuresCommand implements Command<CommandSource> {
@@ -29,7 +36,7 @@ public class StructuresCommand implements Command<CommandSource> {
 	public static ArgumentBuilder<CommandSource, ?> register() {
 		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("structure").executes(CMD);
 
-		builder.then(Commands.argument("structure_piece_id", net.tslat.aoa3.command.StructuresCommand.StructureIdArgument.instance()).executes(StructuresCommand::printStructurePiece));
+		builder.then(Commands.argument("structure_piece_id", TemplateIdArgument.instance()).executes(StructuresCommand::printStructurePiece));
 
 		return builder;
 	}
@@ -51,12 +58,14 @@ public class StructuresCommand implements Command<CommandSource> {
 			Template template;
 
 			try {
-				id = net.tslat.aoa3.command.StructuresCommand.StructureIdArgument.getStructureId(cmd, "structure_piece_id");
-				template = ServerLifecycleHooks.getCurrentServer().getStructureManager().get(id);
+				id = TemplateIdArgument.getTemplateId(cmd, "structure_piece_id");
+				template = TemplateIdArgument.getTemplate(id);
 			}
 			catch (Exception ex) {
 				template = null;
 				id = null;
+
+				ex.printStackTrace();
 			}
 
 			if (template == null) {
@@ -148,5 +157,56 @@ public class StructuresCommand implements Command<CommandSource> {
 		}
 
 		return 1;
+	}
+
+	public static class TemplateIdArgument implements ArgumentType<ResourceLocation> {
+		private static final Collection<String> EXAMPLES = Arrays.asList("minecraft:igloo/bottom", "aoa3:abyss/abyssal_lotto_hut/abyssal_lotto_hut");
+		private static final DynamicCommandExceptionType UNKNOWN_STRUCTURE_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslationTextComponent("command.aoa.structures.invalidStructure", arg));
+
+		public static TemplateIdArgument instance() {
+			return new TemplateIdArgument();
+		}
+
+		public static ResourceLocation getTemplateId(CommandContext<CommandSource> context, String name) throws CommandSyntaxException {
+			return findTemplate(context.getArgument(name, ResourceLocation.class));
+		}
+
+		public static Template getTemplate(ResourceLocation path) throws CommandSyntaxException {
+			Template template = StructureTemplateSkimmer.getTemplate(path);
+
+			if (template == null)
+				throw UNKNOWN_STRUCTURE_EXCEPTION.create(path);
+
+			return template;
+		}
+
+		private static ResourceLocation findTemplate(ResourceLocation path) throws CommandSyntaxException {
+			getTemplate(path);
+
+			return path;
+		}
+
+		@Override
+		public ResourceLocation parse(StringReader reader) throws CommandSyntaxException {
+			return ResourceLocation.read(reader);
+		}
+
+		@Override
+		public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+			StringReader reader = new StringReader(builder.getInput());
+
+			reader.setCursor(builder.getStart());
+
+			builder = builder.createOffset(reader.getCursor());
+
+			ISuggestionProvider.suggestResource(StructureTemplateSkimmer.getTemplateList(), builder);
+
+			return builder.buildFuture();
+		}
+
+		@Override
+		public Collection<String> getExamples() {
+			return EXAMPLES;
+		}
 	}
 }

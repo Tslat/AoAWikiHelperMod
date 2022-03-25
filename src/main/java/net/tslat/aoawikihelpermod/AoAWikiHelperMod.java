@@ -7,18 +7,18 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.VersionChecker;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.FileUtils;
-import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.dataskimmers.*;
+import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapters;
 import net.tslat.aoawikihelpermod.util.LootTableHelper;
+import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +29,7 @@ import static net.tslat.aoawikihelpermod.AoAWikiHelperMod.MOD_ID;
 
 @Mod(MOD_ID)
 public class AoAWikiHelperMod {
-	public static final String VERSION = "2.6.1";
+	public static final String VERSION = "2.7";
 	public static final String MOD_ID = "aoawikihelpermod";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
@@ -46,7 +46,7 @@ public class AoAWikiHelperMod {
 		MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
 		MinecraftForge.EVENT_BUS.addListener(this::registerRecipeSkimmer);
 		MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
-		MinecraftForge.EVENT_BUS.addListener(this::loadFinished);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::loadFinished);
 	}
 
 	@SubscribeEvent
@@ -59,10 +59,12 @@ public class AoAWikiHelperMod {
 		ev.addListener(new RecipesSkimmer());
 		ev.addListener(new LootTablesSkimmer());
 		ev.addListener(new HaulingFishTableSkimmer());
+		ev.addListener(new StructureTemplateSkimmer());
 	}
 
 	@SubscribeEvent
 	public void serverStarted(FMLServerStartedEvent ev) {
+		FakeWorld.init();
 		BlockDataSkimmer.init();
 		ItemDataSkimmer.init();
 		MerchantsSkimmer.init(ev.getServer());
@@ -72,8 +74,10 @@ public class AoAWikiHelperMod {
 
 	@SubscribeEvent
 	public void loadFinished(final FMLLoadCompleteEvent ev) {
-		if (VersionChecker.getResult(ModList.get().getModFileById(AdventOfAscension.MOD_ID).getMods().get(0)).status == VersionChecker.Status.OUTDATED)
-			isOutdatedAoA = true;
+		//if (VersionChecker.getResult(ModList.get().getModFileById(AdventOfAscension.MOD_ID).getMods().get(0)).status == VersionChecker.Status.OUTDATED)
+		//	isOutdatedAoA = true;
+
+		IsoRenderAdapters.init();
 	}
 
 	private void patchClickEvent() {

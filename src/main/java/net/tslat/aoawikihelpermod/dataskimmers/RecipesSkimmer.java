@@ -11,7 +11,7 @@ import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
-import net.tslat.aoa3.object.recipe.InfusionRecipe;
+import net.tslat.aoa3.content.recipe.InfusionRecipe;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 import net.tslat.aoawikihelpermod.util.printers.handlers.recipe.*;

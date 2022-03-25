@@ -15,6 +15,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle' // Parchment
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'org.spongepowered.mixin'
 
 version = mod_version
 group = 'net.tslat.aoawikihelpermod'
@@ -37,6 +38,21 @@ minecraft {
             workingDirectory project.file('run')
 
             taskName 'Client'
+            property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+
+            mods {
+                aoawikihelpermod {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            taskName 'Server'
             property 'forge.logging.console.level', 'debug'
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
@@ -70,12 +86,16 @@ dependencies {
 
     // Disabled temporarily while in Alpha releases
     //implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version")
-    implementation fg.deobf("libs:AoA3-1.16.5-3.6-Alpha:3")
+    implementation fg.deobf("libs:AoA3-1.16.5-3.6:PublicAlpha")
 
     // Mixin annotation processor, just in case we need it
     if (System.getProperty("idea.sync.active") != "true") {
         annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
     }
+}
+
+mixin {
+    add sourceSets.main, "${modid}.refmap.json"
 }
 
 jar {

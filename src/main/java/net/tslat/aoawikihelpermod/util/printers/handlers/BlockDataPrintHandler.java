@@ -9,7 +9,7 @@ import net.minecraft.item.Items;
 import net.minecraft.state.Property;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.ResourceLocation;
-import net.tslat.aoa3.object.block.functional.light.LampBlock;
+import net.tslat.aoa3.content.block.functional.light.LampBlock;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 

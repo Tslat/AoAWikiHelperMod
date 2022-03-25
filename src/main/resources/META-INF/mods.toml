@@ -4,7 +4,7 @@ license="MIT"
 
 [[mods]]
 modId="aoawikihelpermod"
-version="2.5.1"
+version="2.7"
 displayName="AoA WikiHelper Mod"
 credits="Silencer, for the everlasting wiki support for AoA. Fujino and Sonicwave for contributions to this mod and its continuation."
 authors="Tslat"
@@ -26,6 +26,6 @@ https://adventofascension.gamepedia.com'''
 [[dependencies.aoawikihelpermod]]
     modId="aoa3"
     mandatory=true
-    versionRange="[3,)"
+    versionRange="[1.16.5-3.6-Public Alpha,)"
     ordering="NONE"
     side="BOTH"

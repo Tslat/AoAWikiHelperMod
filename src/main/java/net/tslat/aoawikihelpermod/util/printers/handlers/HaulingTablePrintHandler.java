@@ -11,7 +11,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.common.registration.custom.AoASkills;
-import net.tslat.aoa3.object.loottable.condition.PlayerHasLevel;
+import net.tslat.aoa3.content.loottable.condition.PlayerHasLevel;
 import net.tslat.aoawikihelpermod.util.LootTableHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 

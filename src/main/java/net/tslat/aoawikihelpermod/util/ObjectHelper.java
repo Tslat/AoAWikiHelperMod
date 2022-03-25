@@ -7,7 +7,6 @@ import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.attributes.Attribute;
@@ -239,10 +238,11 @@ public class ObjectHelper {
 		itemTooltip.add(dummyComponent);
 		controlItemTooltip.add(dummyComponent);
 		controlItemTooltip.add(dummyComponent);
-		item.appendHoverText(new ItemStack(item), null, itemTooltip, ITooltipFlag.TooltipFlags.NORMAL);
+
+		ClientHelper.collectTooltipLines(item, itemTooltip, false);
 
 		if (controlItem != null)
-			controlItem.appendHoverText(new ItemStack(controlItem), null, controlItemTooltip, ITooltipFlag.TooltipFlags.NORMAL);
+			ClientHelper.collectTooltipLines(controlItem, controlItemTooltip, false);
 
 		tooltipLoop:
 		for (ITextComponent text : itemTooltip) {
