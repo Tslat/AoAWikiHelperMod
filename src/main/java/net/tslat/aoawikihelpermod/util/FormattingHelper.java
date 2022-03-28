@@ -29,7 +29,7 @@ public class FormattingHelper {
 	}
 
 	public static String healthValue(float value) {
-		return "{{hp|" + NumberUtil.roundToNthDecimalPlace(value, 3) + "}}";
+		return "{{hp|" + NumberUtil.roundToNthDecimalPlace(value, 2) + "}}";
 	}
 
 	public static String createImageBlock(IItemProvider item) {

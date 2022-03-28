@@ -4,6 +4,7 @@ import net.minecraft.block.*;
 import net.minecraft.entity.passive.fish.AbstractFishEntity;
 import net.minecraft.util.math.vector.Vector3f;
 import net.tslat.aoa3.content.entity.base.AbstractLavaFishEntity;
+import net.tslat.aoa3.content.entity.projectile.gun.BaseBullet;
 import net.tslat.aoawikihelpermod.render.IsometricPrinterScreen;
 import net.tslat.aoawikihelpermod.render.typeadapter.block.DoublePlantBlockRenderAdapter;
 
@@ -24,5 +25,8 @@ public final class IsoRenderAdapters {
 				block.getBlock() instanceof BedBlock,
 				Vector3f.YP, -180f));
 		IsometricPrinterScreen.registerBlockAdapter(new DoublePlantBlockRenderAdapter());
+		IsometricPrinterScreen.registerEntityAdapter(new SimpleScaleRenderAdapter<>(entity ->
+				entity instanceof BaseBullet,
+				5f));
 	}
 }
