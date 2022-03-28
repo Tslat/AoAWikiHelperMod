@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.item.*;
 import net.tslat.aoa3.common.registration.AoATools;
@@ -202,7 +203,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String damage = FormattingHelper.healthValue((float)cannon.getDamage());
 				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(cannon, Attributes.ATTACK_SPEED) + 4), 2) + "s";
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)cannon.getFiringDelay(), 2) + "/sec";
-				String recoil = NumberUtil.roundToNthDecimalPlace(cannon.getRecoilModifier(), 2);
+				String recoil = NumberUtil.roundToNthDecimalPlace(cannon.getRecoilForShot(cannon.getDefaultInstance(), (LivingEntity)cmd.getSource().getEntity()), 2);
 				String durability = String.valueOf(cannon.getMaxDamage(new ItemStack(cannon)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(cannon, AoAWeapons.MINI_CANNON.get());
 
@@ -277,7 +278,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(greatblade, AoAWeapons.ROYAL_GREATBLADE.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
 						damage,
 						attackSpeed,
 						durability,
@@ -309,12 +310,12 @@ public class OverviewCommand implements Command<CommandSource> {
 				String damage = FormattingHelper.healthValue((float)gun.getDamage());
 				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(gun, Attributes.ATTACK_SPEED) + 4), 2) + "s";
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)gun.getFiringDelay(), 2) + "/sec";
-				String recoil = NumberUtil.roundToNthDecimalPlace(gun.getRecoilModifier(), 2);
+				String recoil = NumberUtil.roundToNthDecimalPlace(gun.getRecoilForShot(gun.getDefaultInstance(), (LivingEntity)cmd.getSource().getEntity()), 2);
 				String durability = String.valueOf(gun.getMaxDamage(new ItemStack(gun)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(gun, AoAWeapons.SQUAD_GUN.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
 						damage,
 						unholsterTime,
 						fireRate,
@@ -347,12 +348,12 @@ public class OverviewCommand implements Command<CommandSource> {
 				String itemName = ObjectHelper.getItemName(maul);
 				String damage = FormattingHelper.healthValue(maul.getAttackDamage());
 				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeFromItem(maul, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
-				String knockback = NumberUtil.roundToNthDecimalPlace((float)maul.getBaseKnockback() * 7, 2) + " Blocks";
+				String knockback = "+" + NumberUtil.roundToNthDecimalPlace((float)maul.getBaseKnockback(), 2);
 				String durability = String.valueOf(maul.getMaxDamage(new ItemStack(maul)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(maul, AoAWeapons.CORALSTONE_MAUL.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
 						damage,
 						attackSpeed,
 						knockback,
@@ -425,12 +426,12 @@ public class OverviewCommand implements Command<CommandSource> {
 				String pellets = String.valueOf(shotgun.getPelletCount());
 				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(shotgun, Attributes.ATTACK_SPEED) + 4), 2) + "s";
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)shotgun.getFiringDelay(), 2) + "/sec";
-				String recoil = NumberUtil.roundToNthDecimalPlace(shotgun.getRecoilModifier(), 2);
+				String recoil = NumberUtil.roundToNthDecimalPlace(shotgun.getRecoilForShot(shotgun.getDefaultInstance(), (LivingEntity)cmd.getSource().getEntity()), 2);
 				String durability = String.valueOf(shotgun.getMaxDamage(new ItemStack(shotgun)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(shotgun, AoAWeapons.MINI_CANNON.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
 						damage,
 						pellets,
 						unholsterTime,
@@ -504,12 +505,12 @@ public class OverviewCommand implements Command<CommandSource> {
 				String damage = FormattingHelper.healthValue((float)sniper.getDamage());
 				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(sniper, Attributes.ATTACK_SPEED) + 4), 2) + "s";
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)sniper.getFiringDelay(), 2) + "/sec";
-				String recoil = NumberUtil.roundToNthDecimalPlace(sniper.getRecoilModifier(), 2);
+				String recoil = NumberUtil.roundToNthDecimalPlace(sniper.getRecoilForShot(sniper.getDefaultInstance(), (LivingEntity)cmd.getSource().getEntity()) * 0.25f, 2);
 				String durability = String.valueOf(sniper.getMaxDamage(new ItemStack(sniper)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(sniper, AoAWeapons.MINI_CANNON.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
 						damage,
 						unholsterTime,
 						fireRate,
@@ -552,7 +553,7 @@ public class OverviewCommand implements Command<CommandSource> {
 				}
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
 						FormattingHelper.listToString(runeArray, false),
 						durability,
 						tooltip);

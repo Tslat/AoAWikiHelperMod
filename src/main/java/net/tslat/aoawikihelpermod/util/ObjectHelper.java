@@ -46,12 +46,12 @@ public class ObjectHelper {
 	private static final ArrayList<Pattern> TOOLTIP_BLACKLIST = new ArrayList<Pattern>();
 
 	static {
-		TOOLTIP_BLACKLIST.add(Pattern.compile("^[\\d|\\.]+ \\w+ Damage$"));
-		TOOLTIP_BLACKLIST.add(Pattern.compile("^Firing Rate: .*?"));
+		TOOLTIP_BLACKLIST.add(Pattern.compile("^[\\d|\\.]+ \\w+ damage$"));
+		TOOLTIP_BLACKLIST.add(Pattern.compile("^Firing rate: .*?"));
 		TOOLTIP_BLACKLIST.add(Pattern.compile("^Ammo: .*?"));
 		TOOLTIP_BLACKLIST.add(Pattern.compile("^Consumes [\\d|\\.]+ \\w+$"));
-		TOOLTIP_BLACKLIST.add(Pattern.compile("^[\\d|\\.]+ Average \\w+ Damage$"));
-		TOOLTIP_BLACKLIST.add(Pattern.compile("^Runes Required:.*?"));
+		TOOLTIP_BLACKLIST.add(Pattern.compile("^[\\d|\\.]+ Average \\w+ damage$"));
+		TOOLTIP_BLACKLIST.add(Pattern.compile("^Runes required:.*?"));
 		TOOLTIP_BLACKLIST.add(Pattern.compile("^\\d+ \\w+ Runes?"));
 	}
 
