@@ -1,39 +1,39 @@
 package net.tslat.aoawikihelpermod.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.WorldRenderer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.crash.ReportedException;
-import net.minecraft.fluid.FluidState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockDisplayReader;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraftforge.client.ForgeHooksClient;
 
 public class StaticFluidRenderer {
-	public static void renderFluid(MatrixStack.Entry matrixEntry, BlockPos pos, IBlockDisplayReader world, IVertexBuilder vertexBuilder, BlockState blockState) {
+	public static void renderFluid(PoseStack.Pose matrixEntry, BlockPos pos, BlockAndTintGetter world, VertexConsumer vertexBuilder, BlockState blockState) {
 		try {
 			renderFluidBlock(matrixEntry, pos, world, vertexBuilder, blockState);
 		}
 		catch (Exception ex) {
 			CrashReport crashReport = CrashReport.forThrowable(ex, "Statically rendering fluid block");
 
-			CrashReportCategory.populateBlockDetails(crashReport.addCategory("Rendering Fluid"), pos, blockState);
+			CrashReportCategory.populateBlockDetails(crashReport.addCategory("Rendering Fluid"), world, pos, blockState);
 
 			throw new ReportedException(crashReport);
 		}
 	}
 
-	private static void renderFluidBlock(MatrixStack.Entry matrixEntry, BlockPos pos, IBlockDisplayReader world, IVertexBuilder vertexBuilder, BlockState blockState) {
+	private static void renderFluidBlock(PoseStack.Pose matrixEntry, BlockPos pos, BlockAndTintGetter world, VertexConsumer vertexBuilder, BlockState blockState) {
 		FluidState fluidState = world.getFluidState(pos);
 		boolean isLava = fluidState.is(FluidTags.LAVA);
 		TextureAtlasSprite[] fluidSprites = ForgeHooksClient.getFluidSprites(world, pos, fluidState);
@@ -68,7 +68,7 @@ public class StaticFluidRenderer {
 				southFluidHeight -= 0.001f;
 				southEastFluidHeight -= 0.001f;
 				eastFluidHeight -= 0.001f;
-				Vector3d flow = fluidState.getFlow(world, pos);
+				Vec3 flow = fluidState.getFlow(world, pos);
 				float renderUMin;
 				float flowAdjustedUMin;
 				float renderUMax;
@@ -91,9 +91,9 @@ public class StaticFluidRenderer {
 				}
 				else {
 					TextureAtlasSprite flowingTexture = fluidSprites[1];
-					float flowAngle = (float)MathHelper.atan2(flow.z, flow.x) - (float)Math.PI / 2f;
-					float flowAngleX = MathHelper.sin(flowAngle) * 0.25f;
-					float flowAngleZ = MathHelper.cos(flowAngle) * 0.25f;
+					float flowAngle = (float)Math.atan2(flow.z, flow.x) - (float)Math.PI / 2f;
+					float flowAngleX = Mth.sin(flowAngle) * 0.25f;
+					float flowAngleZ = Mth.cos(flowAngle) * 0.25f;
 					renderUMin = flowingTexture.getU(8 + (-flowAngleZ - flowAngleX) * 16);
 					renderVMin = flowingTexture.getV(8 + (-flowAngleZ + flowAngleX) * 16);
 					flowAdjustedUMin = flowingTexture.getU(8 + (-flowAngleZ + flowAngleX) * 16);
@@ -109,14 +109,14 @@ public class StaticFluidRenderer {
 				float renderWidthStretch = (float)fluidSprites[0].getWidth() / (fluidSprites[0].getU1() - fluidSprites[0].getU0());
 				float renderHeightStretch = (float)fluidSprites[0].getHeight() / (fluidSprites[0].getV1() - fluidSprites[0].getV0());
 				float maxStretch = 4f / Math.max(renderHeightStretch, renderWidthStretch);
-				renderUMin = MathHelper.lerp(maxStretch, renderUMin, averageU);
-				flowAdjustedUMin = MathHelper.lerp(maxStretch, flowAdjustedUMin, averageU);
-				renderUMax = MathHelper.lerp(maxStretch, renderUMax, averageU);
-				flowAdjustedUMax = MathHelper.lerp(maxStretch, flowAdjustedUMax, averageU);
-				renderVMin = MathHelper.lerp(maxStretch, renderVMin, averageV);
-				renderVMax = MathHelper.lerp(maxStretch, renderVMax, averageV);
-				flowAdjustedVMax = MathHelper.lerp(maxStretch, flowAdjustedVMax, averageV);
-				flowAdjustmentVMin = MathHelper.lerp(maxStretch, flowAdjustmentVMin, averageV);
+				renderUMin = Mth.lerp(maxStretch, renderUMin, averageU);
+				flowAdjustedUMin = Mth.lerp(maxStretch, flowAdjustedUMin, averageU);
+				renderUMax = Mth.lerp(maxStretch, renderUMax, averageU);
+				flowAdjustedUMax = Mth.lerp(maxStretch, flowAdjustedUMax, averageU);
+				renderVMin = Mth.lerp(maxStretch, renderVMin, averageV);
+				renderVMax = Mth.lerp(maxStretch, renderVMax, averageV);
+				flowAdjustedVMax = Mth.lerp(maxStretch, flowAdjustedVMax, averageV);
+				flowAdjustmentVMin = Mth.lerp(maxStretch, flowAdjustmentVMin, averageV);
 				int packedLight = getLightColour(world, pos);
 				float red = topShading * fluidTintRed;
 				float green = topShading * fluidTintGreen;
@@ -241,14 +241,14 @@ public class StaticFluidRenderer {
 		}
 	}
 
-	public static int getLightColour(IBlockDisplayReader world, BlockPos pos) {
-		int colour = WorldRenderer.getLightColor(world, pos);
-		int aboveColour = WorldRenderer.getLightColor(world, pos.above());
+	public static int getLightColour(BlockAndTintGetter world, BlockPos pos) {
+		int colour = LevelRenderer.getLightColor(world, pos);
+		int aboveColour = LevelRenderer.getLightColor(world, pos.above());
 
 		return Math.max(colour & 255, aboveColour & 255) | Math.max(colour >> 16 & 255, aboveColour >> 16 & 255) << 16;
 	}
 
-	public static float getFluidHeight(IBlockReader world, BlockPos pos, FluidState fluid) {
+	public static float getFluidHeight(BlockGetter world, BlockPos pos, FluidState fluid) {
 		int heightAverager = 0;
 		float contributingHeights = 0;
 
@@ -289,36 +289,36 @@ public class StaticFluidRenderer {
 		return sprites;
 	}*/
 
-	public static boolean doesAdjacentFluidMatch(IBlockReader world, BlockPos pos, Direction side, FluidState fluid) {
+	public static boolean doesAdjacentFluidMatch(BlockGetter world, BlockPos pos, Direction side, FluidState fluid) {
 		return doesFluidMatch(world, pos.relative(side), fluid);
 	}
 
-	public static boolean doesFluidMatch(IBlockReader world, BlockPos pos, FluidState fluid) {
+	public static boolean doesFluidMatch(BlockGetter world, BlockPos pos, FluidState fluid) {
 		return fluid.getType().isSame(world.getFluidState(pos).getType());
 	}
 
-	public static boolean isFaceOccluded(IBlockReader world, Direction side, float height, BlockPos pos, BlockState state) {
+	public static boolean isFaceOccluded(BlockGetter world, Direction side, float height, BlockPos pos, BlockState state) {
 		if (!state.canOcclude())
 			return false;
 
-		return VoxelShapes.blockOccudes(VoxelShapes.box(0, 0, 0, 1, height, 1), state.getOcclusionShape(world, pos), side);
+		return Shapes.blockOccudes(Shapes.box(0, 0, 0, 1, height, 1), state.getOcclusionShape(world, pos), side);
 	}
 
-	public static boolean isFaceOccludedByNeighbour(IBlockReader world, BlockPos pos, Direction side, float height) {
+	public static boolean isFaceOccludedByNeighbour(BlockGetter world, BlockPos pos, Direction side, float height) {
 		BlockPos neighbourPos = pos.relative(side);
 
 		return isFaceOccluded(world, side, height, neighbourPos, world.getBlockState(neighbourPos));
 	}
 
-	public static boolean isFaceOccludedBySelf(IBlockReader world, BlockPos pos, BlockState state, Direction side) {
+	public static boolean isFaceOccludedBySelf(BlockGetter world, BlockPos pos, BlockState state, Direction side) {
 		return isFaceOccluded(world, side.getOpposite(), 1, pos, state);
 	}
 
-	public static boolean shouldRenderFace(IBlockDisplayReader world, BlockPos pos, FluidState fluidState, BlockState state, Direction side) {
+	public static boolean shouldRenderFace(BlockAndTintGetter world, BlockPos pos, FluidState fluidState, BlockState state, Direction side) {
 		return !isFaceOccludedBySelf(world, pos, state, side) && !doesAdjacentFluidMatch(world, pos, side, fluidState);
 	}
 
-	public static void vert(IVertexBuilder vertexBuilder, double x, double y, double z, float red, float green, float blue, float alpha, float u, float v, int packedLight) {
+	public static void vert(VertexConsumer vertexBuilder, double x, double y, double z, float red, float green, float blue, float alpha, float u, float v, int packedLight) {
 		vertexBuilder.vertex(x, y, z).color(red, green, blue, alpha).uv(u, v).uv2(packedLight).normal(0, 1, 0).endVertex();
 	}
 }

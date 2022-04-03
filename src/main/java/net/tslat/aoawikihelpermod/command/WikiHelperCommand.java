@@ -3,16 +3,20 @@ package net.tslat.aoawikihelpermod.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.util.text.*;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 
 public class WikiHelperCommand {
-	public static void registerSubCommands(CommandDispatcher<CommandSource> dispatcher) {
-		LiteralArgumentBuilder<CommandSource> cmd = Commands.literal("wikihelper");
+	public static void registerSubCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
+		LiteralArgumentBuilder<CommandSourceStack> cmd = Commands.literal("wikihelper");
 
 		if (!AoAWikiHelperMod.isOutdatedAoA) {
 			cmd.then(OverviewCommand.register())
@@ -37,45 +41,45 @@ public class WikiHelperCommand {
 		dispatcher.register(cmd);
 	}
 
-	private static int outdatedCommand(CommandContext<CommandSource> cmd) {
-		cmd.getSource().sendFailure(new StringTextComponent("AoA is outdated! Update AoA to the latest version to use the Wikihelper mod!"));
+	private static int outdatedCommand(CommandContext<CommandSourceStack> cmd) {
+		cmd.getSource().sendFailure(new TextComponent("AoA is outdated! Update AoA to the latest version to use the Wikihelper mod!"));
 
 		return 1;
 	}
 
-	public static StringTextComponent getCmdPrefix(String subcommand) {
-		return new StringTextComponent(TextFormatting.DARK_RED + "[AoAWikiHelper|" + TextFormatting.GOLD + subcommand + TextFormatting.DARK_RED + "] ");
+	public static TextComponent getCmdPrefix(String subcommand) {
+		return new TextComponent(ChatFormatting.DARK_RED + "[AoAWikiHelper|" + ChatFormatting.GOLD + subcommand + ChatFormatting.DARK_RED + "] ");
 	}
 
-	public static void error(CommandSource source, String subcommand, String message, ITextComponent... args) {
-		error(source, subcommand, new TranslationTextComponent(message, args));
+	public static void error(CommandSourceStack source, String subcommand, String message, Component... args) {
+		error(source, subcommand, new TranslatableComponent(message, args));
 	}
 
-	public static void error(CommandSource source, String subcommand, IFormattableTextComponent message, ITextComponent... args) {
-		source.sendFailure(getCmdPrefix(subcommand).append(message.withStyle(TextFormatting.DARK_RED)));
+	public static void error(CommandSourceStack source, String subcommand, MutableComponent message, Component... args) {
+		source.sendFailure(getCmdPrefix(subcommand).append(message.withStyle(ChatFormatting.DARK_RED)));
 	}
 
-	public static void info(CommandSource source, String subcommand, String message, ITextComponent... args) {
-		info(source, subcommand, new TranslationTextComponent(message, args));
+	public static void info(CommandSourceStack source, String subcommand, String message, Component... args) {
+		info(source, subcommand, new TranslatableComponent(message, args));
 	}
 
-	public static void info(CommandSource source, String subcommand, IFormattableTextComponent message, ITextComponent... args) {
-		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(TextFormatting.GRAY)), true);
+	public static void info(CommandSourceStack source, String subcommand, MutableComponent message, Component... args) {
+		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(ChatFormatting.GRAY)), true);
 	}
 
-	public static void success(CommandSource source, String subcommand, String message, ITextComponent... args) {
-		success(source, subcommand, new TranslationTextComponent(message, args));
+	public static void success(CommandSourceStack source, String subcommand, String message, Component... args) {
+		success(source, subcommand, new TranslatableComponent(message, args));
 	}
 
-	public static void success(CommandSource source, String subcommand, IFormattableTextComponent message) {
-		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(TextFormatting.GREEN)), true);
+	public static void success(CommandSourceStack source, String subcommand, MutableComponent message) {
+		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(ChatFormatting.GREEN)), true);
 	}
 
-	public static void warn(CommandSource source, String subcommand, String message, ITextComponent... args) {
-		warn(source, subcommand, new TranslationTextComponent(message, args));
+	public static void warn(CommandSourceStack source, String subcommand, String message, Component... args) {
+		warn(source, subcommand, new TranslatableComponent(message, args));
 	}
 
-	public static void warn(CommandSource source, String subcommand, IFormattableTextComponent message) {
-		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(TextFormatting.RED)), true);
+	public static void warn(CommandSourceStack source, String subcommand, MutableComponent message) {
+		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(ChatFormatting.RED)), true);
 	}
 }

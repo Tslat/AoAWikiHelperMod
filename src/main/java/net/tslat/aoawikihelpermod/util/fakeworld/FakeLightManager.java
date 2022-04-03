@@ -1,18 +1,18 @@
 package net.tslat.aoawikihelpermod.util.fakeworld;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.SectionPos;
-import net.minecraft.world.LightType;
-import net.minecraft.world.chunk.IChunkLightProvider;
-import net.minecraft.world.chunk.NibbleArray;
-import net.minecraft.world.lighting.IWorldLightListener;
-import net.minecraft.world.lighting.WorldLightManager;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.chunk.DataLayer;
+import net.minecraft.world.level.chunk.LightChunkGetter;
+import net.minecraft.world.level.lighting.LayerLightEventListener;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 
 import javax.annotation.Nullable;
 
-public class FakeLightManager extends WorldLightManager {
-	public FakeLightManager(IChunkLightProvider chunkProvider) {
+public class FakeLightManager extends LevelLightEngine {
+	public FakeLightManager(LightChunkGetter chunkProvider) {
 		super(chunkProvider, true, true);
 	}
 
@@ -39,24 +39,35 @@ public class FakeLightManager extends WorldLightManager {
 	public void enableLightSources(ChunkPos chunkPos, boolean enableSkyLight) {}
 
 	@Override
-	public void queueSectionData(LightType type, SectionPos pos, @Nullable NibbleArray array, boolean skipUntrusted) {}
+	public void queueSectionData(LightLayer type, SectionPos pos, @Nullable DataLayer array, boolean skipUntrusted) {}
 
 	@Override
-	public IWorldLightListener getLayerListener(LightType type) {
-		return new IWorldLightListener() {
+	public LayerLightEventListener getLayerListener(LightLayer type) {
+		return new LayerLightEventListener() {
 			@Nullable
-			@Override
-			public NibbleArray getDataLayerData(SectionPos sectionPos) {
+			public DataLayer getDataLayerData(SectionPos pos) {
 				return null;
 			}
 
-			@Override
 			public int getLightValue(BlockPos pos) {
 				return 15;
 			}
 
-			@Override
-			public void updateSectionStatus(SectionPos pos, boolean isEmpty) {}
+			public void checkBlock(BlockPos pos) {}
+
+			public void onBlockEmissionIncrease(BlockPos pos, int offset) {}
+
+			public boolean hasLightWork() {
+				return false;
+			}
+
+			public int runUpdates(int toUpdate, boolean skyLight, boolean blockLight) {
+				return toUpdate;
+			}
+
+			public void updateSectionStatus(SectionPos pos, boolean pIsEmpty) {}
+
+			public void enableLightSources(ChunkPos pos, boolean doSkyLight) {}
 		};
 	}
 

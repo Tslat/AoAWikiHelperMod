@@ -2,10 +2,10 @@ package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
@@ -23,11 +23,11 @@ public class SmeltingRecipeHandler extends RecipePrintHandler {
 
 	private final JsonObject rawRecipe;
 	@Nullable
-	private final IRecipe<?> recipe;
+	private final Recipe<?> recipe;
 
 	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
-	public SmeltingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public SmeltingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
 		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
 		this.recipe = recipe;
@@ -68,8 +68,8 @@ public class SmeltingRecipeHandler extends RecipePrintHandler {
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
 		Pair<String, String> input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("ingredient"));
 		Triple<Integer, String, String> output = ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result"));
-		float xp = JSONUtils.getAsFloat(rawRecipe, "experience", 0);
-		int cookingTime = JSONUtils.getAsInt(rawRecipe, "cookingtime", 200);
+		float xp = GsonHelper.getAsFloat(rawRecipe, "experience", 0);
+		int cookingTime = GsonHelper.getAsInt(rawRecipe, "cookingtime", 200);
 
 		String[] printData = new String[5];
 		printData[0] = (output.getLeft() > 1 ? output.getLeft() + " " : "") + FormattingHelper.createLinkableText(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName));

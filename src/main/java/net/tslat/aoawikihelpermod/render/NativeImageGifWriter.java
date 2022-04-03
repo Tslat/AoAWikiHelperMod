@@ -1,6 +1,6 @@
 package net.tslat.aoawikihelpermod.render;
 
-import net.minecraft.client.renderer.texture.NativeImage;
+import com.mojang.blaze3d.platform.NativeImage;
 
 import javax.imageio.*;
 import javax.imageio.metadata.IIOInvalidTreeException;

@@ -2,9 +2,9 @@ package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
 import net.tslat.aoa3.common.registration.AoABlocks;
 import net.tslat.aoa3.content.recipe.UpgradeKitRecipe;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -26,7 +26,7 @@ public class UpgradeKitRecipeHandler extends RecipePrintHandler {
 
 	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
-	public UpgradeKitRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public UpgradeKitRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
 		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
 		this.recipe = (UpgradeKitRecipe)recipe;

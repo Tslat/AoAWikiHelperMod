@@ -1,6 +1,6 @@
 package net.tslat.aoawikihelpermod.util.printers;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.tslat.aoawikihelpermod.util.printers.handlers.HaulingTablePrintHandler;
 
 import javax.annotation.Nullable;

@@ -1,7 +1,7 @@
 package net.tslat.aoawikihelpermod.render.typeadapter;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.function.Predicate;
 
@@ -20,12 +20,12 @@ public class SimpleScaleRenderAdapter<T> implements IsoRenderAdapter<T> {
 	}
 
 	@Override
-	public void makePreRenderAdjustments(T renderingObject, MatrixStack matrix) {
+	public void makePreRenderAdjustments(T renderingObject, PoseStack matrix) {
 		matrix.scale(this.scale, this.scale, this.scale);
 	}
 
 	@Override
-	public boolean handleCustomRender(T renderingObject, MatrixStack matrix, IRenderTypeBuffer buffer) {
+	public boolean handleCustomRender(T renderingObject, PoseStack matrix, MultiBufferSource buffer) {
 		return false;
 	}
 }

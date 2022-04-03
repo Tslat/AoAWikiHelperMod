@@ -9,27 +9,27 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.BlockStateArgument;
-import net.minecraft.command.arguments.ResourceLocationArgument;
-import net.minecraft.command.arguments.SuggestionProviders;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.Util;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 import net.tslat.aoawikihelpermod.render.*;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 
-public class IsometricCommand implements Command<CommandSource> {
+public class IsometricCommand implements Command<CommandSourceStack> {
 	private static final IsometricCommand CMD = new IsometricCommand();
-	public static final SuggestionProvider<CommandSource> ENTITY_ID_SUGGESTIONS = SuggestionProviders.register(new ResourceLocation("all_entities"), (context, suggestionBuilder) -> ISuggestionProvider.suggestResource(Registry.ENTITY_TYPE.stream(), suggestionBuilder, EntityType::getKey, (entityType) -> new TranslationTextComponent(Util.makeDescriptionId("entity", EntityType.getKey(entityType)))));
+	public static final SuggestionProvider<CommandSourceStack> ENTITY_ID_SUGGESTIONS = SuggestionProviders.register(new ResourceLocation("all_entities"), (context, suggestionBuilder) -> SharedSuggestionProvider.suggestResource(Registry.ENTITY_TYPE.stream(), suggestionBuilder, EntityType::getKey, (entityType) -> new TranslatableComponent(Util.makeDescriptionId("entity", EntityType.getKey(entityType)))));
 
-	public static ArgumentBuilder<CommandSource, ?> register() {
-		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("iso").requires(source -> source.getEntity() instanceof PlayerEntity).executes(CMD);
+	public static ArgumentBuilder<CommandSourceStack, ?> register() {
+		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("iso").requires(source -> source.getEntity() instanceof Player).executes(CMD);
 
 		builder.then(Commands.literal("entity")
 				.then(Commands.argument("entity_id", ResourceLocationArgument.id())
@@ -89,13 +89,13 @@ public class IsometricCommand implements Command<CommandSource> {
 	}
 
 	@Override
-	public int run(CommandContext<CommandSource> context) {
+	public int run(CommandContext<CommandSourceStack> context) {
 		WikiHelperCommand.info(context.getSource(), commandName(), "Print out isometric images of different objects");
 
 		return 1;
 	}
 
-	private static int printEntityIso(CommandContext<CommandSource> context, int imageSize, boolean animated, float rotation) throws CommandSyntaxException {
+	private static int printEntityIso(CommandContext<CommandSourceStack> context, int imageSize, boolean animated, float rotation) throws CommandSyntaxException {
 		context.getSource().getPlayerOrException();
 
 		IsometricPrinterScreen.queuePrintTask(() -> {
@@ -121,7 +121,7 @@ public class IsometricCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printBlockIso(CommandContext<CommandSource> context, int imageSize, boolean animated, float rotation) throws CommandSyntaxException {
+	private static int printBlockIso(CommandContext<CommandSourceStack> context, int imageSize, boolean animated, float rotation) throws CommandSyntaxException {
 		context.getSource().getPlayerOrException();
 
 		IsometricPrinterScreen.queuePrintTask(() -> {
@@ -148,7 +148,7 @@ public class IsometricCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printStructureIso(CommandContext<CommandSource> context, int imageSize, float rotation, boolean doFullStructure) throws CommandSyntaxException {
+	private static int printStructureIso(CommandContext<CommandSourceStack> context, int imageSize, float rotation, boolean doFullStructure) throws CommandSyntaxException {
 		context.getSource().getPlayerOrException();
 
 		IsometricPrinterScreen.queuePrintTask(() -> {

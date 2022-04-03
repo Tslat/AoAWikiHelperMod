@@ -4,10 +4,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
@@ -25,7 +25,7 @@ public class TEPulverizerRecipeHandler extends RecipePrintHandler {
 
 	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
-	public TEPulverizerRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public TEPulverizerRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
 		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
 	}
@@ -75,8 +75,8 @@ public class TEPulverizerRecipeHandler extends RecipePrintHandler {
 			return this.printoutData.get(targetItem);
 
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
-		Pair<String, String> input = ObjectHelper.getIngredientName(JSONUtils.getAsJsonObject(this.rawRecipe, "input"));
-		int energy = JSONUtils.getAsInt(this.rawRecipe, "energy", 4000);
+		Pair<String, String> input = ObjectHelper.getIngredientName(GsonHelper.getAsJsonObject(this.rawRecipe, "input"));
+		int energy = GsonHelper.getAsInt(this.rawRecipe, "energy", 4000);
 		List<Triple<Integer, String, String>> result;
 
 		if (this.rawRecipe.get("result").isJsonObject()) {

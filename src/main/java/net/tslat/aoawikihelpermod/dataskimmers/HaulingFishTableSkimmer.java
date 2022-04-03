@@ -5,11 +5,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.client.resources.JsonReloadListener;
-import net.minecraft.loot.LootSerializers;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.storage.loot.Deserializers;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.HaulingTablePrintHandler;
@@ -17,8 +17,8 @@ import net.tslat.aoawikihelpermod.util.printers.handlers.HaulingTablePrintHandle
 import java.util.HashMap;
 import java.util.Map;
 
-public class HaulingFishTableSkimmer extends JsonReloadListener {
-	private static final Gson GSON = LootSerializers.createLootTableSerializer().create();
+public class HaulingFishTableSkimmer extends SimpleJsonResourceReloadListener {
+	private static final Gson GSON = Deserializers.createLootTableSerializer().create();
 	public static final HashMap<ResourceLocation, HaulingTablePrintHandler> TABLE_PRINTERS = new HashMap<ResourceLocation, HaulingTablePrintHandler>();
 	public static final HashMultimap<ResourceLocation, ResourceLocation> TABLES_BY_LOOT = HashMultimap.create();
 
@@ -27,7 +27,7 @@ public class HaulingFishTableSkimmer extends JsonReloadListener {
 	}
 
 	@Override
-	protected void apply(Map<ResourceLocation, JsonElement> jsonMap, IResourceManager resourceManager, IProfiler profiler) {
+	protected void apply(Map<ResourceLocation, JsonElement> jsonMap, ResourceManager resourceManager, ProfilerFiller profiler) {
 		TABLE_PRINTERS.clear();
 		TABLES_BY_LOOT.clear();
 

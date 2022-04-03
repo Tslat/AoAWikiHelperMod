@@ -1,7 +1,7 @@
 package net.tslat.aoawikihelpermod.dataskimmers;
 
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.ItemDataPrintHandler;
 

@@ -1,29 +1,29 @@
 package net.tslat.aoawikihelpermod.render;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.block.JigsawBlock;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.command.CommandSource;
-import net.minecraft.tileentity.JigsawTileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.FlatChunkGenerator;
-import net.minecraft.world.gen.FlatGenerationSettings;
-import net.minecraft.world.gen.feature.jigsaw.JigsawManager;
-import net.minecraft.world.gen.feature.jigsaw.SingleJigsawPiece;
-import net.minecraft.world.gen.feature.structure.AbstractVillagePiece;
-import net.minecraft.world.gen.feature.structure.VillageConfig;
-import net.minecraft.world.gen.feature.template.Template;
-import net.minecraft.world.gen.feature.template.TemplateManager;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.JigsawBlock;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.JigsawBlockEntity;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
+import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.tslat.aoa3.common.registration.AoADimensions;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.dataskimmers.StructureTemplateSkimmer;
@@ -38,11 +38,11 @@ import java.util.function.Consumer;
 
 public class StructureIsoPrinter extends IsometricPrinterScreen {
 	protected final ResourceLocation templateId;
-	protected final ArrayList<Template.BlockInfo> blocks;
-	protected Vector3i renderSize;
+	protected final ArrayList<StructureTemplate.StructureBlockInfo> blocks;
+	protected Vec3i renderSize;
 	protected final float rotation;
 
-	public StructureIsoPrinter(ResourceLocation templateId, boolean expandJigsaw, float rotation, int imageSize, CommandSource commandSource, String commandName, Consumer<File> fileConsumer) {
+	public StructureIsoPrinter(ResourceLocation templateId, boolean expandJigsaw, float rotation, int imageSize, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
 		super(imageSize, rotation, commandSource, commandName, fileConsumer);
 
 		if (templateId.getPath().startsWith("structures/"))
@@ -56,7 +56,7 @@ public class StructureIsoPrinter extends IsometricPrinterScreen {
 	}
 
 	private void extractTemplateData(boolean expandJigsaw, ResourceLocation templateId) {
-		Template template = StructureTemplateSkimmer.getTemplate(templateId);
+		StructureTemplate template = StructureTemplateSkimmer.getTemplate(templateId);
 
 		if (template == null) {
 			WikiHelperCommand.error(this.commandSource, this.commandName, "Unable to find or load structure: '" + templateId + "'");
@@ -68,11 +68,11 @@ public class StructureIsoPrinter extends IsometricPrinterScreen {
 		boolean placeBlocks = true;
 
 		if (expandJigsaw) {
-			for (Template.BlockInfo block : template.palettes.get(0).blocks()) {
+			for (StructureTemplate.StructureBlockInfo block : template.palettes.get(0).blocks()) {
 				if (block.state.getBlock() instanceof JigsawBlock) {
 					world.setBlock(block.pos, block.state, 0);
 
-					JigsawTileEntity tile = (JigsawTileEntity)world.getBlockEntity(block.pos);
+					JigsawBlockEntity tile = (JigsawBlockEntity)world.getBlockEntity(block.pos);
 
 					if (tile.getPool() != null) {
 						generateJigsawPiece(template, tile);
@@ -83,12 +83,12 @@ public class StructureIsoPrinter extends IsometricPrinterScreen {
 		}
 
 		if (placeBlocks) {
-			for (Template.BlockInfo block : template.palettes.get(0).blocks()) {
+			for (StructureTemplate.StructureBlockInfo block : template.palettes.get(0).blocks()) {
 				world.setBlock(block.pos, block.state, 0);
 			}
 		}
 
-		Pair<Vector3i, List<Template.BlockInfo>> renderInfo = world.getChunkSource().compileBlocksIntoList();
+		Pair<Vec3i, List<StructureTemplate.StructureBlockInfo>> renderInfo = world.getChunkSource().compileBlocksIntoList();
 		this.renderSize = renderInfo.getFirst();
 		this.blocks.addAll(renderInfo.getSecond());
 	}
@@ -100,19 +100,19 @@ public class StructureIsoPrinter extends IsometricPrinterScreen {
 
 	@Override
 	protected void renderObject() {
-		MatrixStack matrix = new MatrixStack();
+		PoseStack matrix = new PoseStack();
 
 		withAlignedIsometricProjection(matrix, () -> {
-			BlockRendererDispatcher blockRenderer = this.minecraft.getBlockRenderer();
-			EntityRendererManager renderManager = this.minecraft.getEntityRenderDispatcher();
-			IRenderTypeBuffer.Impl renderBuffer = mc.renderBuffers().bufferSource();
+			BlockRenderDispatcher blockRenderer = this.minecraft.getBlockRenderer();
+			EntityRenderDispatcher renderManager = this.minecraft.getEntityRenderDispatcher();
+			MultiBufferSource.BufferSource renderBuffer = mc.renderBuffers().bufferSource();
 
 			renderManager.setRenderShadow(false);
 
 			try {
 				matrix.translate(0, Math.tan(this.renderSize.getX() / (float)this.renderSize.getZ()) * Math.sin(45f) / -Math.cos(35.264f), 0);
 
-				for (Template.BlockInfo block : this.blocks) {
+				for (StructureTemplate.StructureBlockInfo block : this.blocks) {
 					matrix.pushPose();
 					matrix.translate(block.pos.getX() - this.renderSize.getX() / 2f, block.pos.getY() - this.renderSize.getY() / 2f, block.pos.getZ() - this.renderSize.getZ() / 2f);
 					RenderUtil.renderStandardisedBlock(blockRenderer, matrix, renderBuffer, block.state, block.pos);
@@ -141,21 +141,21 @@ public class StructureIsoPrinter extends IsometricPrinterScreen {
 		FakeWorld.INSTANCE.reset();
 	}
 
-	protected void generateJigsawPiece(Template template, JigsawTileEntity tileEntity) {
+	protected void generateJigsawPiece(StructureTemplate template, JigsawBlockEntity tileEntity) {
 		Random rand = tileEntity.getLevel().getRandom();
 		BlockPos pos = tileEntity.getBlockPos();
-		List<AbstractVillagePiece> pieces = Lists.newArrayList();
-		TemplateManager templateManager = AoADimensions.OVERWORLD.getWorld().getStructureManager();
-		VillageConfig config = new VillageConfig(() -> FakeWorld.INSTANCE.registryAccess().registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY).get(tileEntity.getPool()), 15);
-		ChunkGenerator chunkGenerator = new FlatChunkGenerator(FlatGenerationSettings.getDefault(FakeWorld.INSTANCE.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY)));
-		AbstractVillagePiece villagePiece = new AbstractVillagePiece(templateManager, new SingleJigsawPiece(template), new BlockPos(0, 0, 0), 1, Rotation.NONE, new MutableBoundingBox(pos, pos));
+		List<PoolElementStructurePiece> pieces = Lists.newArrayList();
+		StructureManager templateManager = AoADimensions.OVERWORLD.getWorld().getStructureManager();
+		Registry<StructureSet> structureSetRegistry = FakeWorld.INSTANCE.registryAccess().registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
+		ChunkGenerator chunkGenerator = new FlatLevelSource(structureSetRegistry, FlatLevelGeneratorSettings.getDefault(FakeWorld.INSTANCE.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), structureSetRegistry));
+		PoolElementStructurePiece villagePiece = new PoolElementStructurePiece(templateManager, new SinglePoolElement(template), new BlockPos(0, 0, 0), 1, Rotation.NONE, new BoundingBox(pos));
 
-		JigsawManager.addPieces(FakeWorld.INSTANCE.registryAccess(), villagePiece, 10, AbstractVillagePiece::new, chunkGenerator, templateManager, pieces, rand);
+		JigsawPlacement.addPieces(FakeWorld.INSTANCE.registryAccess(), villagePiece, 10, PoolElementStructurePiece::new, chunkGenerator, templateManager, pieces, rand, tileEntity.getLevel());
 
 		pieces.add(villagePiece);
 
-		for (AbstractVillagePiece piece : pieces) {
-			piece.place((FakeWorld)tileEntity.getLevel(), FakeWorld.INSTANCE.getStructureManager(), chunkGenerator, rand, MutableBoundingBox.infinite(), pos, false);
+		for (PoolElementStructurePiece piece : pieces) {
+			piece.place((FakeWorld)tileEntity.getLevel(), FakeWorld.INSTANCE.getStructureManager(), chunkGenerator, rand, BoundingBox.infinite(), pos, false);
 		}
 	}
 }

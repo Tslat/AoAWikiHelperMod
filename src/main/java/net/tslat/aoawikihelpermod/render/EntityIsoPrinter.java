@@ -1,13 +1,14 @@
 package net.tslat.aoawikihelpermod.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.ResourceLocation;
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapter;
@@ -23,7 +24,7 @@ public class EntityIsoPrinter extends IsometricPrinterScreen {
 	protected ResourceLocation entityId;
 	protected Entity cachedEntity;
 
-	public EntityIsoPrinter(ResourceLocation entityId, int imageSize, float rotationAdjust, CommandSource commandSource, String commandName, Consumer<File> fileConsumer) {
+	public EntityIsoPrinter(ResourceLocation entityId, int imageSize, float rotationAdjust, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
 		super(imageSize, rotationAdjust, commandSource, commandName, fileConsumer);
 
 		this.entityId = entityId;
@@ -49,9 +50,9 @@ public class EntityIsoPrinter extends IsometricPrinterScreen {
 		}
 
 		this.cachedEntity.tickCount = 0;
-		this.cachedEntity.xRot = 0;
+		this.cachedEntity.setXRot(0);
 		this.cachedEntity.xRotO = 0;
-		this.cachedEntity.yRot = 0;
+		this.cachedEntity.setYRot(0);
 		this.cachedEntity.yRotO = 0;
 
 		if (cachedEntity instanceof LivingEntity) {
@@ -70,12 +71,13 @@ public class EntityIsoPrinter extends IsometricPrinterScreen {
 
 	@Override
 	protected void renderObject() {
-		MatrixStack matrix = new MatrixStack();
+		PoseStack matrix = new PoseStack();
 
 		withAlignedIsometricProjection(matrix, () -> {
-			EntityRendererManager renderManager = this.minecraft.getEntityRenderDispatcher();
-			IRenderTypeBuffer.Impl renderBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+			EntityRenderDispatcher renderManager = this.minecraft.getEntityRenderDispatcher();
+			MultiBufferSource.BufferSource renderBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 
+			Lighting.setupForEntityInInventory();
 			renderManager.setRenderShadow(false);
 
 			try {
@@ -89,11 +91,12 @@ public class EntityIsoPrinter extends IsometricPrinterScreen {
 
 			renderBuffer.endBatch();
 			renderManager.setRenderShadow(true);
+			Lighting.setupFor3DItems();
 		});
 	}
 
 	@Override
-	protected void makePreRenderAdjustments(MatrixStack matrix) {
+	protected void makePreRenderAdjustments(PoseStack matrix) {
 		matrix.translate(this.cachedEntity.getBbWidth() / 3.5f, -this.cachedEntity.getBbHeight() / 2f, 0);
 
 		for (IsoRenderAdapter<Entity> adapter : this.adapters) {
@@ -106,7 +109,7 @@ public class EntityIsoPrinter extends IsometricPrinterScreen {
 		return PrintHelper.configDir.toPath().resolve("Entity Renders").resolve(cachedEntity.getType().getRegistryName().getNamespace()).resolve(cachedEntity.getDisplayName().getString() + " - " + targetSize + "px.png").toFile();
 	}
 
-	protected boolean customRenderEntity(MatrixStack matrix, IRenderTypeBuffer renderBuffer) {
+	protected boolean customRenderEntity(PoseStack matrix, MultiBufferSource.BufferSource renderBuffer) {
 		for (IsoRenderAdapter<Entity> adapter : this.adapters) {
 			if (adapter.handleCustomRender(this.cachedEntity, matrix, renderBuffer))
 				return true;

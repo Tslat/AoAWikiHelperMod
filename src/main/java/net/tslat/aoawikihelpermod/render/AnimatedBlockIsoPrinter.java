@@ -1,16 +1,16 @@
 package net.tslat.aoawikihelpermod.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.block.BlockState;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector4f;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.texture.NativeImage;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
@@ -34,7 +34,7 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 
 	private final NativeImageGifWriter gifWriter;
 
-	public AnimatedBlockIsoPrinter(BlockState block, int imageSize, float rotationAdjust, CommandSource commandSource, String commandName, Consumer<File> fileConsumer) {
+	public AnimatedBlockIsoPrinter(BlockState block, int imageSize, float rotationAdjust, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
 		super(block, imageSize, rotationAdjust, commandSource, commandName, fileConsumer);
 
 		this.renderTicks = calculateRenderTickTime();
@@ -56,7 +56,7 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		if (gifWriter == null)
 			return;
 
@@ -150,16 +150,16 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 	}
 
 	private boolean isOnFirstFrame() {
-		BlockRendererDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
+		BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
 		Random rand = new Random();
 		int highestFrameTime = 0;
-		IBakedModel model = blockRenderer.getBlockModel(this.block);
+		BakedModel model = blockRenderer.getBlockModel(this.block);
 
 		for (Direction face : Direction.values()) {
 			rand.setSeed(42L);
 
 			for (BakedQuad quad : model.getQuads(this.block, face, rand, EmptyModelData.INSTANCE)) {
-				if (quad.getSprite().frame != 0 || quad.getSprite().subFrame != 0)
+				if (quad.getSprite().animatedTexture.frame != 0 || quad.getSprite().animatedTexture.subFrame != 0)
 					return false;
 			}
 		}
@@ -167,7 +167,7 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 		rand.setSeed(42L);
 
 		for (BakedQuad quad : model.getQuads(this.block, null, rand, EmptyModelData.INSTANCE)) {
-			if (quad.getSprite().frame != 0 || quad.getSprite().subFrame != 0)
+			if (quad.getSprite().animatedTexture.frame != 0 || quad.getSprite().animatedTexture.subFrame != 0)
 				return false;
 		}
 
@@ -175,10 +175,10 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 	}
 
 	private int calculateRenderTickTime() {
-		BlockRendererDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
+		BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
 		Random rand = new Random();
 		int highestFrameTime = 0;
-		IBakedModel model = blockRenderer.getBlockModel(this.block);
+		BakedModel model = blockRenderer.getBlockModel(this.block);
 
 		for (Direction face : Direction.values()) {
 			rand.setSeed(42L);
@@ -187,8 +187,8 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 				TextureAtlasSprite sprite = quad.getSprite();
 				int totalLength = 0;
 
-				for (int i = 0; i < sprite.metadata.getFrameCount(); i++) {
-					totalLength += sprite.metadata.getFrameTime(i);
+				for (TextureAtlasSprite.FrameInfo frameInfo : sprite.animatedTexture.frames) {
+					totalLength += frameInfo.time;
 				}
 
 				highestFrameTime = Math.max(highestFrameTime, totalLength);
@@ -201,8 +201,8 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 			TextureAtlasSprite sprite = quad.getSprite();
 			int totalLength = 0;
 
-			for (int i = 0; i < sprite.metadata.getFrameCount(); i++) {
-				totalLength += sprite.metadata.getFrameTime(i);
+			for (TextureAtlasSprite.FrameInfo frameInfo : sprite.animatedTexture.frames) {
+				totalLength += frameInfo.time;
 			}
 
 			highestFrameTime = Math.max(highestFrameTime, totalLength);

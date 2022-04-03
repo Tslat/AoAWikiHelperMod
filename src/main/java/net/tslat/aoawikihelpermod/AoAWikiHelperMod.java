@@ -2,18 +2,18 @@ package net.tslat.aoawikihelpermod;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.FileUtils;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.dataskimmers.*;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapters;
@@ -29,7 +29,7 @@ import static net.tslat.aoawikihelpermod.AoAWikiHelperMod.MOD_ID;
 
 @Mod(MOD_ID)
 public class AoAWikiHelperMod {
-	public static final String VERSION = "2.7.2";
+	public static final String VERSION = "2.8";
 	public static final String MOD_ID = "aoawikihelpermod";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
@@ -63,7 +63,7 @@ public class AoAWikiHelperMod {
 	}
 
 	@SubscribeEvent
-	public void serverStarted(FMLServerStartedEvent ev) {
+	public void serverStarted(ServerStartedEvent ev) {
 		FakeWorld.init();
 		BlockDataSkimmer.init();
 		ItemDataSkimmer.init();
@@ -82,30 +82,7 @@ public class AoAWikiHelperMod {
 
 	private void patchClickEvent() {
 		try {
-			ObfuscationReflectionHelper.setPrivateValue(ClickEvent.Action.class, ClickEvent.Action.OPEN_FILE, true, "field_150676_f");
-
-			/*Field targetField = null;
-
-			for (Field field : ClickEvent.Action.class.getDeclaredFields()) {
-				String fieldName = field.getName();
-
-				if (fieldName.equals("field_150676_f") || fieldName.equals("allowFromServer") || fieldName.equals("allowedInChat"))
-					targetField = field;
-			}
-
-			if (targetField == null) {
-				LOGGER.warn("Failed to patch in support for opening files from chat. Skipping");
-
-				return;
-			}
-
-			targetField.setAccessible(true);
-
-			Field modifiers = Field.class.getDeclaredField("modifiers");
-
-			modifiers.setAccessible(true);
-			modifiers.setInt(targetField, targetField.getModifiers() & ~Modifier.FINAL);
-			targetField.set(ClickEvent.Action.OPEN_FILE, true);*/
+			ObfuscationReflectionHelper.setPrivateValue(ClickEvent.Action.class, ClickEvent.Action.OPEN_FILE, true, "f_130635_");
 		}
 		catch (Exception ex) {
 			LOGGER.error("Failed to patch in support for opening files from chat. Skipping", ex);

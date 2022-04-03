@@ -2,11 +2,11 @@ package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.SmithingRecipe;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.UpgradeRecipe;
+import net.minecraft.world.level.block.Blocks;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
@@ -23,14 +23,14 @@ public class SmithingRecipeHandler extends RecipePrintHandler {
 
 	private final JsonObject rawRecipe;
 	@Nullable
-	private final SmithingRecipe recipe;
+	private final UpgradeRecipe recipe;
 
-	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
+	private final HashMap<Item, String[]> printoutData = new HashMap<>();
 
-	public SmithingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public SmithingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
 		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
-		this.recipe = (SmithingRecipe)recipe;
+		this.recipe = (UpgradeRecipe)recipe;
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class SmithingRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public List<ResourceLocation> getIngredientsForLookup() {
-		ArrayList<ResourceLocation> ingredients = new ArrayList<ResourceLocation>(2);
+		ArrayList<ResourceLocation> ingredients = new ArrayList<>(2);
 		ResourceLocation base = ObjectHelper.getIngredientItemId(this.rawRecipe.get("base"));
 		ResourceLocation addition = ObjectHelper.getIngredientItemId(this.rawRecipe.get("addition"));
 

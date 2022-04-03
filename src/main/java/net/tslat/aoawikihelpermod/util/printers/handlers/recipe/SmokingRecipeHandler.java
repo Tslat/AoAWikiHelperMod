@@ -2,12 +2,12 @@ package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.SmokingRecipe;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.SmokingRecipe;
+import net.minecraft.world.level.block.Blocks;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
@@ -28,7 +28,7 @@ public class SmokingRecipeHandler extends RecipePrintHandler {
 
 	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
-	public SmokingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public SmokingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
 		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
 		this.recipe = (SmokingRecipe)recipe;
@@ -74,8 +74,8 @@ public class SmokingRecipeHandler extends RecipePrintHandler {
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
 		Pair<String, String> input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("ingredient"));
 		Triple<Integer, String, String> output = ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result"));
-		float xp = JSONUtils.getAsFloat(rawRecipe, "experience", 0);
-		int cookingTime = JSONUtils.getAsInt(rawRecipe, "cookingtime", 100);
+		float xp = GsonHelper.getAsFloat(rawRecipe, "experience", 0);
+		int cookingTime = GsonHelper.getAsInt(rawRecipe, "cookingtime", 100);
 
 		String[] printData = new String[] {
 				FormattingHelper.createLinkableText(input.getSecond(), true, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) +

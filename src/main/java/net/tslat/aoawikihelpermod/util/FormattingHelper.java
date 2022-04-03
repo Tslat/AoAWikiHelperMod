@@ -1,23 +1,21 @@
 package net.tslat.aoawikihelpermod.util;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.BinomialRange;
-import net.minecraft.loot.ConstantRange;
-import net.minecraft.loot.IRandomRange;
-import net.minecraft.loot.RandomValueRange;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.storage.loot.providers.number.*;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.StringUtil;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 public class FormattingHelper {
 	public static String bold(String text) {
@@ -32,7 +30,7 @@ public class FormattingHelper {
 		return "{{hp|" + NumberUtil.roundToNthDecimalPlace(value, 2) + "}}";
 	}
 
-	public static String createImageBlock(IItemProvider item) {
+	public static String createImageBlock(ItemLike item) {
 		return createImageBlock(ObjectHelper.getItemName(item));
 	}
 
@@ -48,7 +46,7 @@ public class FormattingHelper {
 		return createLinkableItem(object.getItem(), object.getCount() > 1, shouldLink);
 	}
 
-	public static String createLinkableItem(IItemProvider object, boolean pluralise, boolean shouldLink) {
+	public static String createLinkableItem(ItemLike object, boolean pluralise, boolean shouldLink) {
 		return createLinkableText(ObjectHelper.getItemName(object.asItem()), pluralise, object.asItem().getRegistryName().getNamespace().equals("minecraft"), shouldLink);
 	}
 
@@ -69,17 +67,10 @@ public class FormattingHelper {
 	}
 
 	public static String createLinkableText(String text, boolean pluralise, boolean isVanilla, boolean shouldLink) {
-		shouldLink = shouldLink;// | isVanilla;
-
 		StringBuilder builder = new StringBuilder(shouldLink ? "[[" : "");
 		String pluralName = pluralise ? lazyPluralise(text) : text;
 
-		if (false && isVanilla) { // Not redirecting mcw links anymore
-			builder.append("mcw:");
-			builder.append(text);
-			builder.append("|");
-		}
-		else if (shouldLink && !pluralName.equals(text)) {
+		if (shouldLink && !pluralName.equals(text)) {
 			builder.append(text);
 			builder.append("|");
 		}
@@ -96,19 +87,19 @@ public class FormattingHelper {
 		return !text.endsWith("s") && !text.endsWith("y") ? text.endsWith("x") || text.endsWith("o") ? text + "es" : text + "s" : text;
 	}
 
-	public static IFormattableTextComponent generateResultMessage(File file, String linkName, @Nullable String clipboardContent) {
+	public static MutableComponent generateResultMessage(File file, String linkName, @Nullable String clipboardContent) {
 		String fileUrl = file.getAbsolutePath().replace("\\", "/");
-		IFormattableTextComponent component = new StringTextComponent("Generated data file: ")
-				.append(new StringTextComponent(linkName).withStyle(style -> style.withColor(TextFormatting.BLUE)
+		MutableComponent component = new TextComponent("Generated data file: ")
+				.append(new TextComponent(linkName).withStyle(style -> style.withColor(ChatFormatting.BLUE)
 						.setUnderlined(true)
 						.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, fileUrl))));
 
 		if (clipboardContent != null) {
 				component
-						.append(new StringTextComponent(" "))
-						.append(new StringTextComponent("(Copy)").withStyle(style -> style.withColor(TextFormatting.BLUE)
+						.append(new TextComponent(" "))
+						.append(new TextComponent("(Copy)").withStyle(style -> style.withColor(ChatFormatting.BLUE)
 								.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, clipboardContent))
-								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Copy contents of file to clipboard")))));
+								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Copy contents of file to clipboard")))));
 		}
 
 		return component;
@@ -128,23 +119,50 @@ public class FormattingHelper {
 		return builder.toString();
 	}
 
-	public static String getStringFromRange(IRandomRange range) {
-		if (range instanceof ConstantRange)
-			return String.valueOf(((ConstantRange)range).value);
+	public static Optional<Float> tryParseFloat(String value) {
+		try {
+			return Optional.of(Float.parseFloat(value));
+		}
+		catch (NumberFormatException ex) {
+			return Optional.empty();
+		}
+	}
 
-		if (range instanceof RandomValueRange) {
-			RandomValueRange randomRange = (RandomValueRange)range;
+	public static String getStringFromRange(NumberProvider range) {
+		if (range instanceof ConstantValue)
+			return String.valueOf(((ConstantValue)range).value);
 
-			if (randomRange.getMin() != randomRange.getMax()) {
-				return NumberUtil.roundToNthDecimalPlace(randomRange.getMin(), 3) + "-" + NumberUtil.roundToNthDecimalPlace(randomRange.getMax(), 3);
+		if (range instanceof BinomialDistributionGenerator)
+			return "0+";
+
+		if (range instanceof UniformGenerator randomRange) {
+			String min = getStringFromRange(randomRange.min);
+			String max = getStringFromRange(randomRange.max);
+
+			if (!randomRange.min.equals(randomRange.max)) {
+				Optional<Float> minValue = tryParseFloat(min);
+				Optional<Float> maxValue = tryParseFloat(max);
+
+				return (minValue.isPresent() ? NumberUtil.roundToNthDecimalPlace(minValue.get(), 3) : min) + "-" + (maxValue.isPresent() ? NumberUtil.roundToNthDecimalPlace(maxValue.get(), 3) : max);
 			}
 			else {
-				return NumberUtil.roundToNthDecimalPlace(randomRange.getMin(), 3);
+				Optional<Float> value = tryParseFloat(min);
+
+				if (value.isPresent())
+					return NumberUtil.roundToNthDecimalPlace(value.get(), 3);
+
+				return min;
 			}
 		}
 
-		if (range instanceof BinomialRange)
-			return "0+";
+		if (range instanceof ScoreboardValue scoreboardValue) {
+			String val = "Scoreboard value of '" + scoreboardValue.score + "'";
+
+			if (scoreboardValue.scale != 0)
+				val += " * " + NumberUtil.roundToNthDecimalPlace(scoreboardValue.scale, 3);
+
+			return val;
+		}
 
 		return "1";
 	}

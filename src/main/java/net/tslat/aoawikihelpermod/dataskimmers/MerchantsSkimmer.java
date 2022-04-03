@@ -3,20 +3,20 @@ package net.tslat.aoawikihelpermod.dataskimmers;
 import com.google.common.collect.HashMultimap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.merchant.villager.VillagerEntity;
-import net.minecraft.entity.merchant.villager.VillagerProfession;
-import net.minecraft.entity.merchant.villager.VillagerTrades;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.MerchantOffer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.content.entity.base.AoATrader;
@@ -24,23 +24,22 @@ import net.tslat.aoa3.content.entity.npc.trader.UndeadHeraldEntity;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.MerchantTradePrintHandler;
-import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
 public class MerchantsSkimmer {
-	public static final HashMap<VillagerProfession, Int2ObjectMap<ArrayList<MerchantTradePrintHandler>>> TRADE_PRINTERS_BY_PROFESSION = new HashMap<VillagerProfession, Int2ObjectMap<ArrayList<MerchantTradePrintHandler>>>();
-	public static final HashMap<ResourceLocation, Int2ObjectMap<ArrayList<MerchantTradePrintHandler>>> TRADE_PRINTERS_BY_AOA_TRADER = new HashMap<ResourceLocation, Int2ObjectMap<ArrayList<MerchantTradePrintHandler>>>();
+	public static final HashMap<VillagerProfession, Int2ObjectMap<ArrayList<MerchantTradePrintHandler>>> TRADE_PRINTERS_BY_PROFESSION = new HashMap<>();
+	public static final HashMap<ResourceLocation, Int2ObjectMap<ArrayList<MerchantTradePrintHandler>>> TRADE_PRINTERS_BY_AOA_TRADER = new HashMap<>();
 
 	public static final HashMultimap<ResourceLocation, MerchantTradePrintHandler> TRADES_BY_COST = HashMultimap.create();
 	public static final HashMultimap<ResourceLocation, MerchantTradePrintHandler> TRADES_BY_ITEM = HashMultimap.create();
 
-	private static VillagerEntity merchantInstance = null;
+	private static Villager merchantInstance = null;
 
 	public static void init(MinecraftServer server) {
-		ServerWorld world = server.getLevel(World.OVERWORLD);
+		ServerLevel world = server.getLevel(Level.OVERWORLD);
 
 		if (world == null)
 			return;
@@ -52,15 +51,15 @@ public class MerchantsSkimmer {
 
 		for (VillagerProfession profession : ForgeRegistries.PROFESSIONS.getValues()) {
 			ResourceLocation id = profession.getRegistryName();
-			Int2ObjectMap<VillagerTrades.ITrade[]> trades = VillagerTrades.TRADES.get(profession);
+			Int2ObjectMap<VillagerTrades.ItemListing[]> trades = VillagerTrades.TRADES.get(profession);
 
 			for (int i = 1; i <= 5; i++) {
 				if (!trades.containsKey(i))
 					continue;
 
-				VillagerTrades.ITrade[] offers = trades.get(i);
+				VillagerTrades.ItemListing[] offers = trades.get(i);
 
-				for (VillagerTrades.ITrade offer : offers) {
+				for (VillagerTrades.ItemListing offer : offers) {
 					mapTradeToIngredients(world, profession, i, offer);
 				}
 			}
@@ -68,14 +67,14 @@ public class MerchantsSkimmer {
 
 		for (EntityType<?> entityType : ObjectHelper.scrapeRegistryForEntities(type -> type.getRegistryName().getNamespace().equals(AdventOfAscension.MOD_ID))) {
 			try {
-				Entity entity = entityType.create(world, null, null, null, new BlockPos(0, 100, 0), SpawnReason.TRIGGERED, false, false);
+				Entity entity = entityType.create(world, null, null, null, new BlockPos(0, 100, 0), MobSpawnType.TRIGGERED, false, false);
 
 				if (entity == null)
 					continue;
 
 				if (entity instanceof AoATrader) {
 					AoATrader trader = (AoATrader)entity;
-					Int2ObjectMap<VillagerTrades.ITrade[]> trades = trader.getTradesMap();
+					Int2ObjectMap<VillagerTrades.ItemListing[]> trades = trader.getTradesMap();
 
 					if (trades == null)
 						continue;
@@ -84,15 +83,15 @@ public class MerchantsSkimmer {
 						if (!trades.containsKey(i))
 							continue;
 
-						VillagerTrades.ITrade[] offers = trades.get(i);
+						VillagerTrades.ItemListing[] offers = trades.get(i);
 
-						for (VillagerTrades.ITrade offer : offers) {
+						for (VillagerTrades.ItemListing offer : offers) {
 							mapTradeToIngredients(trader, i, offer);
 						}
 					}
 
 					if (trader instanceof UndeadHeraldEntity) {
-						for (ServerWorld tradeWorld : server.getAllLevels()) {
+						for (ServerLevel tradeWorld : server.getAllLevels()) {
 							MerchantOffer offer = ((UndeadHeraldEntity)trader).getAdditionalBannerTrade(tradeWorld);
 
 							if (offer != null)
@@ -101,10 +100,10 @@ public class MerchantsSkimmer {
 					}
 				}
 
-				entity.remove();
+				entity.discard();
 			}
 			catch (Exception ex) {
-				AoAWikiHelperMod.LOGGER.log(Level.ERROR, "Unable to instantiate entity, skipping", ex);
+				AoAWikiHelperMod.LOGGER.log(org.apache.logging.log4j.Level.ERROR, "Unable to instantiate entity, skipping", ex);
 			}
 		}
 	}
@@ -114,7 +113,7 @@ public class MerchantsSkimmer {
 		Int2ObjectMap<ArrayList<MerchantTradePrintHandler>> tradeMap = TRADE_PRINTERS_BY_AOA_TRADER.get(trader.getType().getRegistryName());
 
 		if (tradeMap == null) {
-			tradeMap = new Int2ObjectOpenHashMap<ArrayList<MerchantTradePrintHandler>>();
+			tradeMap = new Int2ObjectOpenHashMap<>();
 
 			TRADE_PRINTERS_BY_AOA_TRADER.put(trader.getType().getRegistryName(), tradeMap);
 		}
@@ -122,7 +121,7 @@ public class MerchantsSkimmer {
 		ArrayList<MerchantTradePrintHandler> tieredTrades = tradeMap.get(professionLevel);
 
 		if (tieredTrades == null) {
-			tieredTrades = new ArrayList<MerchantTradePrintHandler>();
+			tieredTrades = new ArrayList<>();
 
 			tradeMap.put(professionLevel, tieredTrades);
 		}
@@ -136,25 +135,25 @@ public class MerchantsSkimmer {
 		TRADES_BY_ITEM.put(offer.getResult().getItem().getRegistryName(), handler);
 	}
 
-	private static void mapTradeToIngredients(AoATrader trader, int professionLevel, VillagerTrades.ITrade trade) {
+	private static void mapTradeToIngredients(AoATrader trader, int professionLevel, VillagerTrades.ItemListing trade) {
 		MerchantOffer offer = trade.getOffer(trader, new Random());
 
 		if (offer != null)
 			mapTradeToIngredients(trader, professionLevel, offer);
 	}
 
-	private static void mapTradeToIngredients(ServerWorld world, VillagerProfession profession, int professionLevel, VillagerTrades.ITrade trade) {
+	private static void mapTradeToIngredients(ServerLevel world, VillagerProfession profession, int professionLevel, VillagerTrades.ItemListing trade) {
 		if (merchantInstance == null) {
-			merchantInstance = new VillagerEntity(EntityType.VILLAGER, world);
-			merchantInstance.finalizeSpawn(world, world.getCurrentDifficultyAt(new BlockPos(0, 0, 0)), SpawnReason.TRIGGERED, null, null);
+			merchantInstance = new Villager(EntityType.VILLAGER, world);
+			merchantInstance.finalizeSpawn(world, world.getCurrentDifficultyAt(new BlockPos(0, 0, 0)), MobSpawnType.TRIGGERED, null, null);
 		}
 
 		merchantInstance.setVillagerData(merchantInstance.getVillagerData().setProfession(profession));
 
 		MerchantOffer offer;
 
-		if (trade instanceof VillagerTrades.EmeraldForMapTrade) {
-			VillagerTrades.EmeraldForMapTrade emeraldTrade = (VillagerTrades.EmeraldForMapTrade)trade;
+		if (trade instanceof VillagerTrades.TreasureMapForEmeralds) {
+			VillagerTrades.TreasureMapForEmeralds emeraldTrade = (VillagerTrades.TreasureMapForEmeralds)trade;
 
 			offer = new MerchantOffer(new ItemStack(Items.EMERALD, emeraldTrade.emeraldCost), new ItemStack(Items.COMPASS), new ItemStack(Items.FILLED_MAP), emeraldTrade.maxUses, emeraldTrade.villagerXp, 0.2f);
 		}
@@ -169,7 +168,7 @@ public class MerchantsSkimmer {
 		Int2ObjectMap<ArrayList<MerchantTradePrintHandler>> tradeMap = TRADE_PRINTERS_BY_PROFESSION.get(profession);
 
 		if (tradeMap == null) {
-			tradeMap = new Int2ObjectOpenHashMap<ArrayList<MerchantTradePrintHandler>>();
+			tradeMap = new Int2ObjectOpenHashMap<>();
 
 			TRADE_PRINTERS_BY_PROFESSION.put(profession, tradeMap);
 		}
@@ -177,7 +176,7 @@ public class MerchantsSkimmer {
 		ArrayList<MerchantTradePrintHandler> tieredTrades = tradeMap.get(professionLevel);
 
 		if (tieredTrades == null) {
-			tieredTrades = new ArrayList<MerchantTradePrintHandler>();
+			tieredTrades = new ArrayList<>();
 
 			tradeMap.put(professionLevel, tieredTrades);
 		}

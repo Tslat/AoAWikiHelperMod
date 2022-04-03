@@ -1,11 +1,11 @@
 package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonObject;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.Tags;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
@@ -23,7 +23,7 @@ public class ShulkerColourRecipeHandler extends RecipePrintHandler {
 
 	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
-	public ShulkerColourRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public ShulkerColourRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
 		this.recipeId = recipeId;
 	}
 
@@ -46,7 +46,7 @@ public class ShulkerColourRecipeHandler extends RecipePrintHandler {
 	public List<ResourceLocation> getIngredientsForLookup() {
 		return Arrays.asList(
 				Blocks.SHULKER_BOX.getRegistryName(),
-				Tags.Items.DYES.getName()
+				Tags.Items.DYES.location()
 		);
 	}
 
@@ -63,7 +63,7 @@ public class ShulkerColourRecipeHandler extends RecipePrintHandler {
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(9);
 
 		ingredientsHandler.addIngredient(ObjectHelper.getItemName(Blocks.SHULKER_BOX), "minecraft");
-		ingredientsHandler.addIngredient(StringUtil.toTitleCase(Tags.Items.DYES.getName().getPath()), "minecraft");
+		ingredientsHandler.addIngredient(StringUtil.toTitleCase(Tags.Items.DYES.location().getPath()), "minecraft");
 		ingredientsHandler.addOutput(new ItemStack(Blocks.SHULKER_BOX));
 		String targetItemName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
 

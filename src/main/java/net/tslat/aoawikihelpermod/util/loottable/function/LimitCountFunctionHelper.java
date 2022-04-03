@@ -1,6 +1,6 @@
 package net.tslat.aoawikihelpermod.util.loottable.function;
 
-import net.minecraft.loot.functions.LimitCount;
+import net.minecraft.world.level.storage.loot.functions.LimitCount;
 
 import javax.annotation.Nonnull;
 

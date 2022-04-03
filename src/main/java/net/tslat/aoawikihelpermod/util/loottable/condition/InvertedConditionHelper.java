@@ -1,14 +1,14 @@
 package net.tslat.aoawikihelpermod.util.loottable.condition;
 
-import net.minecraft.loot.conditions.Inverted;
+import net.minecraft.world.level.storage.loot.predicates.InvertedLootItemCondition;
 import net.tslat.aoawikihelpermod.util.LootTableHelper;
 
 import javax.annotation.Nonnull;
 
-public class InvertedConditionHelper extends LootConditionHelper<Inverted> {
+public class InvertedConditionHelper extends LootConditionHelper<InvertedLootItemCondition> {
 	@Nonnull
 	@Override
-	public String getDescription(Inverted condition) {
+	public String getDescription(InvertedLootItemCondition condition) {
 		String termDescription = LootTableHelper.getConditionDescription(condition.term);
 
 		if (termDescription.length() < 3)

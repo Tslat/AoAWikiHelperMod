@@ -1,16 +1,18 @@
 package net.tslat.aoawikihelpermod.util;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.PotionItem;
-import net.minecraft.loot.*;
-import net.minecraft.loot.conditions.*;
-import net.minecraft.loot.functions.*;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.PotionUtils;
-import net.minecraft.tags.ITag;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.PotionItem;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.*;
+import net.minecraft.world.level.storage.loot.functions.*;
+import net.minecraft.world.level.storage.loot.predicates.*;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.common.registration.AoABlocks;
 import net.tslat.aoa3.content.loottable.condition.HoldingItem;
 import net.tslat.aoa3.content.loottable.condition.PlayerHasLevel;
@@ -31,43 +33,43 @@ import java.util.HashMap;
 import java.util.List;
 
 public class LootTableHelper {
-	private static final HashMap<Class<? extends ILootCondition>, LootConditionHelper<? extends ILootCondition>> CONDITION_DESCRIPTORS = new HashMap<Class<? extends ILootCondition>, LootConditionHelper<? extends ILootCondition>>();
-	private static final HashMap<Class<? extends ILootFunction>, LootFunctionHelper<? extends ILootFunction>> FUNCTION_DESCRIPTORS = new HashMap<Class<? extends ILootFunction>, LootFunctionHelper<? extends ILootFunction>>();
+	private static final HashMap<Class<? extends LootItemCondition>, LootConditionHelper<? extends LootItemCondition>> CONDITION_DESCRIPTORS = new HashMap<>();
+	private static final HashMap<Class<? extends LootItemFunction>, LootFunctionHelper<? extends LootItemFunction>> FUNCTION_DESCRIPTORS = new HashMap<>();
 	private static final Field lootTablePoolsField;
 	private static final Field lootPoolEntriesField;
 	private static final Field lootPoolConditionsField;
 
 	static {
-		lootTablePoolsField = ObfuscationReflectionHelper.findField(LootTable.class, "field_186466_c");
-		lootPoolEntriesField = ObfuscationReflectionHelper.findField(LootPool.class, "field_186453_a");
-		lootPoolConditionsField = ObfuscationReflectionHelper.findField(LootPool.class, "field_186454_b");
+		lootTablePoolsField = ObfuscationReflectionHelper.findField(LootTable.class, "f_79109_");
+		lootPoolEntriesField = ObfuscationReflectionHelper.findField(LootPool.class, "f_79023_");
+		lootPoolConditionsField = ObfuscationReflectionHelper.findField(LootPool.class, "f_79024_");
 	}
 
 	public static void init() {
-		CONDITION_DESCRIPTORS.put(Alternative.class, new AlternativeConditionHelper());
-		CONDITION_DESCRIPTORS.put(BlockStateProperty.class, new BlockStatePropertyConditionHelper());
-		CONDITION_DESCRIPTORS.put(DamageSourceProperties.class, new DamageSourcePropertiesConditionHelper());
-		CONDITION_DESCRIPTORS.put(EntityHasProperty.class, new EntityHasPropertyConditionHelper());
-		CONDITION_DESCRIPTORS.put(EntityHasScore.class, new EntityHasScoreConditionHelper());
+		CONDITION_DESCRIPTORS.put(AlternativeLootItemCondition.class, new AlternativeConditionHelper());
+		CONDITION_DESCRIPTORS.put(LootItemBlockStatePropertyCondition.class, new BlockStatePropertyConditionHelper());
+		CONDITION_DESCRIPTORS.put(DamageSourceCondition.class, new DamageSourcePropertiesConditionHelper());
+		CONDITION_DESCRIPTORS.put(LootItemEntityPropertyCondition.class, new EntityHasPropertyConditionHelper());
+		CONDITION_DESCRIPTORS.put(EntityHasScoreCondition.class, new EntityHasScoreConditionHelper());
 		CONDITION_DESCRIPTORS.put(HoldingItem.class, new HoldingItemConditionHelper());
-		CONDITION_DESCRIPTORS.put(Inverted.class, new InvertedConditionHelper());
-		CONDITION_DESCRIPTORS.put(KilledByPlayer.class, new KilledByPlayerConditionHelper());
+		CONDITION_DESCRIPTORS.put(InvertedLootItemCondition.class, new InvertedConditionHelper());
+		CONDITION_DESCRIPTORS.put(LootItemKilledByPlayerCondition.class, new KilledByPlayerConditionHelper());
 		CONDITION_DESCRIPTORS.put(LocationCheck.class, new LocationCheckConditionHelper());
 		CONDITION_DESCRIPTORS.put(MatchTool.class, new MatchToolConditionHelper());
 		CONDITION_DESCRIPTORS.put(PlayerHasLevel.class, new PlayerHasLevelConditionHelper());
 		CONDITION_DESCRIPTORS.put(PlayerHasResource.class, new PlayerHasResourceConditionHelper());
-		CONDITION_DESCRIPTORS.put(RandomChance.class, new RandomChanceConditionHelper());
-		CONDITION_DESCRIPTORS.put(RandomChanceWithLooting.class, new RandomChanceWithLootingConditionHelper());
-		CONDITION_DESCRIPTORS.put(TableBonus.class, new TableBonusConditionHelper());
+		CONDITION_DESCRIPTORS.put(LootItemRandomChanceCondition.class, new RandomChanceConditionHelper());
+		CONDITION_DESCRIPTORS.put(LootItemRandomChanceWithLootingCondition.class, new RandomChanceWithLootingConditionHelper());
+		CONDITION_DESCRIPTORS.put(BonusLevelTableCondition.class, new TableBonusConditionHelper());
 		CONDITION_DESCRIPTORS.put(WeatherCheck.class, new WeatherCheckConditionHelper());
 
-		FUNCTION_DESCRIPTORS.put(ApplyBonus.class, new ApplyBonusFunctionHelper());
-		FUNCTION_DESCRIPTORS.put(EnchantWithLevels.class, new EnchantWithLevelsFunctionHelper());
-		FUNCTION_DESCRIPTORS.put(EnchantRandomly.class, new EnchantRandomlyFunctionHelper());
+		FUNCTION_DESCRIPTORS.put(ApplyBonusCount.class, new ApplyBonusFunctionHelper());
+		FUNCTION_DESCRIPTORS.put(EnchantWithLevelsFunction.class, new EnchantWithLevelsFunctionHelper());
+		FUNCTION_DESCRIPTORS.put(EnchantRandomlyFunction.class, new EnchantRandomlyFunctionHelper());
 		FUNCTION_DESCRIPTORS.put(EnchantSpecific.class, new EnchantSpecificFunctionHelper());
 		FUNCTION_DESCRIPTORS.put(LimitCount.class, new LimitCountFunctionHelper());
 		FUNCTION_DESCRIPTORS.put(GrantSkillXp.class, new GrantSkillXpFunctionHelper());
-		FUNCTION_DESCRIPTORS.put(Smelt.class, new SmeltFunctionHelper());
+		FUNCTION_DESCRIPTORS.put(SmeltItemFunction.class, new SmeltFunctionHelper());
 	}
 
 	public static List<LootPool> getPools(LootTable table) {
@@ -81,9 +83,9 @@ public class LootTableHelper {
 		return ImmutableList.of();
 	}
 
-	public static List<LootEntry> getLootEntries(LootPool pool) {
+	public static List<LootPoolEntryContainer> getLootEntries(LootPool pool) {
 		try {
-			return (List<LootEntry>)lootPoolEntriesField.get(pool);
+			return List.of((LootPoolEntryContainer[])lootPoolEntriesField.get(pool));
 		}
 		catch (Exception ex) {
 			AoAWikiHelperMod.LOGGER.log(Level.ERROR, "Failed to get loot entries from reflected entries field.");
@@ -92,9 +94,9 @@ public class LootTableHelper {
 		return ImmutableList.of();
 	}
 
-	public static List<ILootCondition> getConditions(LootPool pool) {
+	public static List<LootItemCondition> getConditions(LootPool pool) {
 		try {
-			return (List<ILootCondition>)lootPoolConditionsField.get(pool);
+			return List.of((LootItemCondition[])lootPoolConditionsField.get(pool));
 		}
 		catch (Exception ex) {
 			AoAWikiHelperMod.LOGGER.log(Level.ERROR, "Failed to get loot pool conditions from reflected conditions field.");
@@ -104,7 +106,7 @@ public class LootTableHelper {
 	}
 
 	@Nonnull
-	public static String getConditionDescription(ILootCondition lootCondition) {
+	public static String getConditionDescription(LootItemCondition lootCondition) {
 		if (!CONDITION_DESCRIPTORS.containsKey(lootCondition.getClass()))
 			return "";
 
@@ -112,20 +114,20 @@ public class LootTableHelper {
 	}
 
 	@Nonnull
-	public static String getFunctionDescription(ILootFunction lootFunction) {
+	public static String getFunctionDescription(LootItemFunction lootFunction) {
 		if (!FUNCTION_DESCRIPTORS.containsKey(lootFunction.getClass()))
 			return "";
 
 		return FUNCTION_DESCRIPTORS.get(lootFunction.getClass()).getDescriptor(lootFunction);
 	}
 
-	public static String getConditionsDescription(String target, Collection<ILootCondition> conditions) {
+	public static String getConditionsDescription(String target, Collection<LootItemCondition> conditions) {
 		if (conditions.isEmpty())
 			return "";
 
 		StringBuilder builder = new StringBuilder("This ").append(target).append(" will only roll ");
 		int initialLength = builder.length();
-		ILootCondition[] conditionArray = conditions.toArray(new ILootCondition[0]);
+		LootItemCondition[] conditionArray = conditions.toArray(new LootItemCondition[0]);
 
 		for (int i = 0; i < conditionArray.length; i++) {
 			String conditionDescription = getConditionDescription(conditionArray[i]);
@@ -155,18 +157,18 @@ public class LootTableHelper {
 		return builder.toString();
 	}
 
-	public static String getFunctionsDescription(String target, Collection<ILootFunction> functions) {
+	public static String getFunctionsDescription(String target, Collection<LootItemFunction> functions) {
 		if (functions.isEmpty())
 			return "";
 
 		StringBuilder builder = new StringBuilder("This ").append(target).append(" ");
 		int initialLength = builder.length();
-		ILootFunction[] functionsArray = functions.toArray(new ILootFunction[0]);
+		LootItemFunction[] functionsArray = functions.toArray(new LootItemFunction[0]);
 
 		for (int i = 0; i < functionsArray.length; i++) {
-			ILootFunction function = functionsArray[i];
+			LootItemFunction function = functionsArray[i];
 
-			if (function instanceof SetCount || function instanceof LootingEnchantBonus)
+			if (function instanceof SetItemCountFunction || function instanceof LootingEnchantFunction)
 				continue;
 
 			String functionDescription = getFunctionDescription(function);
@@ -190,23 +192,23 @@ public class LootTableHelper {
 		return builder.toString();
 	}
 
-	public static String getLootEntryLine(int poolIndex, LootEntry entry, List<ILootCondition> conditions) {
-		if (entry instanceof EmptyLootEntry)
-			return getEmptyLootEntryLine(poolIndex, (EmptyLootEntry)entry, conditions, Arrays.asList(((EmptyLootEntry)entry).functions));
+	public static String getLootEntryLine(int poolIndex, LootPoolEntryContainer entry, List<LootItemCondition> conditions) {
+		if (entry instanceof EmptyLootItem)
+			return getEmptyLootEntryLine(poolIndex, (EmptyLootItem)entry, conditions, Arrays.asList(((EmptyLootItem)entry).functions));
 
-		if (entry instanceof ItemLootEntry)
-			return getItemLootEntryLine(poolIndex, (ItemLootEntry)entry, conditions, Arrays.asList(((ItemLootEntry)entry).functions));
+		if (entry instanceof LootItem)
+			return getItemLootEntryLine(poolIndex, (LootItem)entry, conditions, Arrays.asList(((LootItem)entry).functions));
 
-		if (entry instanceof TagLootEntry)
-			return getTagLootEntryLine(poolIndex, (TagLootEntry)entry, conditions, Arrays.asList(((TagLootEntry)entry).functions));
+		if (entry instanceof TagEntry)
+			return getTagLootEntryLine(poolIndex, (TagEntry)entry, conditions, Arrays.asList(((TagEntry)entry).functions));
 
-		if (entry instanceof TableLootEntry)
-			return getTableLootEntryLine(poolIndex, (TableLootEntry)entry, conditions, Arrays.asList(((TableLootEntry)entry).functions));
+		if (entry instanceof LootTableReference)
+			return getTableLootEntryLine(poolIndex, (LootTableReference)entry, conditions, Arrays.asList(((LootTableReference)entry).functions));
 
 		return "";
 	}
 
-	private static String getEmptyLootEntryLine(int poolIndex, EmptyLootEntry entry, List<ILootCondition> conditions, List<ILootFunction> functions) {
+	private static String getEmptyLootEntryLine(int poolIndex, EmptyLootItem entry, List<LootItemCondition> conditions, List<LootItemFunction> functions) {
 		StringBuilder entryNotesBuilder = new StringBuilder();
 		StringBuilder entryBuilder = new StringBuilder("group:" + poolIndex + "; item:");
 		String looting = getLootingString(functions);
@@ -247,26 +249,26 @@ public class LootTableHelper {
 		return entryBuilder.toString();
 	}
 
-	private static String getItemLootEntryLine(int poolIndex, ItemLootEntry entry, List<ILootCondition> conditions, List<ILootFunction> functions) {
+	private static String getItemLootEntryLine(int poolIndex, LootItem entry, List<LootItemCondition> conditions, List<LootItemFunction> functions) {
 		StringBuilder entryNotesBuilder = new StringBuilder();
 		StringBuilder entryBuilder = new StringBuilder("group:" + poolIndex + "; item:");
 		String looting = getLootingString(functions);
 		String itemName = ObjectHelper.getItemName(entry.item);
 
 		if (entry.item instanceof PotionItem) {
-			for (ILootFunction function : entry.functions) {
-				if (function instanceof SetNBT) {
+			for (LootItemFunction function : entry.functions) {
+				if (function instanceof SetNbtFunction) {
 					ItemStack potionStack = new ItemStack(entry.item);
 
-					((SetNBT)function).run(potionStack, null);
+					((SetNbtFunction)function).run(potionStack, null);
 					entryBuilder.append(potionStack.getHoverName().getString()).append("; image:").append(ObjectHelper.getItemName(entry.item)).append(".png;");
 
-					List<EffectInstance> effects = PotionUtils.getMobEffects(potionStack);
+					List<MobEffectInstance> effects = PotionUtils.getMobEffects(potionStack);
 
 					if (!effects.isEmpty()) {
 						entryNotesBuilder.append("<br/>Effects:");
 
-						for (EffectInstance effect : effects) {
+						for (MobEffectInstance effect : effects) {
 							entryNotesBuilder.append("<br/>").append(effect.getEffect().getDisplayName().getString()).append(" ").append(effect.getAmplifier() + 1);
 							entryNotesBuilder.append(" (").append(FormattingHelper.getTimeFromTicks(effect.getDuration())).append(")");
 						}
@@ -277,11 +279,11 @@ public class LootTableHelper {
 			}
 		}
 		else if (entry.item == AoABlocks.TROPHY.get().asItem()) {
-			for (ILootFunction function : entry.functions) {
-				if (function instanceof SetNBT) {
+			for (LootItemFunction function : entry.functions) {
+				if (function instanceof SetNbtFunction) {
 					ItemStack trophyStack = new ItemStack(entry.item);
 
-					((SetNBT)function).run(trophyStack, null);
+					((SetNbtFunction)function).run(trophyStack, null);
 					entryBuilder.append(trophyStack.getHoverName().getString()).append("; image:").append(ObjectHelper.getItemName(entry.item)).append(".png;");
 
 					break;
@@ -330,11 +332,11 @@ public class LootTableHelper {
 		return entryBuilder.toString();
 	}
 
-	private static String getTagLootEntryLine(int poolIndex, TagLootEntry entry, List<ILootCondition> conditions, List<ILootFunction> functions) {
+	private static String getTagLootEntryLine(int poolIndex, TagEntry entry, List<LootItemCondition> conditions, List<LootItemFunction> functions) {
 		StringBuilder entryNotesBuilder = new StringBuilder();
 		StringBuilder entryBuilder = new StringBuilder("group:" + poolIndex + "; item:");
 		String looting = getLootingString(functions);
-		List<Item> tagItems = entry.tag.getValues();
+		List<Item> tagItems = ForgeRegistries.ITEMS.tags().getTag(entry.tag).stream().toList();
 
 		if (tagItems.isEmpty()) {
 			entryBuilder.append("Varies; image:none;");
@@ -351,12 +353,7 @@ public class LootTableHelper {
 		if (!looting.isEmpty())
 			entryBuilder.append(" looting:").append(looting).append(";");
 
-		if (entry.tag instanceof ITag.INamedTag) {
-			entryNotesBuilder.append("Randomly selects item from anything tagged as ").append(FormattingHelper.createLinkableTag(((ITag.INamedTag<?>)entry.tag).getName().toString()));
-		}
-		else {
-			entryNotesBuilder.append("Randomly selects item from anything with same tag");
-		}
+		entryNotesBuilder.append("Randomly selects item from anything tagged as ").append(FormattingHelper.createLinkableTag(entry.tag.location().toString()));
 
 		if (entry.quality != 0) {
 			if (entryNotesBuilder.length() > 0)
@@ -390,7 +387,7 @@ public class LootTableHelper {
 		return entryBuilder.toString();
 	}
 
-	private static String getTableLootEntryLine(int poolIndex, TableLootEntry entry, List<ILootCondition> conditions, List<ILootFunction> functions) {
+	private static String getTableLootEntryLine(int poolIndex, LootTableReference entry, List<LootItemCondition> conditions, List<LootItemFunction> functions) {
 		StringBuilder entryNotesBuilder = new StringBuilder();
 		StringBuilder entryBuilder = new StringBuilder("group:" + poolIndex + "; image:none; item:");
 		String looting = getLootingString(functions);
@@ -447,31 +444,19 @@ public class LootTableHelper {
 		return entryBuilder.toString();
 	}
 
-	private static String getQuantityString(List<ILootFunction> functions) {
-		for (ILootFunction function : functions) {
-			if (function instanceof SetCount)
-				return FormattingHelper.getStringFromRange(((SetCount)function).value);
+	private static String getQuantityString(List<LootItemFunction> functions) {
+		for (LootItemFunction function : functions) {
+			if (function instanceof SetItemCountFunction)
+				return FormattingHelper.getStringFromRange(((SetItemCountFunction)function).value);
 		}
 
 		return "1";
 	}
 
-	private static String getLootingString(List<ILootFunction> functions) {
-		for (ILootFunction function : functions) {
-			if (function instanceof LootingEnchantBonus) {
-				LootingEnchantBonus bonus = (LootingEnchantBonus)function;
-
-				if (bonus.value.getMin() != bonus.value.getMax()) {
-					if (bonus.limit > 0 && bonus.value.getMin() > bonus.limit)
-						return String.valueOf(bonus.limit);
-
-					return bonus.value.getMin() + "-" + (bonus.limit > 0 ? Math.min(bonus.limit, bonus.value.getMax()) : bonus.value.getMax());
-				}
-				else {
-					if (bonus.limit > 0 && bonus.value.getMax() > bonus.limit)
-						return String.valueOf(bonus.limit);
-				}
-			}
+	private static String getLootingString(List<LootItemFunction> functions) {
+		for (LootItemFunction function : functions) {
+			if (function instanceof LootingEnchantFunction bonus)
+				return FormattingHelper.getStringFromRange(bonus.value);
 		}
 
 		return "";

@@ -5,12 +5,12 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.ItemArgument;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.dataskimmers.*;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -26,11 +26,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
 
-public class ObtainingCommand implements Command<CommandSource> {
+public class ObtainingCommand implements Command<CommandSourceStack> {
 	private static final ObtainingCommand CMD = new ObtainingCommand();
 
-	public static ArgumentBuilder<CommandSource, ?> register() {
-		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("obtaining").executes(CMD);
+	public static ArgumentBuilder<CommandSourceStack, ?> register() {
+		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("obtaining").executes(CMD);
 
 		builder.then(Commands.argument("id", ItemArgument.item()).executes(ObtainingCommand::printSources));
 
@@ -42,13 +42,13 @@ public class ObtainingCommand implements Command<CommandSource> {
 	}
 
 	@Override
-	public int run(CommandContext<CommandSource> context) {
+	public int run(CommandContext<CommandSourceStack> context) {
 		WikiHelperCommand.info(context.getSource(), commandName(), "Print files relating to places a specific item is obtained.");
 
 		return 1;
 	}
 
-	private static boolean checkRecipeSources(Item item, CommandSource commandSource) {
+	private static boolean checkRecipeSources(Item item, CommandSourceStack commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -98,7 +98,7 @@ public class ObtainingCommand implements Command<CommandSource> {
 		return false;
 	}
 
-	private static boolean checkTradeSources(Item item, CommandSource commandSource) {
+	private static boolean checkTradeSources(Item item, CommandSourceStack commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
@@ -123,7 +123,7 @@ public class ObtainingCommand implements Command<CommandSource> {
 		return false;
 	}
 
-	private static boolean checkLogStrippingSources(Item item, CommandSource commandSource) {
+	private static boolean checkLogStrippingSources(Item item, CommandSourceStack commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
@@ -147,7 +147,7 @@ public class ObtainingCommand implements Command<CommandSource> {
 		return false;
 	}
 
-	private static boolean checkHaulingSources(Item item, CommandSource commandSource) {
+	private static boolean checkHaulingSources(Item item, CommandSourceStack commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -183,7 +183,7 @@ public class ObtainingCommand implements Command<CommandSource> {
 		return false;
 	}
 
-	private static boolean checkLootTableSources(Item item, CommandSource commandSource) {
+	private static boolean checkLootTableSources(Item item, CommandSourceStack commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -211,9 +211,9 @@ public class ObtainingCommand implements Command<CommandSource> {
 		return false;
 	}
 
-	private static int printSources(CommandContext<CommandSource> cmd) {
+	private static int printSources(CommandContext<CommandSourceStack> cmd) {
 		Item item = ItemArgument.getItem(cmd, "id").getItem();
-		CommandSource source = cmd.getSource();
+		CommandSourceStack source = cmd.getSource();
 		boolean success;
 
 		WikiHelperCommand.info(cmd.getSource(), "Obtaining", "Searching for sources of '" + item.getRegistryName() + "'...");

@@ -4,13 +4,13 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.item.*;
-import net.tslat.aoa3.common.registration.AoATools;
-import net.tslat.aoa3.common.registration.AoAWeapons;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.*;
+import net.tslat.aoa3.common.registration.item.AoATools;
+import net.tslat.aoa3.common.registration.item.AoAWeapons;
 import net.tslat.aoa3.content.item.tool.axe.BaseAxe;
 import net.tslat.aoa3.content.item.tool.pickaxe.BasePickaxe;
 import net.tslat.aoa3.content.item.tool.shovel.BaseShovel;
@@ -37,11 +37,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class OverviewCommand implements Command<CommandSource> {
+public class OverviewCommand implements Command<CommandSourceStack> {
 	private static final OverviewCommand CMD = new OverviewCommand();
 
-	public static ArgumentBuilder<CommandSource, ?> register() {
-		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("overview").executes(CMD);
+	public static ArgumentBuilder<CommandSourceStack, ?> register() {
+		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("overview").executes(CMD);
 
 		builder.then(Commands.literal("axes").executes(OverviewCommand::printAxes));
 		builder.then(Commands.literal("blasters").executes(OverviewCommand::printBlasters));
@@ -67,13 +67,13 @@ public class OverviewCommand implements Command<CommandSource> {
 	}
 
 	@Override
-	public int run(CommandContext<CommandSource> context) {
+	public int run(CommandContext<CommandSourceStack> context) {
 		WikiHelperCommand.info(context.getSource(), commandName(), "Print overviews for various categories of data in AoA");
 
 		return 1;
 	}
 
-	private static int printAxes(CommandContext<CommandSource> cmd) {
+	private static int printAxes(CommandContext<CommandSourceStack> cmd) {
 		List<Item> axes = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseAxe);
 		String fileName = "Overview - Axes";
 		File outputFile;
@@ -112,7 +112,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printBlasters(CommandContext<CommandSource> cmd) {
+	private static int printBlasters(CommandContext<CommandSourceStack> cmd) {
 		List<Item> blasters = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseBlaster);
 		String fileName = "Overview - Blasters";
 		File outputFile;
@@ -151,7 +151,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printBows(CommandContext<CommandSource> cmd) {
+	private static int printBows(CommandContext<CommandSourceStack> cmd) {
 		List<Item> bows = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseBow);
 		String fileName = "Overview - Bows";
 		File outputFile;
@@ -186,7 +186,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printCannons(CommandContext<CommandSource> cmd) {
+	private static int printCannons(CommandContext<CommandSourceStack> cmd) {
 		List<Item> cannons = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseCannon);
 		String fileName = "Overview - Cannons";
 		File outputFile;
@@ -225,7 +225,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printCrossbows(CommandContext<CommandSource> cmd) {
+	private static int printCrossbows(CommandContext<CommandSourceStack> cmd) {
 		List<Item> crossbows = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseCrossbow);
 		String fileName = "Overview - Crossbows";
 		File outputFile;
@@ -258,7 +258,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printGreatblades(CommandContext<CommandSource> cmd) {
+	private static int printGreatblades(CommandContext<CommandSourceStack> cmd) {
 		List<Item> greatblades = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseGreatblade);
 		String fileName = "Overview - Greatblades";
 		File outputFile;
@@ -293,7 +293,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printGuns(CommandContext<CommandSource> cmd) {
+	private static int printGuns(CommandContext<CommandSourceStack> cmd) {
 		List<Item> guns = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseGun && !(item instanceof BaseCannon) && !(item instanceof BaseSniper) && !(item instanceof BaseShotgun) && !(item instanceof BaseThrownWeapon));
 		String fileName = "Overview - Guns";
 		File outputFile;
@@ -332,7 +332,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printMauls(CommandContext<CommandSource> cmd) {
+	private static int printMauls(CommandContext<CommandSourceStack> cmd) {
 		List<Item> mauls = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseMaul);
 		String fileName = "Overview - Mauls";
 		File outputFile;
@@ -369,7 +369,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printPickaxes(CommandContext<CommandSource> cmd) {
+	private static int printPickaxes(CommandContext<CommandSourceStack> cmd) {
 		List<Item> pickaxes = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BasePickaxe);
 		String fileName = "Overview - Pickaxes";
 		File outputFile;
@@ -408,7 +408,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printShotguns(CommandContext<CommandSource> cmd) {
+	private static int printShotguns(CommandContext<CommandSourceStack> cmd) {
 		List<Item> shotguns = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseShotgun);
 		String fileName = "Overview - Shotguns";
 		File outputFile;
@@ -449,7 +449,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printShovels(CommandContext<CommandSource> cmd) {
+	private static int printShovels(CommandContext<CommandSourceStack> cmd) {
 		List<Item> shovels = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseShovel);
 		String fileName = "Overview - Shovels";
 		File outputFile;
@@ -488,7 +488,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printSnipers(CommandContext<CommandSource> cmd) {
+	private static int printSnipers(CommandContext<CommandSourceStack> cmd) {
 		List<Item> snipers = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseSniper);
 		String fileName = "Overview - Snipers";
 		File outputFile;
@@ -527,7 +527,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printStaves(CommandContext<CommandSource> cmd) {
+	private static int printStaves(CommandContext<CommandSourceStack> cmd) {
 		List<Item> staves = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseStaff);
 		String fileName = "Overview - Staves";
 		File outputFile;
@@ -567,7 +567,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printSwords(CommandContext<CommandSource> cmd) {
+	private static int printSwords(CommandContext<CommandSourceStack> cmd) {
 		List<Item> swords = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseSword);
 		String fileName = "Overview - Swords";
 		File outputFile;
@@ -602,7 +602,7 @@ public class OverviewCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printThrownWeapons(CommandContext<CommandSource> cmd) {
+	private static int printThrownWeapons(CommandContext<CommandSourceStack> cmd) {
 		List<Item> thrownWeapons = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseThrownWeapon);
 		String fileName = "Overview - Thrown Weapons";
 		File outputFile;

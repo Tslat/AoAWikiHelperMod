@@ -1,23 +1,24 @@
 package net.tslat.aoawikihelpermod.util.fakeworld;
 
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.gen.feature.template.Template;
-import net.minecraft.world.lighting.WorldLightManager;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.BooleanSupplier;
 
-public class FakeChunkProvider extends AbstractChunkProvider {
+public class FakeChunkProvider extends ChunkSource {
 	private final HashMap<ChunkPos, FakeChunk> chunkMap;
-	private final WorldLightManager lightManager;
+	private final LevelLightEngine lightManager;
 
 	protected FakeChunkProvider() {
 		this.chunkMap = new HashMap<>();
@@ -26,18 +27,26 @@ public class FakeChunkProvider extends AbstractChunkProvider {
 
 	@Nullable
 	@Override
-	public IChunk getChunk(int chunkX, int chunkZ, ChunkStatus requiredStatus, boolean load) {
+	public ChunkAccess getChunk(int chunkX, int chunkZ, ChunkStatus requiredStatus, boolean load) {
 		return this.chunkMap.computeIfAbsent(new ChunkPos(chunkX, chunkZ), pos -> new FakeChunk(getLevel(), pos));
 	}
+
+	@Override
+	public void tick(BooleanSupplier aheadOfSchedule, boolean tickChunks) {}
 
 	@Override
 	public String gatherStats() {
 		return "";
 	}
 
+	@Override
+	public int getLoadedChunksCount() {
+		return 0;
+	}
+
 	@Nonnull
 	@Override
-	public WorldLightManager getLightEngine() {
+	public LevelLightEngine getLightEngine() {
 		return this.lightManager;
 	}
 
@@ -52,11 +61,11 @@ public class FakeChunkProvider extends AbstractChunkProvider {
 	}
 
 	@Nullable
-	public Pair<Vector3i, List<Template.BlockInfo>> compileBlocksIntoList() {
+	public Pair<Vec3i, List<StructureTemplate.StructureBlockInfo>> compileBlocksIntoList() {
 		if (chunkMap.isEmpty())
 			return null;
 
-		ArrayList<Template.BlockInfo> blocks = new ArrayList<>();
+		ArrayList<StructureTemplate.StructureBlockInfo> blocks = new ArrayList<>();
 		int minX = 0;
 		int minY = 0;
 		int minZ = 0;
@@ -68,7 +77,7 @@ public class FakeChunkProvider extends AbstractChunkProvider {
 			for (Map.Entry<BlockPos, BlockState> block : chunk.getAllFilledBlocks().entrySet()) {
 				BlockPos pos = block.getKey();
 
-				blocks.add(new Template.BlockInfo(pos, block.getValue(), null));
+				blocks.add(new StructureTemplate.StructureBlockInfo(pos, block.getValue(), null));
 
 				if (!block.getValue().isAir()) {
 					minX = Math.min(pos.getX(), minX);
@@ -81,11 +90,11 @@ public class FakeChunkProvider extends AbstractChunkProvider {
 			}
 		}
 
-		blocks.sort(Comparator.<Template.BlockInfo>comparingInt(info -> info.pos.getY()).thenComparingInt(info -> info.pos.getZ()).thenComparingInt(info -> info.pos.getX()));
+		blocks.sort(Comparator.<StructureTemplate.StructureBlockInfo>comparingInt(info -> info.pos.getY()).thenComparingInt(info -> info.pos.getZ()).thenComparingInt(info -> info.pos.getX()));
 
 		BlockPos minPos = blocks.get(0).pos;
 		BlockPos maxPos = blocks.get(blocks.size() - 1).pos;
-		Vector3i totalSize = new Vector3i(Math.abs(maxX - minX) + 1, Math.abs(maxY - minY) + 1, Math.abs(maxZ - minZ) + 1);
+		Vec3i totalSize = new Vec3i(Math.abs(maxX - minX) + 1, Math.abs(maxY - minY) + 1, Math.abs(maxZ - minZ) + 1);
 
 		return Pair.of(totalSize, blocks);
 	}

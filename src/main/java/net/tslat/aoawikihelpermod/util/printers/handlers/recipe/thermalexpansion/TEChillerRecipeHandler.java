@@ -3,10 +3,10 @@ package net.tslat.aoawikihelpermod.util.printers.handlers.recipe.thermalexpansio
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
@@ -25,7 +25,7 @@ public class TEChillerRecipeHandler extends RecipePrintHandler {
 
 	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
-	public TEChillerRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public TEChillerRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
 		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
 	}
@@ -84,10 +84,10 @@ public class TEChillerRecipeHandler extends RecipePrintHandler {
 			return this.printoutData.get(targetItem);
 
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
-		JsonObject input = JSONUtils.getAsJsonObject(this.rawRecipe, "fluid");
-		String inputAmount = JSONUtils.getAsInt(input, "amount", 1000) + "mb";
-		String inputFluid = StringUtil.toTitleCase(new ResourceLocation(JSONUtils.getAsString(input, "fluid")).getPath());
-		int energy = JSONUtils.getAsInt(this.rawRecipe, "energy", 4000);
+		JsonObject input = GsonHelper.getAsJsonObject(this.rawRecipe, "fluid");
+		String inputAmount = GsonHelper.getAsInt(input, "amount", 1000) + "mb";
+		String inputFluid = StringUtil.toTitleCase(new ResourceLocation(GsonHelper.getAsString(input, "fluid")).getPath());
+		int energy = GsonHelper.getAsInt(this.rawRecipe, "energy", 4000);
 		List<Triple<Integer, String, String>> result;
 
 		if (this.rawRecipe.get("result").isJsonObject()) {

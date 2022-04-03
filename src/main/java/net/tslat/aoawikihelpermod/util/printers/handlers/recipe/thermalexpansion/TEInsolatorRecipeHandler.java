@@ -4,10 +4,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
@@ -23,9 +23,9 @@ public class TEInsolatorRecipeHandler extends RecipePrintHandler {
 	private final ResourceLocation recipeId;
 	private final JsonObject rawRecipe;
 
-	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
+	private final HashMap<Item, String[]> printoutData = new HashMap<>();
 
-	public TEInsolatorRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public TEInsolatorRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
 		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
 	}
@@ -56,7 +56,7 @@ public class TEInsolatorRecipeHandler extends RecipePrintHandler {
 			return Collections.singletonList(ObjectHelper.getIngredientItemId(this.rawRecipe.get("result")));
 		}
 		else if (this.rawRecipe.get("result").isJsonArray()) {
-			ArrayList<ResourceLocation> outputs = new ArrayList<ResourceLocation>();
+			ArrayList<ResourceLocation> outputs = new ArrayList<>();
 
 			for (JsonElement ele : this.rawRecipe.get("result").getAsJsonArray()) {
 				outputs.add(ObjectHelper.getIngredientItemId(ele));
@@ -75,9 +75,9 @@ public class TEInsolatorRecipeHandler extends RecipePrintHandler {
 			return this.printoutData.get(targetItem);
 
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
-		Pair<String, String> input = ObjectHelper.getIngredientName(JSONUtils.getAsJsonObject(this.rawRecipe, "input"));
-		int water = JSONUtils.getAsInt(this.rawRecipe, "water", 500);
-		int energy = JSONUtils.getAsInt(this.rawRecipe, "energy", 20000);
+		Pair<String, String> input = ObjectHelper.getIngredientName(GsonHelper.getAsJsonObject(this.rawRecipe, "input"));
+		int water = GsonHelper.getAsInt(this.rawRecipe, "water", 500);
+		int energy = GsonHelper.getAsInt(this.rawRecipe, "energy", 20000);
 		List<Triple<Integer, String, String>> result;
 
 		if (this.rawRecipe.get("result").isJsonObject()) {
@@ -85,7 +85,7 @@ public class TEInsolatorRecipeHandler extends RecipePrintHandler {
 		}
 		else if (this.rawRecipe.get("result").isJsonArray()) {
 			JsonArray resultArray = this.rawRecipe.get("result").getAsJsonArray();
-			result = new ArrayList<Triple<Integer, String, String>>();
+			result = new ArrayList<>();
 
 			for (JsonElement ele : resultArray) {
 				result.add(ObjectHelper.getStackDetailsFromJson(ele));

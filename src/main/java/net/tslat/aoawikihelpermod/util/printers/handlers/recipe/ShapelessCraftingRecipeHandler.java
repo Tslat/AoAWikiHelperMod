@@ -3,11 +3,11 @@ package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.ICraftingRecipe;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.Recipe;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
@@ -23,14 +23,14 @@ public class ShapelessCraftingRecipeHandler extends RecipePrintHandler {
 
 	private final JsonObject rawRecipe;
 	@Nullable
-	private final ICraftingRecipe recipe;
+	private final CraftingRecipe recipe;
 
-	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
+	private final HashMap<Item, String[]> printoutData = new HashMap<>();
 
-	public ShapelessCraftingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public ShapelessCraftingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
 		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
-		this.recipe = (ICraftingRecipe)recipe;
+		this.recipe = (CraftingRecipe)recipe;
 	}
 
 	@Override
@@ -50,9 +50,9 @@ public class ShapelessCraftingRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public List<ResourceLocation> getIngredientsForLookup() {
-		ArrayList<ResourceLocation> ingredients = new ArrayList<ResourceLocation>();
+		ArrayList<ResourceLocation> ingredients = new ArrayList<>();
 
-		for (JsonElement element : JSONUtils.getAsJsonArray(rawRecipe, "ingredients")) {
+		for (JsonElement element : GsonHelper.getAsJsonArray(rawRecipe, "ingredients")) {
 			ResourceLocation id = ObjectHelper.getIngredientItemId(element);
 
 			if (id != null)
@@ -72,7 +72,7 @@ public class ShapelessCraftingRecipeHandler extends RecipePrintHandler {
 		if (this.printoutData.containsKey(targetItem))
 			return this.printoutData.get(targetItem);
 
-		JsonArray ingredients = JSONUtils.getAsJsonArray(rawRecipe, "ingredients");
+		JsonArray ingredients = GsonHelper.getAsJsonArray(rawRecipe, "ingredients");
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(ingredients.size());
 
 		for (JsonElement ele : ingredients) {

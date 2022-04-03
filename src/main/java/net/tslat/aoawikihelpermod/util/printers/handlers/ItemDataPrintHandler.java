@@ -1,9 +1,10 @@
 package net.tslat.aoawikihelpermod.util.printers.handlers;
 
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ComposterBlock;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraftforge.common.ForgeHooks;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -11,6 +12,7 @@ import net.tslat.aoawikihelpermod.util.ObjectHelper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,9 +34,7 @@ public class ItemDataPrintHandler {
 		if (repairableItems == null)
 			repairableItems = new ArrayList<Item>();
 
-		for (Item item : itemsToRepair) {
-			repairableItems.add(item);
-		}
+		Collections.addAll(repairableItems, itemsToRepair);
 	}
 
 	public String[] getTagsPrintout() {
@@ -143,6 +143,6 @@ public class ItemDataPrintHandler {
 
 	@Nullable
 	private List<ResourceLocation> getTags() {
-		return item.getTags().isEmpty() ? null : new ArrayList<ResourceLocation>(item.getTags());
+		return item.builtInRegistryHolder().tags().toList().isEmpty() ? null : item.builtInRegistryHolder().tags().map(TagKey::location).toList();
 	}
 }

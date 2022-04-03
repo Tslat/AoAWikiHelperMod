@@ -9,13 +9,13 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.ItemParser;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.item.ItemParser;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.dataskimmers.BlockDataSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -30,15 +30,15 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
-public class BlocksCommand implements Command<CommandSource> {
+public class BlocksCommand implements Command<CommandSourceStack> {
 	private static final BlocksCommand CMD = new BlocksCommand();
 
-	public static ArgumentBuilder<CommandSource, ?> register() {
-		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("blocks").executes(CMD);
+	public static ArgumentBuilder<CommandSourceStack, ?> register() {
+		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("blocks").executes(CMD);
 
 		builder.then(Commands.argument("block", BlockArgument.block())
-				.then(LiteralArgumentBuilder.<CommandSource>literal("states").executes(BlocksCommand::printStates))
-				.then(LiteralArgumentBuilder.<CommandSource>literal("tags").executes(BlocksCommand::printTags)));
+				.then(LiteralArgumentBuilder.<CommandSourceStack>literal("states").executes(BlocksCommand::printStates))
+				.then(LiteralArgumentBuilder.<CommandSourceStack>literal("tags").executes(BlocksCommand::printTags)));
 
 		return builder;
 	}
@@ -48,13 +48,13 @@ public class BlocksCommand implements Command<CommandSource> {
 	}
 
 	@Override
-	public int run(CommandContext<CommandSource> context) {
+	public int run(CommandContext<CommandSourceStack> context) {
 		WikiHelperCommand.info(context.getSource(), commandName(), "Print out data related to a given block.");
 
 		return 1;
 	}
 
-	private static int printStates(CommandContext<CommandSource> cmd) {
+	private static int printStates(CommandContext<CommandSourceStack> cmd) {
 		Block block = BlockArgument.getBlock(cmd, "block").getBlock();
 		String blockName = ObjectHelper.getBlockName(block);
 		File outputFile;
@@ -84,7 +84,7 @@ public class BlocksCommand implements Command<CommandSource> {
 		return 1;
 	}
 
-	private static int printTags(CommandContext<CommandSource> cmd) {
+	private static int printTags(CommandContext<CommandSourceStack> cmd) {
 		Block block = BlockArgument.getBlock(cmd, "block").getBlock();
 		String blockName = ObjectHelper.getBlockName(block);
 		File outputFile;
@@ -154,7 +154,7 @@ public class BlocksCommand implements Command<CommandSource> {
 
 			reader.setCursor(builder.getStart());
 
-			return ISuggestionProvider.suggestResource(Registry.BLOCK.keySet(), builder.createOffset(reader.getCursor()));
+			return SharedSuggestionProvider.suggestResource(Registry.BLOCK.keySet(), builder.createOffset(reader.getCursor()));
 		}
 
 		@Override

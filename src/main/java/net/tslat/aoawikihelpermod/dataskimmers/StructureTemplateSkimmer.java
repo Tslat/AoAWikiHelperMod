@@ -1,14 +1,12 @@
 package net.tslat.aoawikihelpermod.dataskimmers;
 
-import net.minecraft.client.resources.ReloadListener;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.feature.template.Template;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
+import net.tslat.aoa3.util.WorldUtil;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
@@ -16,27 +14,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class StructureTemplateSkimmer extends ReloadListener<HashMap<ResourceLocation, Lazy<Template>>> {
-	private static final HashMap<ResourceLocation, Lazy<Template>> templates = new HashMap<>();
-	private static final Lazy<MinecraftServer> currentServer = () -> (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+public class StructureTemplateSkimmer extends SimplePreparableReloadListener<HashMap<ResourceLocation, Lazy<StructureTemplate>>> {
+	private static final HashMap<ResourceLocation, Lazy<StructureTemplate>> templates = new HashMap<>();
 
 	@Override
-	protected HashMap<ResourceLocation, Lazy<Template>> prepare(IResourceManager resourceManager, IProfiler profiler) {
-		HashMap<ResourceLocation, Lazy<Template>> collection = new HashMap<>();
+	protected HashMap<ResourceLocation, Lazy<StructureTemplate>> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+		HashMap<ResourceLocation, Lazy<StructureTemplate>> collection = new HashMap<>();
 		templates.clear();
 
 		for (ResourceLocation file : resourceManager.listResources("structures", fileName -> fileName.endsWith(".nbt"))) {
 			String filePath = file.getPath();
 			ResourceLocation resourcePath = new ResourceLocation(file.getNamespace(), filePath.substring(11, filePath.length() - 4));
 
-			collection.put(resourcePath, () -> currentServer.get().getStructureManager().get(resourcePath));
+			collection.put(resourcePath, () -> WorldUtil.getServer().getStructureManager().get(resourcePath).get());
 		}
 
 		return collection;
 	}
 
 	@Override
-	protected void apply(HashMap<ResourceLocation, Lazy<Template>> collection, IResourceManager resourceManager, IProfiler profiler) {
+	protected void apply(HashMap<ResourceLocation, Lazy<StructureTemplate>> collection, ResourceManager resourceManager, ProfilerFiller profiler) {
 		templates.putAll(collection);
 	}
 
@@ -45,7 +42,7 @@ public class StructureTemplateSkimmer extends ReloadListener<HashMap<ResourceLoc
 	}
 
 	@Nullable
-	public static Template getTemplate(ResourceLocation path) {
+	public static StructureTemplate getTemplate(ResourceLocation path) {
 		if (templates.containsKey(path))
 			return templates.get(path).get();
 

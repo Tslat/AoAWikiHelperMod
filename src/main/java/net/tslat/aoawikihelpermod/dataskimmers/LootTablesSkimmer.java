@@ -4,12 +4,16 @@ import com.google.common.collect.HashMultimap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.client.resources.JsonReloadListener;
-import net.minecraft.loot.*;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResource;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.storage.loot.Deserializers;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraftforge.common.ForgeHooks;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.LootTableHelper;
@@ -19,8 +23,8 @@ import org.apache.logging.log4j.Level;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LootTablesSkimmer extends JsonReloadListener {
-	private static final Gson GSON = LootSerializers.createLootTableSerializer().create();
+public class LootTablesSkimmer extends SimpleJsonResourceReloadListener {
+	private static final Gson GSON = Deserializers.createLootTableSerializer().create();
 	public static final HashMap<ResourceLocation, LootTablePrintHandler> TABLE_PRINTERS = new HashMap<ResourceLocation, LootTablePrintHandler>();
 	public static final HashMultimap<ResourceLocation, ResourceLocation> TABLES_BY_LOOT = HashMultimap.create();
 
@@ -29,7 +33,7 @@ public class LootTablesSkimmer extends JsonReloadListener {
 	}
 
 	@Override
-	protected void apply(Map<ResourceLocation, JsonElement> jsonMap, IResourceManager resourceManager, IProfiler profiler) {
+	protected void apply(Map<ResourceLocation, JsonElement> jsonMap, ResourceManager resourceManager, ProfilerFiller profiler) {
 		TABLE_PRINTERS.clear();
 		TABLES_BY_LOOT.clear();
 
@@ -43,7 +47,7 @@ public class LootTablesSkimmer extends JsonReloadListener {
 			try {
 				LootTable table = null;
 
-				try (IResource resource = resourceManager.getResource(getPreparedPath(id))) {
+				try (Resource resource = resourceManager.getResource(getPreparedPath(id))) {
 					table = ForgeHooks.loadLootTable(GSON, id, json, true, null);
 				}
 				catch (Exception ex) {
@@ -64,9 +68,9 @@ public class LootTablesSkimmer extends JsonReloadListener {
 
 	private void populateLootByTable(ResourceLocation tableId, LootTable table, JsonObject rawTable) {
 		for (LootPool pool : LootTableHelper.getPools(table)) {
-			for (LootEntry entry : LootTableHelper.getLootEntries(pool)) {
-				if (entry instanceof ItemLootEntry) {
-					TABLES_BY_LOOT.put(((ItemLootEntry)entry).item.getRegistryName(), tableId);
+			for (LootPoolEntryContainer entry : LootTableHelper.getLootEntries(pool)) {
+				if (entry instanceof LootItem) {
+					TABLES_BY_LOOT.put(((LootItem)entry).item.getRegistryName(), tableId);
 				}
 			}
 		}

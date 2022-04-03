@@ -1,12 +1,12 @@
 package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonObject;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Recipe;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
@@ -23,7 +23,7 @@ public class SuspiciousStewRecipeHandler extends RecipePrintHandler {
 
 	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
-	public SuspiciousStewRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public SuspiciousStewRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
 		this.recipeId = recipeId;
 	}
 
@@ -48,7 +48,7 @@ public class SuspiciousStewRecipeHandler extends RecipePrintHandler {
 				Items.BROWN_MUSHROOM.getRegistryName(),
 				Items.RED_MUSHROOM.getRegistryName(),
 				Items.BOWL.getRegistryName(),
-				ItemTags.SMALL_FLOWERS.getName()
+				ItemTags.SMALL_FLOWERS.location()
 		);
 	}
 
@@ -67,7 +67,7 @@ public class SuspiciousStewRecipeHandler extends RecipePrintHandler {
 		ingredientsHandler.addIngredient(ObjectHelper.getItemName(Items.BROWN_MUSHROOM), "minecraft");
 		ingredientsHandler.addIngredient(ObjectHelper.getItemName(Items.RED_MUSHROOM), "minecraft");
 		ingredientsHandler.addIngredient(ObjectHelper.getItemName(Items.BOWL), "minecraft");
-		ingredientsHandler.addIngredient(StringUtil.toTitleCase(ItemTags.SMALL_FLOWERS.getName().getPath()), "minecraft");
+		ingredientsHandler.addIngredient(StringUtil.toTitleCase(ItemTags.SMALL_FLOWERS.location().getPath()), "minecraft");
 		ingredientsHandler.addOutput(new ItemStack(Items.SUSPICIOUS_STEW));
 		String targetItemName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
 

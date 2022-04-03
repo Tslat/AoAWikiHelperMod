@@ -5,12 +5,12 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.ItemArgument;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.dataskimmers.BlockDataSkimmer;
 import net.tslat.aoawikihelpermod.dataskimmers.ItemDataSkimmer;
@@ -30,11 +30,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
 
-public class UsagesCommand implements Command<CommandSource> {
+public class UsagesCommand implements Command<CommandSourceStack> {
 	private static final UsagesCommand CMD = new UsagesCommand();
 
-	public static ArgumentBuilder<CommandSource, ?> register() {
-		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("usages").executes(CMD);
+	public static ArgumentBuilder<CommandSourceStack, ?> register() {
+		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("usages").executes(CMD);
 
 		builder.then(Commands.argument("id", ItemArgument.item()).executes(UsagesCommand::printUsages));
 
@@ -46,13 +46,13 @@ public class UsagesCommand implements Command<CommandSource> {
 	}
 
 	@Override
-	public int run(CommandContext<CommandSource> context) {
+	public int run(CommandContext<CommandSourceStack> context) {
 		WikiHelperCommand.info(context.getSource(), commandName(), "Print files relating to places a specific item is used.");
 
 		return 1;
 	}
 
-	private static boolean checkRecipeUsages(Item item, CommandSource commandSource) {
+	private static boolean checkRecipeUsages(Item item, CommandSourceStack commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -103,7 +103,7 @@ public class UsagesCommand implements Command<CommandSource> {
 		return false;
 	}
 
-	private static boolean checkRepairUsages(Item item, CommandSource commandSource) {
+	private static boolean checkRepairUsages(Item item, CommandSourceStack commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
@@ -126,7 +126,7 @@ public class UsagesCommand implements Command<CommandSource> {
 		return false;
 	}
 
-	private static boolean checkFuelUsages(Item item, CommandSource commandSource) {
+	private static boolean checkFuelUsages(Item item, CommandSourceStack commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
@@ -149,7 +149,7 @@ public class UsagesCommand implements Command<CommandSource> {
 		return false;
 	}
 
-	private static boolean checkLogStrippingUsages(Item item, CommandSource commandSource) {
+	private static boolean checkLogStrippingUsages(Item item, CommandSourceStack commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
@@ -173,7 +173,7 @@ public class UsagesCommand implements Command<CommandSource> {
 		return false;
 	}
 
-	private static boolean checkComposterUsages(Item item, CommandSource commandSource) {
+	private static boolean checkComposterUsages(Item item, CommandSourceStack commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
@@ -196,7 +196,7 @@ public class UsagesCommand implements Command<CommandSource> {
 		return false;
 	}
 
-	private static boolean checkTradeUsages(Item item, CommandSource commandSource) {
+	private static boolean checkTradeUsages(Item item, CommandSourceStack commandSource) {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
@@ -221,9 +221,9 @@ public class UsagesCommand implements Command<CommandSource> {
 		return false;
 	}
 
-	private static int printUsages(CommandContext<CommandSource> cmd) {
+	private static int printUsages(CommandContext<CommandSourceStack> cmd) {
 		Item item = ItemArgument.getItem(cmd, "id").getItem();
-		CommandSource source = cmd.getSource();
+		CommandSourceStack source = cmd.getSource();
 		boolean success;
 
 		WikiHelperCommand.info(cmd.getSource(), "Usages", "Searching for usages of '" + item.getRegistryName() + "'...");

@@ -6,12 +6,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraftforge.registries.tags.ITag;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import org.apache.commons.lang3.tuple.Triple;
@@ -33,7 +33,7 @@ public abstract class RecipePrintHandler {
 	}
 
 	public interface Factory {
-		RecipePrintHandler create(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe);
+		RecipePrintHandler create(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe);
 	}
 
 	public static class RecipeIngredientsHandler {

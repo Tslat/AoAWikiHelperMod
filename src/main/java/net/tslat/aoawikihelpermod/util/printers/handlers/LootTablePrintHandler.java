@@ -2,11 +2,14 @@ package net.tslat.aoawikihelpermod.util.printers.handlers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
-import net.minecraft.loot.*;
-import net.minecraft.loot.conditions.ILootCondition;
-import net.minecraft.loot.functions.ILootFunction;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntry;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.LootTableHelper;
 
@@ -36,7 +39,7 @@ public class LootTablePrintHandler {
 		if (this.cachedPools != null)
 			return this.cachedPools;
 
-		this.tableType = JSONUtils.getAsString(rawTable, "type", "generic");
+		this.tableType = GsonHelper.getAsString(rawTable, "type", "generic");
 
 		if (this.tableType.contains(":"))
 			this.tableType = this.tableType.split(":")[1];
@@ -94,8 +97,8 @@ public class LootTablePrintHandler {
 			this.rolls = rolls;
 			this.bonusRolls = bonusRolls;
 
-			List<ILootCondition> conditions = LootTableHelper.getConditions(pool);
-			List<ILootFunction> functions = Arrays.asList(pool.functions);
+			List<LootItemCondition> conditions = LootTableHelper.getConditions(pool);
+			List<LootItemFunction> functions = Arrays.asList(pool.functions);
 			StringBuilder poolNotesBuilder = new StringBuilder();
 
 			if (!conditions.isEmpty())
@@ -110,7 +113,7 @@ public class LootTablePrintHandler {
 
 			this.notes = poolNotesBuilder.length() > 0 ? poolNotesBuilder.toString() : null;
 
-			for (LootEntry entry : LootTableHelper.getLootEntries(pool)) {
+			for (LootPoolEntryContainer entry : LootTableHelper.getLootEntries(pool)) {
 				String entryLine = LootTableHelper.getLootEntryLine(poolIndex, entry, Arrays.asList(entry.conditions));
 
 				if (entryLine.length() > 0)

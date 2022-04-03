@@ -1,6 +1,6 @@
 package net.tslat.aoawikihelpermod.util.loottable.condition;
 
-import net.minecraft.loot.conditions.WeatherCheck;
+import net.minecraft.world.level.storage.loot.predicates.WeatherCheck;
 
 import javax.annotation.Nonnull;
 

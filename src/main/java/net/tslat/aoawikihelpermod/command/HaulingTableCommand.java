@@ -5,12 +5,12 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.ResourceLocationArgument;
-import net.minecraft.command.arguments.SuggestionProviders;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.resources.ResourceLocation;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
@@ -21,12 +21,12 @@ import net.tslat.aoawikihelpermod.util.printers.handlers.HaulingTablePrintHandle
 
 import java.io.File;
 
-public class HaulingTableCommand implements Command<CommandSource> {
+public class HaulingTableCommand implements Command<CommandSourceStack> {
 	private static final HaulingTableCommand CMD = new HaulingTableCommand();
-	private static final SuggestionProvider<CommandSource> SUGGESTION_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "hauling_tables"), (context, builder) -> ISuggestionProvider.suggestResource(HaulingFishTableSkimmer.TABLE_PRINTERS.keySet().stream(), builder));
+	private static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "hauling_tables"), (context, builder) -> SharedSuggestionProvider.suggestResource(HaulingFishTableSkimmer.TABLE_PRINTERS.keySet().stream(), builder));
 
-	public static ArgumentBuilder<CommandSource, ?> register() {
-		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("haulingtable").executes(CMD);
+	public static ArgumentBuilder<CommandSourceStack, ?> register() {
+		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("haulingtable").executes(CMD);
 
 		builder.then(Commands.argument("id", ResourceLocationArgument.id()).suggests(SUGGESTION_PROVIDER).executes(cmd -> printTable(cmd, ResourceLocationArgument.getId(cmd, "id"))));
 
@@ -37,7 +37,7 @@ public class HaulingTableCommand implements Command<CommandSource> {
 		return "HaulingTable";
 	}
 
-	private static int printTable(CommandContext<CommandSource> cmd, ResourceLocation tableId) {
+	private static int printTable(CommandContext<CommandSourceStack> cmd, ResourceLocation tableId) {
 		try {
 			HaulingTablePrintHandler printHandler = HaulingFishTableSkimmer.TABLE_PRINTERS.get(tableId);
 
@@ -80,7 +80,7 @@ public class HaulingTableCommand implements Command<CommandSource> {
 	}
 
 	@Override
-	public int run(CommandContext<CommandSource> context) {
+	public int run(CommandContext<CommandSourceStack> context) {
 		WikiHelperCommand.info(context.getSource(), commandName(), "Print out a specific Hauling table in its relevant template format");
 
 		return 1;

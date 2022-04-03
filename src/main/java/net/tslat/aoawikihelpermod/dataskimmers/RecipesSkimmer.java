@@ -2,15 +2,15 @@ package net.tslat.aoawikihelpermod.dataskimmers;
 
 import com.google.common.collect.HashMultimap;
 import com.google.gson.JsonElement;
-import net.minecraft.client.resources.JsonReloadListener;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.RecipeManager;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.tslat.aoa3.content.recipe.InfusionRecipe;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
@@ -22,7 +22,7 @@ import org.apache.logging.log4j.Level;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RecipesSkimmer extends JsonReloadListener {
+public class RecipesSkimmer extends SimpleJsonResourceReloadListener {
 	private static final HashMap<String, RecipePrintHandler.Factory> RECIPE_HANDLERS = new HashMap<String, RecipePrintHandler.Factory>();
 	public static final HashMap<ResourceLocation, RecipePrintHandler> RECIPE_PRINTERS = new HashMap<ResourceLocation, RecipePrintHandler>();
 	public static final HashMultimap<ResourceLocation, ResourceLocation> RECIPES_BY_INGREDIENT = HashMultimap.create();
@@ -65,7 +65,7 @@ public class RecipesSkimmer extends JsonReloadListener {
 	}
 
 	@Override
-	protected void apply(Map<ResourceLocation, JsonElement> jsonMap, IResourceManager resourceManager, IProfiler profiler) {
+	protected void apply(Map<ResourceLocation, JsonElement> jsonMap, ResourceManager resourceManager, ProfilerFiller profiler) {
 		RECIPE_PRINTERS.clear();
 		RECIPES_BY_INGREDIENT.clear();
 		RECIPES_BY_OUTPUT.clear();
@@ -78,7 +78,7 @@ public class RecipesSkimmer extends JsonReloadListener {
 				continue;
 
 			try {
-				IRecipe<?> recipe = null;
+				Recipe<?> recipe = null;
 
 				try {
 					recipe = RecipeManager.fromJson(id, json.getAsJsonObject());
@@ -87,7 +87,7 @@ public class RecipesSkimmer extends JsonReloadListener {
 					AoAWikiHelperMod.LOGGER.log(Level.WARN, "Unknown recipe found: " + id + ", using only json format.");
 				}
 
-				String recipeType = JSONUtils.getAsString(json.getAsJsonObject(), "type");
+				String recipeType = GsonHelper.getAsString(json.getAsJsonObject(), "type");
 				RecipePrintHandler.Factory factory = RECIPE_HANDLERS.get(recipeType);
 
 				if (factory == null) {
@@ -113,7 +113,7 @@ public class RecipesSkimmer extends JsonReloadListener {
 		}
 	}
 
-	private void populateIngredientsByRecipe(ResourceLocation id, IRecipe<?> recipe) {
+	private void populateIngredientsByRecipe(ResourceLocation id, Recipe<?> recipe) {
 		for (Ingredient ingredient : recipe.getIngredients()) {
 			for (ItemStack stack : ingredient.getItems()) {
 				RECIPES_BY_INGREDIENT.put(stack.getItem().getRegistryName(), id);

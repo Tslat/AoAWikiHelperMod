@@ -3,11 +3,11 @@ package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipe;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
@@ -24,7 +24,7 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 
 	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
-	public ShapedCraftingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public ShapedCraftingRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
 		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
 		this.recipe = (ShapedRecipe)recipe;
@@ -49,7 +49,7 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 	public List<ResourceLocation> getIngredientsForLookup() {
 		ArrayList<ResourceLocation> ingredients = new ArrayList<ResourceLocation>();
 
-		for (Map.Entry<String, JsonElement> key : JSONUtils.getAsJsonObject(rawRecipe, "key").entrySet()) {
+		for (Map.Entry<String, JsonElement> key : GsonHelper.getAsJsonObject(rawRecipe, "key").entrySet()) {
 			JsonObject value;
 
 			if (key.getValue().isJsonArray()) {
@@ -82,7 +82,7 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 
 		ingredientMap.put(" ", new Pair<String, String>("", ""));
 
-		for (Map.Entry<String, JsonElement> key : JSONUtils.getAsJsonObject(rawRecipe, "key").entrySet()) {
+		for (Map.Entry<String, JsonElement> key : GsonHelper.getAsJsonObject(rawRecipe, "key").entrySet()) {
 			JsonObject value;
 
 			if (key.getValue().isJsonArray()) {
@@ -95,7 +95,7 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 			ingredientMap.put(key.getKey(), ObjectHelper.getIngredientName(value));
 		}
 
-		String[] pattern = ShapedRecipe.shrink(ShapedRecipe.patternFromJson(JSONUtils.getAsJsonArray(this.rawRecipe, "pattern")));
+		String[] pattern = ShapedRecipe.shrink(ShapedRecipe.patternFromJson(GsonHelper.getAsJsonArray(this.rawRecipe, "pattern")));
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(9);
 
 		for (int x = 0; x < pattern.length; x++) {

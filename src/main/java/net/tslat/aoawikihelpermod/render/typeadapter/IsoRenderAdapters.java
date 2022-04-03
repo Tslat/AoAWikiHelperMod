@@ -1,9 +1,9 @@
 package net.tslat.aoawikihelpermod.render.typeadapter;
 
-import net.minecraft.block.*;
-import net.minecraft.entity.passive.fish.AbstractFishEntity;
-import net.minecraft.entity.passive.fish.PufferfishEntity;
-import net.minecraft.util.math.vector.Vector3f;
+import com.mojang.math.Vector3f;
+import net.minecraft.world.entity.animal.AbstractFish;
+import net.minecraft.world.entity.animal.Pufferfish;
+import net.minecraft.world.level.block.*;
 import net.tslat.aoa3.content.entity.base.AbstractLavaFishEntity;
 import net.tslat.aoa3.content.entity.projectile.gun.BaseBullet;
 import net.tslat.aoawikihelpermod.render.IsometricPrinterScreen;
@@ -12,7 +12,7 @@ import net.tslat.aoawikihelpermod.render.typeadapter.block.DoublePlantBlockRende
 public final class IsoRenderAdapters {
 	public static void init() {
 		IsometricPrinterScreen.registerEntityAdapter(new SimpleRotationRenderAdapter<>(entity ->
-				entity instanceof AbstractFishEntity ||
+				entity instanceof AbstractFish ||
 				entity instanceof AbstractLavaFishEntity,
 				Vector3f.ZP, 90f));
 		IsometricPrinterScreen.registerBlockAdapter(new SimpleRotationRenderAdapter<>(block ->
@@ -30,7 +30,7 @@ public final class IsoRenderAdapters {
 				entity instanceof BaseBullet,
 				5f));
 		IsometricPrinterScreen.registerEntityAdapter(new SimpleScaleAndRotateRenderAdapter<>(entity ->
-				entity instanceof PufferfishEntity,
+				entity instanceof Pufferfish,
 				5f,
 				Vector3f.ZP,
 				-90f));

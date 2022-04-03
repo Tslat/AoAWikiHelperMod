@@ -3,11 +3,11 @@ package net.tslat.aoawikihelpermod.util.printers.handlers;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.common.registration.custom.AoASkills;
@@ -133,17 +133,17 @@ public class HaulingTablePrintHandler {
 		}
 
 		if (notesBuilder.length() == 0) {
-			if (JSONUtils.getAsBoolean(rawTable, "for_lava", false))
+			if (GsonHelper.getAsBoolean(rawTable, "for_lava", false))
 				notesBuilder.append("This table is for lava fishing");
 
-			if (JSONUtils.getAsBoolean(rawTable, "for_traps", false))
+			if (GsonHelper.getAsBoolean(rawTable, "for_traps", false))
 				notesBuilder.append("This table is for trap entities");
 
 			if (rawTable.has("biomes")) {
 				JsonArray biomeArray = rawTable.getAsJsonArray("biomes");
 
 				if (biomeArray.size() == 1) {
-					notesBuilder.append("This table applies to the ").append(ObjectHelper.getBiomeName(RegistryKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(biomeArray.get(0).getAsString())))).append(" biome");
+					notesBuilder.append("This table applies to the ").append(ObjectHelper.getBiomeName(ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(biomeArray.get(0).getAsString())))).append(" biome");
 				}
 				else {
 					notesBuilder.append("This table to applies to the following biomes:\n");
@@ -152,7 +152,7 @@ public class HaulingTablePrintHandler {
 						if (i > 0)
 							notesBuilder.append("\n");
 
-						notesBuilder.append("* ").append(ObjectHelper.getBiomeName(RegistryKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(biomeArray.get(i).getAsString()))));
+						notesBuilder.append("* ").append(ObjectHelper.getBiomeName(ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(biomeArray.get(i).getAsString()))));
 					}
 				}
 			}
@@ -161,7 +161,7 @@ public class HaulingTablePrintHandler {
 				JsonArray biomeCategories = rawTable.getAsJsonArray("categories");
 
 				if (biomeCategories.size() == 1) {
-					notesBuilder.append("If not overridden by another table with a relevant biome, this table applies all biomes marked as ").append(ObjectHelper.getBiomeCategoryName(Biome.Category.byName(biomeCategories.get(0).getAsString())));
+					notesBuilder.append("If not overridden by another table with a relevant biome, this table applies all biomes marked as ").append(ObjectHelper.getBiomeCategoryName(Biome.BiomeCategory.byName(biomeCategories.get(0).getAsString())));
 				}
 				else {
 					notesBuilder.append("This table to applies to any biome marked as any of the following categories:\n");
@@ -170,7 +170,7 @@ public class HaulingTablePrintHandler {
 						if (i > 0)
 							notesBuilder.append("\n");
 
-						notesBuilder.append("* ").append(ObjectHelper.getBiomeCategoryName(Biome.Category.byName(biomeCategories.get(i).getAsString())));
+						notesBuilder.append("* ").append(ObjectHelper.getBiomeCategoryName(Biome.BiomeCategory.byName(biomeCategories.get(i).getAsString())));
 					}
 				}
 			}

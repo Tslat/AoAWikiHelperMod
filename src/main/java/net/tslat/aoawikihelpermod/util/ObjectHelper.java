@@ -5,27 +5,27 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.util.LocaleUtil;
@@ -68,7 +68,7 @@ public class ObjectHelper {
 	}
 
 	public static Multimap<Attribute, AttributeModifier> getAttributesForItem(Item item) {
-		return item.getAttributeModifiers(EquipmentSlotType.MAINHAND, new ItemStack(item));
+		return item.getAttributeModifiers(EquipmentSlot.MAINHAND, new ItemStack(item));
 	}
 
 	public static double getAttributeFromItem(Item item, Attribute attribute) {
@@ -81,7 +81,7 @@ public class ObjectHelper {
 	}
 
 	public static double getAttributeValue(Attribute attribute, Collection<AttributeModifier> modifiers) {
-		ModifiableAttributeInstance instance = new ModifiableAttributeInstance(attribute, consumer -> {});
+		AttributeInstance instance = new AttributeInstance(attribute, consumer -> {});
 
 		for (AttributeModifier modifier : modifiers) {
 			if (!instance.hasModifier(modifier))
@@ -112,10 +112,10 @@ public class ObjectHelper {
 		String ownerId;
 
 		if (obj.has("item")) {
-			return getFormattedItemDetails(new ResourceLocation(JSONUtils.getAsString(obj, "item")));
+			return getFormattedItemDetails(new ResourceLocation(GsonHelper.getAsString(obj, "item")));
 		}
 		else if (obj.has("tag")) {
-			ingredientName = JSONUtils.getAsString(obj, "tag");
+			ingredientName = GsonHelper.getAsString(obj, "tag");
 
 			if (!ingredientName.contains(":"))
 				ingredientName = "minecraft:" + ingredientName;
@@ -138,7 +138,7 @@ public class ObjectHelper {
 				return null;
 
 			if (obj.has("item")) {
-				return new ResourceLocation(JSONUtils.getAsString(obj, "item"));
+				return new ResourceLocation(GsonHelper.getAsString(obj, "item"));
 			}
 			else {
 				throw new JsonParseException("Invalidly formatted ingredient, unable to proceed.");
@@ -161,7 +161,7 @@ public class ObjectHelper {
 		return ForgeRegistries.ENTITIES.getValue(id) != EntityType.PIG;
 	}
 
-	public static String getItemName(IItemProvider item) {
+	public static String getItemName(ItemLike item) {
 		ResourceLocation itemId = item.asItem().getRegistryName();
 		String suffix = isEntity(itemId) ? " (item)" : "";
 
@@ -175,7 +175,7 @@ public class ObjectHelper {
 		return StringUtil.toTitleCase(block.getRegistryName().getPath());
 	}
 
-	public static String getBiomeName(RegistryKey<Biome> biome) {
+	public static String getBiomeName(ResourceKey<Biome> biome) {
 		ResourceLocation biomeId = biome.location();
 
 		if (biomeId.getNamespace().equals(AdventOfAscension.MOD_ID))
@@ -191,13 +191,13 @@ public class ObjectHelper {
 		return LocaleUtil.getLocaleMessage("entity." + id.getNamespace() + "." + id.getPath()).getString() + suffix;
 	}
 
-	public static String getBiomeCategoryName(Biome.Category category) {
+	public static String getBiomeCategoryName(Biome.BiomeCategory category) {
 		return StringUtil.toTitleCase(category.getName());
 	}
 
 	public static String getEnchantmentName(Enchantment enchant, int level) {
 		if (level <= 0)
-			return new TranslationTextComponent(enchant.getDescriptionId()).getString();
+			return new TranslatableComponent(enchant.getDescriptionId()).getString();
 
 		return enchant.getFullname(level).getString();
 	}
@@ -228,10 +228,10 @@ public class ObjectHelper {
 	}
 
 	public static String attemptToExtractItemSpecificEffects(Item item, @Nullable Item controlItem) {
-		StringTextComponent dummyComponent = new StringTextComponent("");
+		TextComponent dummyComponent = new TextComponent("");
 
-		List<ITextComponent> itemTooltip = new ArrayList<ITextComponent>();
-		List<ITextComponent> controlItemTooltip = new ArrayList<ITextComponent>();
+		List<Component> itemTooltip = new ArrayList<Component>();
+		List<Component> controlItemTooltip = new ArrayList<Component>();
 		StringBuilder builder = new StringBuilder();
 
 		itemTooltip.add(dummyComponent);
@@ -245,7 +245,7 @@ public class ObjectHelper {
 			ClientHelper.collectTooltipLines(controlItem, controlItemTooltip, false);
 
 		tooltipLoop:
-		for (ITextComponent text : itemTooltip) {
+		for (Component text : itemTooltip) {
 			String line = text.getString();
 
 			if (line.isEmpty())
@@ -256,7 +256,7 @@ public class ObjectHelper {
 					continue tooltipLoop;
 			}
 
-			for (ITextComponent controlText : controlItemTooltip) {
+			for (Component controlText : controlItemTooltip) {
 				if (areStringsSimilar(line, controlText.getString()))
 					continue tooltipLoop;
 			}

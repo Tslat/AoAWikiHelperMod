@@ -1,14 +1,14 @@
 package net.tslat.aoawikihelpermod.util.loottable.condition;
 
-import net.minecraft.loot.conditions.RandomChanceWithLooting;
+import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceWithLootingCondition;
 import net.tslat.aoa3.util.NumberUtil;
 
 import javax.annotation.Nonnull;
 
-public class RandomChanceWithLootingConditionHelper extends LootConditionHelper<RandomChanceWithLooting> {
+public class RandomChanceWithLootingConditionHelper extends LootConditionHelper<LootItemRandomChanceWithLootingCondition> {
 	@Nonnull
 	@Override
-	public String getDescription(RandomChanceWithLooting condition) {
+	public String getDescription(LootItemRandomChanceWithLootingCondition condition) {
 		float chance = condition.percent;
 		float lootingMod = condition.lootingMultiplier;
 

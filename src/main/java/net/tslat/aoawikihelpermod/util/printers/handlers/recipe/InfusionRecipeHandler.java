@@ -4,11 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -27,12 +27,12 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 
 	private final JsonObject rawRecipe;
 	@Nullable
-	private final IRecipe<?> recipe;
+	private final Recipe<?> recipe;
 	private final boolean isImbuing;
 
 	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
-	public InfusionRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable IRecipe<?> recipe) {
+	public InfusionRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
 		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
 		this.recipe = recipe;
@@ -61,7 +61,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 	public List<ResourceLocation> getIngredientsForLookup() {
 		ArrayList<ResourceLocation> ingredients = new ArrayList<ResourceLocation>();
 
-		for (JsonElement element : JSONUtils.getAsJsonArray(rawRecipe, "ingredients")) {
+		for (JsonElement element : GsonHelper.getAsJsonArray(rawRecipe, "ingredients")) {
 			ResourceLocation id = ObjectHelper.getIngredientItemId(element);
 
 			if (id != null)
@@ -98,7 +98,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		int maxXp = 0;
 
 		if (rawRecipe.has("infusion_level"))
-			infusionReq = JSONUtils.getAsInt(rawRecipe, "infusion_level");
+			infusionReq = GsonHelper.getAsInt(rawRecipe, "infusion_level");
 
 		if (rawRecipe.has("infusion_xp")) {
 			JsonElement xpJson = rawRecipe.get("infusion_xp");
@@ -110,20 +110,20 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 				JsonObject xpJsonObj = xpJson.getAsJsonObject();
 
 				if (xpJsonObj.has("min") && xpJsonObj.has("max")) {
-					minXp = Math.max(0, JSONUtils.getAsInt(xpJsonObj, "min"));
-					maxXp = Math.max(minXp, JSONUtils.getAsInt(xpJsonObj, "max"));
+					minXp = Math.max(0, GsonHelper.getAsInt(xpJsonObj, "min"));
+					maxXp = Math.max(minXp, GsonHelper.getAsInt(xpJsonObj, "max"));
 				}
 			}
 		}
 
 		JsonObject infusionJson = rawRecipe.getAsJsonObject("infusion");
 		String enchantmentName;
-		ResourceLocation enchantmentId = new ResourceLocation(JSONUtils.getAsString(infusionJson, "enchantment"));
+		ResourceLocation enchantmentId = new ResourceLocation(GsonHelper.getAsString(infusionJson, "enchantment"));
 		Enchantment enchant = ForgeRegistries.ENCHANTMENTS.getValue(enchantmentId);
 		int enchantLevel = 1;
 
 		if (infusionJson.has("level"))
-			enchantLevel = JSONUtils.getAsInt(infusionJson, "level");
+			enchantLevel = GsonHelper.getAsInt(infusionJson, "level");
 
 		if (enchant == null) {
 			enchantmentName = StringUtil.toTitleCase(enchantmentId.getPath()) + enchantLevel;
@@ -132,7 +132,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 			enchantmentName = ObjectHelper.getEnchantmentName(enchant, enchantLevel);
 		}
 
-		JsonArray ingredients = JSONUtils.getAsJsonArray(rawRecipe, "ingredients");
+		JsonArray ingredients = GsonHelper.getAsJsonArray(rawRecipe, "ingredients");
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(ingredients.size() + 1);
 
 		for (JsonElement ele : ingredients) {
@@ -154,7 +154,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 	private String[] makeInfusionRecipe(@Nullable Item targetItem) {
 		String[] printData = new String[3];
 
-		JsonArray ingredients = JSONUtils.getAsJsonArray(rawRecipe, "ingredients");
+		JsonArray ingredients = GsonHelper.getAsJsonArray(rawRecipe, "ingredients");
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(ingredients.size() + 1);
 		Pair<String, String> input = ObjectHelper.getIngredientName(rawRecipe.getAsJsonObject("input"));
 		String targetItemName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
@@ -164,7 +164,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 			ingredientsHandler.addIngredient(ele);
 		}
 
-		ingredientsHandler.addOutput(JSONUtils.getAsJsonObject(rawRecipe, "result"));
+		ingredientsHandler.addOutput(GsonHelper.getAsJsonObject(rawRecipe, "result"));
 
 		String output = FormattingHelper.createLinkableText(ingredientsHandler.getOutput().getRight(), ingredientsHandler.getOutput().getLeft() > 1, ingredientsHandler.getOutput().getMiddle().equals("minecraft"), !ingredientsHandler.getOutput().getRight().equals(targetItemName));
 

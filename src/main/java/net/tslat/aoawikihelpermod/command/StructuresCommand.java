@@ -10,15 +10,15 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.gen.feature.template.Template;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.dataskimmers.StructureTemplateSkimmer;
@@ -30,11 +30,11 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class StructuresCommand implements Command<CommandSource> {
+public class StructuresCommand implements Command<CommandSourceStack> {
 	private static final StructuresCommand CMD = new StructuresCommand();
 
-	public static ArgumentBuilder<CommandSource, ?> register() {
-		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("structure").executes(CMD);
+	public static ArgumentBuilder<CommandSourceStack, ?> register() {
+		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("structure").executes(CMD);
 
 		builder.then(Commands.argument("structure_piece_id", TemplateIdArgument.instance()).executes(StructuresCommand::printStructurePiece));
 
@@ -46,16 +46,16 @@ public class StructuresCommand implements Command<CommandSource> {
 	}
 
 	@Override
-	public int run(CommandContext<CommandSource> context) {
+	public int run(CommandContext<CommandSourceStack> context) {
 		WikiHelperCommand.info(context.getSource(), commandName(), "Print out a structure details for specific pieces or template pools.");
 
 		return 1;
 	}
 
-	private static int printStructurePiece(CommandContext<CommandSource> cmd) {
+	private static int printStructurePiece(CommandContext<CommandSourceStack> cmd) {
 		try {
 			ResourceLocation id;
-			Template template;
+			StructureTemplate template;
 
 			try {
 				id = TemplateIdArgument.getTemplateId(cmd, "structure_piece_id");
@@ -79,10 +79,10 @@ public class StructuresCommand implements Command<CommandSource> {
 			HashSet<ResourceLocation> entities = new HashSet<ResourceLocation>();
 			ArrayList<String> entityEntries = new ArrayList<String>();
 			StringBuilder contentsBuilder = new StringBuilder();
-			BlockPos size = template.getSize();
+			Vec3i size = template.getSize();
 
-			for (Template.Palette palette : template.palettes) {
-				for (Template.BlockInfo blockInfo : palette.blocks()) {
+			for (StructureTemplate.Palette palette : template.palettes) {
+				for (StructureTemplate.StructureBlockInfo blockInfo : palette.blocks()) {
 					Block block = blockInfo.state.getBlock();
 
 					if (block == Blocks.AIR || block == Blocks.JIGSAW || block == Blocks.STRUCTURE_BLOCK)
@@ -104,7 +104,7 @@ public class StructuresCommand implements Command<CommandSource> {
 						.append(FormattingHelper.createLinkableText(blockName, false, block.getRegistryName().getNamespace().equals("minecraft"), true));
 			}
 
-			for (Template.EntityInfo entity : template.entityInfoList) {
+			for (StructureTemplate.StructureEntityInfo entity : template.entityInfoList) {
 				if (entity.nbt.contains("id")) {
 					ResourceLocation entityId = new ResourceLocation(entity.nbt.getString("id"));
 
@@ -161,18 +161,18 @@ public class StructuresCommand implements Command<CommandSource> {
 
 	public static class TemplateIdArgument implements ArgumentType<ResourceLocation> {
 		private static final Collection<String> EXAMPLES = Arrays.asList("minecraft:igloo/bottom", "aoa3:abyss/abyssal_lotto_hut/abyssal_lotto_hut");
-		private static final DynamicCommandExceptionType UNKNOWN_STRUCTURE_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslationTextComponent("command.aoa.structures.invalidStructure", arg));
+		private static final DynamicCommandExceptionType UNKNOWN_STRUCTURE_EXCEPTION = new DynamicCommandExceptionType(arg -> new TranslatableComponent("command.aoa.structures.invalidStructure", arg));
 
 		public static TemplateIdArgument instance() {
 			return new TemplateIdArgument();
 		}
 
-		public static ResourceLocation getTemplateId(CommandContext<CommandSource> context, String name) throws CommandSyntaxException {
+		public static ResourceLocation getTemplateId(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
 			return findTemplate(context.getArgument(name, ResourceLocation.class));
 		}
 
-		public static Template getTemplate(ResourceLocation path) throws CommandSyntaxException {
-			Template template = StructureTemplateSkimmer.getTemplate(path);
+		public static StructureTemplate getTemplate(ResourceLocation path) throws CommandSyntaxException {
+			StructureTemplate template = StructureTemplateSkimmer.getTemplate(path);
 
 			if (template == null)
 				throw UNKNOWN_STRUCTURE_EXCEPTION.create(path);
@@ -199,7 +199,7 @@ public class StructuresCommand implements Command<CommandSource> {
 
 			builder = builder.createOffset(reader.getCursor());
 
-			ISuggestionProvider.suggestResource(StructureTemplateSkimmer.getTemplateList(), builder);
+			SharedSuggestionProvider.suggestResource(StructureTemplateSkimmer.getTemplateList(), builder);
 
 			return builder.buildFuture();
 		}

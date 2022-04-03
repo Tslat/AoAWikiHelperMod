@@ -5,14 +5,14 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.minecraft.block.Block;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.ResourceLocationArgument;
-import net.minecraft.command.arguments.SuggestionProviders;
-import net.minecraft.entity.EntityType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoa3.util.StringUtil;
@@ -24,12 +24,12 @@ import net.tslat.aoawikihelpermod.util.printers.handlers.LootTablePrintHandler;
 
 import java.io.File;
 
-public class LootTableCommand implements Command<CommandSource> {
+public class LootTableCommand implements Command<CommandSourceStack> {
 	private static final LootTableCommand CMD = new LootTableCommand();
-	private static final SuggestionProvider<CommandSource> SUGGESTION_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "loot_tables"), (context, builder) -> ISuggestionProvider.suggestResource(LootTablesSkimmer.TABLE_PRINTERS.keySet().stream(), builder));
+	private static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "loot_tables"), (context, builder) -> SharedSuggestionProvider.suggestResource(LootTablesSkimmer.TABLE_PRINTERS.keySet().stream(), builder));
 
-	public static ArgumentBuilder<CommandSource, ?> register() {
-		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("loottable").executes(CMD);
+	public static ArgumentBuilder<CommandSourceStack, ?> register() {
+		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("loottable").executes(CMD);
 
 		builder.then(Commands.literal("table").then(Commands.argument("loot_table", ResourceLocationArgument.id()).suggests(SUGGESTION_PROVIDER).executes(cmd -> printTable(cmd, ResourceLocationArgument.getId(cmd, "loot_table")))));
 		builder.then(Commands.literal("entity").then(Commands.argument("entity", ResourceLocationArgument.id()).suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(LootTableCommand::printEntityTable)));
@@ -42,7 +42,7 @@ public class LootTableCommand implements Command<CommandSource> {
 		return "LootTable";
 	}
 
-	private static int printBlockTable(CommandContext<CommandSource> cmd) {
+	private static int printBlockTable(CommandContext<CommandSourceStack> cmd) {
 		Block block = BlocksCommand.BlockArgument.getBlock(cmd, "block").getBlock();
 
 		if (block.getLootTable() == null) {
@@ -54,7 +54,7 @@ public class LootTableCommand implements Command<CommandSource> {
 		return printTable(cmd, block.getLootTable());
 	}
 
-	private static int printEntityTable(CommandContext<CommandSource> cmd) {
+	private static int printEntityTable(CommandContext<CommandSourceStack> cmd) {
 		ResourceLocation id = ResourceLocationArgument.getId(cmd, "entity");
 		EntityType<?> entity = ForgeRegistries.ENTITIES.getValue(id);
 
@@ -67,7 +67,7 @@ public class LootTableCommand implements Command<CommandSource> {
 		return printTable(cmd, entity.getDefaultLootTable());
 	}
 
-	private static int printTable(CommandContext<CommandSource> cmd, ResourceLocation tableId) {
+	private static int printTable(CommandContext<CommandSourceStack> cmd, ResourceLocation tableId) {
 		try {
 			LootTablePrintHandler printHandler = LootTablesSkimmer.TABLE_PRINTERS.get(tableId);
 
@@ -110,7 +110,7 @@ public class LootTableCommand implements Command<CommandSource> {
 	}
 
 	@Override
-	public int run(CommandContext<CommandSource> context) {
+	public int run(CommandContext<CommandSourceStack> context) {
 		WikiHelperCommand.info(context.getSource(), commandName(), "Print out a specific loot table in its relevant template format");
 
 		return 1;

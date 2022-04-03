@@ -1,12 +1,12 @@
 package net.tslat.aoawikihelpermod.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.math.BlockPos;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapter;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
@@ -20,7 +20,7 @@ public class BlockIsoPrinter extends IsometricPrinterScreen {
 	protected final ArrayList<IsoRenderAdapter<BlockState>> adapters = new ArrayList<>(1);
 	protected final BlockState block;
 
-	public BlockIsoPrinter(BlockState block, int imageSize, float rotationAdjust, CommandSource commandSource, String commandName, Consumer<File> fileConsumer) {
+	public BlockIsoPrinter(BlockState block, int imageSize, float rotationAdjust, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
 		super(imageSize, rotationAdjust, commandSource, commandName, fileConsumer);
 
 		this.block = block;
@@ -46,12 +46,12 @@ public class BlockIsoPrinter extends IsometricPrinterScreen {
 
 	@Override
 	protected void renderObject() {
-		MatrixStack matrix = new MatrixStack();
+		PoseStack matrix = new PoseStack();
 
 		withAlignedIsometricProjection(matrix, () -> {
-			BlockRendererDispatcher blockRenderer = this.minecraft.getBlockRenderer();
-			EntityRendererManager renderManager = this.minecraft.getEntityRenderDispatcher();
-			IRenderTypeBuffer.Impl renderBuffer = mc.renderBuffers().bufferSource();
+			BlockRenderDispatcher blockRenderer = this.minecraft.getBlockRenderer();
+			EntityRenderDispatcher renderManager = this.minecraft.getEntityRenderDispatcher();
+			MultiBufferSource.BufferSource renderBuffer = mc.renderBuffers().bufferSource();
 
 			renderManager.setRenderShadow(false);
 
@@ -70,13 +70,13 @@ public class BlockIsoPrinter extends IsometricPrinterScreen {
 	}
 
 	@Override
-	protected void makePreRenderAdjustments(MatrixStack matrix) {
+	protected void makePreRenderAdjustments(PoseStack matrix) {
 		for (IsoRenderAdapter<BlockState> adapter : this.adapters) {
 			adapter.makePreRenderAdjustments(this.block, matrix);
 		}
 	}
 
-	protected boolean customRenderBlock(BlockRendererDispatcher blockRenderer, MatrixStack matrix, IRenderTypeBuffer renderBuffer) {
+	protected boolean customRenderBlock(BlockRenderDispatcher blockRenderer, PoseStack matrix, MultiBufferSource renderBuffer) {
 		for (IsoRenderAdapter<BlockState> adapter : this.adapters) {
 			if (adapter.handleCustomRender(this.block, matrix, renderBuffer))
 				return true;

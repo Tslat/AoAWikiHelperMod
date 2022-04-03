@@ -1,10 +1,10 @@
 package net.tslat.aoawikihelpermod.util.printers.handlers;
 
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.entity.merchant.villager.VillagerProfession;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.MerchantOffer;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.MerchantOffer;
 import net.tslat.aoa3.content.entity.base.AoATrader;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.StringUtil;
@@ -41,7 +41,7 @@ public class MerchantTradePrintHandler {
 	private final Pair<String, Integer> tradeDetails;
 	private final int tradesToUnlockAtLevel;
 
-	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
+	private final HashMap<Item, String[]> printoutData = new HashMap<>();
 
 	public MerchantTradePrintHandler(AoATrader trader, int professionLevel, MerchantOffer trade) {
 		this.trade = trade;

@@ -1,12 +1,12 @@
 package net.tslat.aoawikihelpermod.util.fakeworld;
 
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.storage.ISpawnWorldInfo;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.storage.WritableLevelData;
 
 import javax.annotation.Nonnull;
 
-public class FakeSpawnInfo implements ISpawnWorldInfo {
+public class FakeSpawnInfo implements WritableLevelData {
 	private static final GameRules gameRules = new GameRules();
 
 	@Override

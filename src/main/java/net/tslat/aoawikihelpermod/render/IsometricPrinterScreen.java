@@ -1,20 +1,20 @@
 package net.tslat.aoawikihelpermod.render;
 
 import com.google.common.collect.HashMultimap;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MainWindow;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
+import com.mojang.math.Vector4f;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.client.shader.Framebuffer;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector4f;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.tslat.aoa3.util.ColourUtil;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapter;
@@ -32,7 +32,7 @@ public abstract class IsometricPrinterScreen extends Screen {
 	private static final HashMultimap<Class<?>, IsoRenderAdapter<?>> adapters = HashMultimap.create();
 
 	protected final Consumer<File> fileConsumer;
-	protected final CommandSource commandSource;
+	protected final CommandSourceStack commandSource;
 	protected final String commandName;
 
 	protected final float rotationAdjust;
@@ -48,15 +48,15 @@ public abstract class IsometricPrinterScreen extends Screen {
 	@Nonnull
 	protected String currentStatus = "Rendering...";
 
-	protected IsometricPrinterScreen(int maxSize, float rotationAdjust, CommandSource commandSource, String commandName, Consumer<File> fileConsumer) {
-		super(new StringTextComponent("Isometric Rendering"));
+	protected IsometricPrinterScreen(int maxSize, float rotationAdjust, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
+		super(new TextComponent("Isometric Rendering"));
 
 		this.fileConsumer = fileConsumer;
 		this.commandSource = commandSource;
 		this.commandName = commandName;
 		this.rotationAdjust = rotationAdjust;
 
-		MainWindow window = mc.getWindow();
+		Window window = mc.getWindow();
 		this.windowWidth = window.getScreenWidth();
 		this.windowHeight = window.getScreenHeight();
 
@@ -80,14 +80,14 @@ public abstract class IsometricPrinterScreen extends Screen {
 		return mc.level != null;
 	}
 
-	protected void makePreRenderAdjustments(MatrixStack matrix) {}
+	protected void makePreRenderAdjustments(PoseStack matrix) {}
 
 	protected abstract void renderObject();
 
 	protected abstract File getOutputFile();
 
 	@Override
-	public void render(MatrixStack matrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
+	public void render(PoseStack matrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
 		if (determineScaleAndPosition()) {
 			RenderUtil.clearRenderBuffer();
 			renderObject();
@@ -102,7 +102,7 @@ public abstract class IsometricPrinterScreen extends Screen {
 		this.mc.setScreen(null);
 	}
 
-	protected void drawCurrentStatus(MatrixStack matrix) {
+	protected void drawCurrentStatus(PoseStack matrix) {
 		int stringWidth = this.mc.font.width(this.currentStatus);
 
 		matrix.pushPose();
@@ -112,7 +112,7 @@ public abstract class IsometricPrinterScreen extends Screen {
 	}
 
 	protected NativeImage captureImage() {
-		Framebuffer buffer = this.mc.getMainRenderTarget();
+		RenderTarget buffer = this.mc.getMainRenderTarget();
 		NativeImage image = new NativeImage(buffer.width, buffer.height, true);
 
 		RenderSystem.bindTexture(buffer.getColorTextureId());
@@ -313,8 +313,7 @@ public abstract class IsometricPrinterScreen extends Screen {
 		return new Vector4f(minX, minY, maxX, maxY);
 	}
 
-	protected final void withAlignedIsometricProjection(MatrixStack matrix, Runnable renderOps) {
-		RenderSystem.pushMatrix();
+	protected final void withAlignedIsometricProjection(PoseStack matrix, Runnable renderOps) {
 		matrix.pushPose();
 
 		matrix.scale(this.scale, this.scale, 1);
@@ -327,7 +326,6 @@ public abstract class IsometricPrinterScreen extends Screen {
 		renderOps.run();
 
 		matrix.popPose();
-		RenderSystem.popMatrix();
 	}
 
 	public static void queuePrintTask(Supplier<? extends IsometricPrinterScreen> screenProvider) {

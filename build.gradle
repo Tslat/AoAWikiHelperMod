@@ -14,16 +14,15 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle' // Parchment
 apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 version = mod_version
 group = 'net.tslat.aoawikihelpermod'
 archivesBaseName = 'aoawikihelpermod'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
 sourceSets {
     main.resources.srcDir 'src/generated/resources'
@@ -76,6 +75,11 @@ repositories {
         }
     }
 
+    maven {
+        name = "Geckolib" // Geckolib
+        url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/"
+    }
+
     flatDir {
         dirs 'libs'
     }
@@ -84,9 +88,9 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:$project.minecraft_version-$project.forge_version"
 
-    // Disabled temporarily while in Alpha releases
-    //implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version")
-    implementation fg.deobf("libs:AoA3-1.16.5-3.6:PublicAlpha")
+    implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version")
+    implementation fg.deobf("software.bernie.geckolib:geckolib-$project.geckolib_version")
+    //implementation fg.deobf("libs:AoA3-1.16.5-3.6:PublicAlpha")
 
     // Mixin annotation processor, just in case we need it
     if (System.getProperty("idea.sync.active") != "true") {
@@ -103,11 +107,12 @@ jar {
         attributes([
             "Specification-Title": "aoawikihelpermod",
             "Specification-Vendor": "Tslat",
-            "Specification-Version": "2.0",
+            "Specification-Version": "1.18.2",
             "Implementation-Title": project.name,
-            "Implementation-Version": "${version}",
+            "Implementation-Version": "${mod_version}",
             "Implementation-Vendor" :"Tslat",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+            "MixinConfigs": "${modid}.mixins.json"
         ])
     }
 }

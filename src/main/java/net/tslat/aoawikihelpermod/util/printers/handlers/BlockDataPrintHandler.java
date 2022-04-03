@@ -1,14 +1,14 @@
 package net.tslat.aoawikihelpermod.util.printers.handlers;
 
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.block.Block;
-import net.minecraft.block.HorizontalBlock;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.Items;
-import net.minecraft.state.Property;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.material.FluidState;
 import net.tslat.aoa3.content.block.functional.light.LampBlock;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
@@ -113,9 +113,9 @@ public class BlockDataPrintHandler {
 
 	public void prepLogStripDescription() {
 		ArrayList<Block> strippableBlocks = new ArrayList<Block>(1);
-		Block stripsTo = AxeItem.STRIPABLES.get(this.block);
+		Block stripsTo = AxeItem.STRIPPABLES.get(this.block);
 
-		for (Map.Entry<Block, Block> entry : AxeItem.STRIPABLES.entrySet()) {
+		for (Map.Entry<Block, Block> entry : AxeItem.STRIPPABLES.entrySet()) {
 			if (entry.getValue() == this.block)
 				strippableBlocks.add(entry.getKey());
 		}
@@ -169,28 +169,28 @@ public class BlockDataPrintHandler {
 
 	@Nullable
 	private List<ResourceLocation> getBlockTags() {
-		if (block.getTags().isEmpty())
+		if (block.builtInRegistryHolder().tags().toList().isEmpty())
 			return null;
 
-		return new ArrayList<ResourceLocation>(block.getTags());
+		return block.builtInRegistryHolder().tags().map(TagKey::location).toList();
 	}
 
 	@Nullable
 	private List<ResourceLocation> getItemTags() {
-		if (block.asItem() == Items.AIR || block.asItem().getTags().isEmpty())
+		if (block.asItem() == Items.AIR || block.asItem().builtInRegistryHolder().tags().toList().isEmpty())
 			return null;
 
-		return new ArrayList<ResourceLocation>(block.asItem().getTags());
+		return block.asItem().builtInRegistryHolder().tags().map(TagKey::location).toList();
 	}
 
 	@Nullable
 	private List<ResourceLocation> getFluidTags() {
 		FluidState fluidState = block.getFluidState(block.defaultBlockState());
 
-		if (fluidState.isEmpty() || fluidState.getType().getTags().isEmpty())
+		if (fluidState.isEmpty() || fluidState.getType().builtInRegistryHolder().tags().toList().isEmpty())
 			return null;
 
-		return new ArrayList<ResourceLocation>(fluidState.getType().getTags());
+		return fluidState.getType().builtInRegistryHolder().tags().map(TagKey::location).toList();
 	}
 
 	// Not at all an exhaustive list, this can easily be expanded
@@ -207,7 +207,7 @@ public class BlockDataPrintHandler {
 		else if (property == BlockStateProperties.HALF) {
 			return "Which vertical half of the block it currently is.";
 		}
-		else if (property == HorizontalBlock.FACING) {
+		else if (property == BlockStateProperties.HORIZONTAL_FACING) {
 			return "Which direction the block is facing in all cardinal directions.";
 		}
 		else if (property == BlockStateProperties.FACING) {

@@ -1,10 +1,10 @@
 package net.tslat.aoawikihelpermod.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector4f;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector4f;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.resources.ResourceLocation;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 
@@ -27,7 +27,7 @@ public final class AnimatedEntityIsoPrinter extends EntityIsoPrinter {
 	private NativeImageGifWriter gifWriter;
 	private final int cachedFPS;
 
-	public AnimatedEntityIsoPrinter(ResourceLocation entityId, int imageSize, int recordLength, float rotationAdjust, CommandSource commandSource, String commandName, Consumer<File> fileConsumer) {
+	public AnimatedEntityIsoPrinter(ResourceLocation entityId, int imageSize, int recordLength, float rotationAdjust, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
 		super(entityId, imageSize, rotationAdjust, commandSource, commandName, fileConsumer);
 
 		this.renderTicks = recordLength;
@@ -60,7 +60,7 @@ public final class AnimatedEntityIsoPrinter extends EntityIsoPrinter {
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		if (gifWriter == null)
 			return;
 

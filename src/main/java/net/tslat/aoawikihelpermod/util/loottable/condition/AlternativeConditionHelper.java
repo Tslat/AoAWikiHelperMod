@@ -1,14 +1,14 @@
 package net.tslat.aoawikihelpermod.util.loottable.condition;
 
-import net.minecraft.loot.conditions.Alternative;
+import net.minecraft.world.level.storage.loot.predicates.AlternativeLootItemCondition;
 import net.tslat.aoawikihelpermod.util.LootTableHelper;
 
 import javax.annotation.Nonnull;
 
-public class AlternativeConditionHelper extends LootConditionHelper<Alternative> {
+public class AlternativeConditionHelper extends LootConditionHelper<AlternativeLootItemCondition> {
 	@Nonnull
 	@Override
-	public String getDescription(Alternative condition) {
+	public String getDescription(AlternativeLootItemCondition condition) {
 		if (condition.terms.length == 0) {
 			return "";
 		}
