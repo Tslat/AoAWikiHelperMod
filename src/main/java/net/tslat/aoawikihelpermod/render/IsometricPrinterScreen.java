@@ -48,6 +48,8 @@ public abstract class IsometricPrinterScreen extends Screen {
 	@Nonnull
 	protected String currentStatus = "Rendering...";
 
+	protected float defaultRefScale = 1;
+
 	protected IsometricPrinterScreen(int maxSize, float rotationAdjust, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
 		super(new TextComponent("Isometric Rendering"));
 
@@ -74,13 +76,12 @@ public abstract class IsometricPrinterScreen extends Screen {
 	}
 
 	protected boolean preRenderingCheck() {
-		if (this.targetSize < 50)
-			WikiHelperCommand.warn(this.commandSource, this.commandName, "Small target image size: '" + this.targetSize + "', render may fail to provide a result.");
-
 		return mc.level != null;
 	}
 
-	protected void makePreRenderAdjustments(PoseStack matrix) {}
+	protected void makePreRenderAdjustments(PoseStack matrix) {
+		matrix.scale(10, 10, 10);
+	}
 
 	protected abstract void renderObject();
 
@@ -131,7 +132,7 @@ public abstract class IsometricPrinterScreen extends Screen {
 		AtomicBoolean succeeded = new AtomicBoolean(true);
 
 		Util.ioPool().execute(() -> {
-			try {
+			try (image) {
 				if (outputFile.exists()) {
 					outputFile.delete();
 				}
@@ -145,9 +146,6 @@ public abstract class IsometricPrinterScreen extends Screen {
 				ex.printStackTrace();
 				succeeded.set(false);
 			}
-			finally {
-				image.close();
-			}
 		});
 
 		return succeeded.get() ? outputFile : null;
@@ -157,7 +155,7 @@ public abstract class IsometricPrinterScreen extends Screen {
 	protected final NativeImage extractSubRange(NativeImage source, @Nullable Vector4f bounds) {
 		NativeImage output = new NativeImage(this.targetSize, this.targetSize, true);
 
-		try {
+		try (source) {
 			if (bounds == null)
 				bounds = getBoundsForRenderedImage(source);
 
@@ -167,6 +165,7 @@ public abstract class IsometricPrinterScreen extends Screen {
 				return null;
 			}
 
+
 			int minX = (int)bounds.x();
 			int minY = (int)bounds.y();
 			int xOffset = (int)((this.targetSize - (bounds.z() - minX)) / 2f);
@@ -175,8 +174,8 @@ public abstract class IsometricPrinterScreen extends Screen {
 			if (xOffset < 0 || yOffset < 0)
 				return null;
 
-			for (int x = minX; x < bounds.z(); x++) {
-				for (int y = minY; y < bounds.w(); y++) {
+			for (int x = minX; x <= bounds.z(); x++) {
+				for (int y = minY; y <= bounds.w(); y++) {
 					output.setPixelRGBA(x - minX + xOffset, y - minY + yOffset, source.getPixelRGBA(x, y));
 				}
 			}
@@ -187,15 +186,12 @@ public abstract class IsometricPrinterScreen extends Screen {
 
 			return null;
 		}
-		finally {
-			source.close();
-		}
 
 		return output;
 	}
 
 	protected final boolean determineScaleAndPosition() {
-		float refScale = 1f;
+		float refScale = defaultRefScale;
 		float avgHeight = 0;
 		float avgWidth = 0;
 		NativeImage capture;

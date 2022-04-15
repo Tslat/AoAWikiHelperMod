@@ -16,6 +16,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -23,6 +24,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.tslat.aoawikihelpermod.render.*;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 
@@ -101,6 +103,16 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 								.then(Commands.argument("do_full_structure", BoolArgumentType.bool())
 										.executes(context -> printStructureIso(context, 1000, 0, BoolArgumentType.getBool(context, "do_full_structure"))))));
 
+		builder.then(Commands.literal("item")
+						.then(Commands.argument("stack", ItemArgument.item())
+								.executes(context -> printItemIso(context, -1, false))
+								.then(Commands.argument("image_size", IntegerArgumentType.integer(0, 1000))
+										.executes(context -> printItemIso(context, IntegerArgumentType.getInteger(context, "image_size"), false))
+										.then(Commands.argument("animated", BoolArgumentType.bool())
+												.executes(context -> printItemIso(context, IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated")))))
+								.then(Commands.argument("animated", BoolArgumentType.bool())
+										.executes(context -> printItemIso(context, -1, BoolArgumentType.getBool(context, "animated"))))));
+
 		return builder;
 	}
 
@@ -111,6 +123,31 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 	@Override
 	public int run(CommandContext<CommandSourceStack> context) {
 		WikiHelperCommand.info(context.getSource(), commandName(), "Print out isometric images of different objects");
+
+		return 1;
+	}
+
+	private static int printItemIso(CommandContext<CommandSourceStack> context, int imageSize, boolean animated) throws CommandSyntaxException {
+		context.getSource().getPlayerOrException();
+
+		IsometricPrinterScreen.queuePrintTask(() -> {
+			if (animated) {
+				return new AnimatedItemIsoPrinter(
+						new ItemStack(ItemArgument.getItem(context, "stack").getItem()),
+						imageSize,
+						context.getSource(),
+						CMD.commandName(),
+						file -> WikiHelperCommand.success(context.getSource(), "Iso", FormattingHelper.generateResultMessage(file, file.getName(), null)));
+			}
+			else {
+				return new ItemIsoPrinter(
+						new ItemStack(ItemArgument.getItem(context, "stack").getItem()),
+						imageSize,
+						context.getSource(),
+						CMD.commandName(),
+						file -> WikiHelperCommand.success(context.getSource(), "Iso", FormattingHelper.generateResultMessage(file, file.getName(), null)));
+			}
+		});
 
 		return 1;
 	}
@@ -126,7 +163,8 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 						imageSize,
 						IntegerArgumentType.getInteger(context, "record_length"),
 						rotation,
-						context.getSource(), CMD.commandName(),
+						context.getSource(),
+						CMD.commandName(),
 						file -> WikiHelperCommand.success(context.getSource(), "Iso", FormattingHelper.generateResultMessage(file, file.getName(), null)));
 			}
 			else {
@@ -135,7 +173,8 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 						nbt,
 						imageSize,
 						rotation,
-						context.getSource(), CMD.commandName(),
+						context.getSource(),
+						CMD.commandName(),
 						file -> WikiHelperCommand.success(context.getSource(), "Iso", FormattingHelper.generateResultMessage(file, file.getName(), null)));
 			}
 		});
