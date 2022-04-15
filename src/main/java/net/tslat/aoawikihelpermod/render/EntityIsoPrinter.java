@@ -6,8 +6,10 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
@@ -15,6 +17,7 @@ import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapter;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -22,12 +25,17 @@ import java.util.function.Consumer;
 public class EntityIsoPrinter extends IsometricPrinterScreen {
 	protected final ArrayList<IsoRenderAdapter<Entity>> adapters = new ArrayList<>(1);
 	protected ResourceLocation entityId;
+	protected CompoundTag nbt;
 	protected Entity cachedEntity;
 
-	public EntityIsoPrinter(ResourceLocation entityId, int imageSize, float rotationAdjust, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
+	public EntityIsoPrinter(ResourceLocation entityId, @Nullable CompoundTag nbt, int imageSize, float rotationAdjust, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
 		super(imageSize, rotationAdjust, commandSource, commandName, fileConsumer);
 
 		this.entityId = entityId;
+		this.nbt = nbt;
+
+		if (this.nbt != null)
+			this.nbt.putString("id", entityId.toString());
 	}
 
 	@Override
@@ -41,7 +49,7 @@ public class EntityIsoPrinter extends IsometricPrinterScreen {
 			return false;
 		}
 
-		this.cachedEntity = ForgeRegistries.ENTITIES.getValue(this.entityId).create(FakeWorld.INSTANCE);
+		this.cachedEntity = this.nbt == null ? ForgeRegistries.ENTITIES.getValue(this.entityId).create(FakeWorld.INSTANCE) : EntityType.loadEntityRecursive(this.nbt, FakeWorld.INSTANCE, entity -> entity);
 
 		if (this.cachedEntity == null) {
 			WikiHelperCommand.error(this.commandSource, this.commandName, "Unable to instantiate entity of type: '" + this.entityId + "'. Could be an invalid entity or a bug.");
@@ -55,9 +63,7 @@ public class EntityIsoPrinter extends IsometricPrinterScreen {
 		this.cachedEntity.setYRot(0);
 		this.cachedEntity.yRotO = 0;
 
-		if (cachedEntity instanceof LivingEntity) {
-			LivingEntity living = (LivingEntity)cachedEntity;
-
+		if (cachedEntity instanceof LivingEntity living) {
 			living.yBodyRot = 0;
 			living.yBodyRotO = 0;
 			living.yHeadRot = 0;

@@ -4,10 +4,12 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector4f;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.function.Consumer;
@@ -27,8 +29,8 @@ public final class AnimatedEntityIsoPrinter extends EntityIsoPrinter {
 	private NativeImageGifWriter gifWriter;
 	private final int cachedFPS;
 
-	public AnimatedEntityIsoPrinter(ResourceLocation entityId, int imageSize, int recordLength, float rotationAdjust, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
-		super(entityId, imageSize, rotationAdjust, commandSource, commandName, fileConsumer);
+	public AnimatedEntityIsoPrinter(ResourceLocation entityId, @Nullable CompoundTag nbt, int imageSize, int recordLength, float rotationAdjust, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
+		super(entityId, nbt, imageSize, rotationAdjust, commandSource, commandName, fileConsumer);
 
 		this.renderTicks = recordLength;
 		this.lastTick = this.mc.level.getGameTime();
