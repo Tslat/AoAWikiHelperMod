@@ -92,7 +92,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String efficiency = NumberUtil.roundToNthDecimalPlace(axe.getTier().getSpeed(), 2);
 				String durability = String.valueOf(axe.getTier().getUses());
 				String harvestLevel = String.valueOf(axe.getTier().getLevel());
-				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(axe, AoATools.AMETHYST_AXE.get());
+				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(axe, AoATools.LIMONITE_AXE.get());
 
 				printHelper.entry(
 						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
@@ -388,7 +388,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String efficiency = NumberUtil.roundToNthDecimalPlace(pickaxe.getTier().getSpeed(), 2);
 				String durability = String.valueOf(pickaxe.getTier().getUses());
 				String harvestLevel = String.valueOf(pickaxe.getTier().getLevel());
-				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(pickaxe, AoATools.AMETHYST_PICKAXE.get());
+				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(pickaxe, AoATools.LIMONITE_PICKAXE.get());
 
 				printHelper.entry(
 						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
@@ -468,7 +468,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String efficiency = NumberUtil.roundToNthDecimalPlace(shovel.getTier().getSpeed(), 2);
 				String durability = String.valueOf(shovel.getTier().getUses());
 				String harvestLevel = String.valueOf(shovel.getTier().getLevel());
-				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(shovel, AoATools.AMETHYST_SHOVEL.get());
+				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(shovel, AoATools.LIMONITE_SHOVEL.get());
 
 				printHelper.entry(
 						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
@@ -584,7 +584,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				float damage = (float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_DAMAGE);
 				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
 				String durability = String.valueOf(sword.getTier().getUses());
-				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(item, AoAWeapons.AMETHYST_SWORD.get());
+				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(item, AoAWeapons.LIMONITE_SWORD.get());
 
 				printHelper.entry(
 						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),

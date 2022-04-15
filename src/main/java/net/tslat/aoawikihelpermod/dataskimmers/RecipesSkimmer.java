@@ -119,8 +119,11 @@ public class RecipesSkimmer extends SimpleJsonResourceReloadListener {
 				RECIPES_BY_INGREDIENT.put(stack.getItem().getRegistryName(), id);
 			}
 
-			if (recipe instanceof InfusionRecipe && !((InfusionRecipe)recipe).isEnchanting())
-				RECIPES_BY_INGREDIENT.put(((InfusionRecipe)recipe).getRecipeInput().getItem().getRegistryName(), id);
+			if (recipe instanceof InfusionRecipe infusionRecipe && !infusionRecipe.isEnchanting()) {
+				for (ItemStack stack : infusionRecipe.getRecipeInput().getItems()) {
+					RECIPES_BY_INGREDIENT.put(stack.getItem().getRegistryName(), id);
+				}
+			}
 		}
 
 		RECIPES_BY_OUTPUT.put(recipe.getResultItem().getItem().getRegistryName(), id);

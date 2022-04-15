@@ -34,5 +34,8 @@ public final class IsoRenderAdapters {
 				5f,
 				Vector3f.ZP,
 				-90f));
+		IsometricPrinterScreen.registerBlockAdapter(new SimpleRotationRenderAdapter<>(block ->
+				block.getBlock() instanceof StairBlock,
+				Vector3f.YP, 90f));
 	}
 }

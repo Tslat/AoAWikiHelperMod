@@ -6,7 +6,9 @@ buildscript {
         maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath(group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true) { exclude group: 'org.apache.logging.log4j' }
+        classpath 'org.apache.logging.log4j:log4j-api:2.11.2'
+        classpath 'org.apache.logging.log4j:log4j-core:2.11.2'
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
         classpath 'org.parchmentmc:librarian:1.+' // Parchment
     }
@@ -90,7 +92,6 @@ dependencies {
 
     implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version")
     implementation fg.deobf("software.bernie.geckolib:geckolib-$project.geckolib_version")
-    //implementation fg.deobf("libs:AoA3-1.16.5-3.6:PublicAlpha")
 
     // Mixin annotation processor, just in case we need it
     if (System.getProperty("idea.sync.active") != "true") {
