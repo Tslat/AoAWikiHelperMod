@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[36,)"
+loaderVersion="[40,)"
 license="MIT"
 
 [[mods]]
@@ -14,18 +14,18 @@ https://adventofascension.gamepedia.com'''
 [[dependencies.aoawikihelpermod]]
     modId="forge"
     mandatory=true
-    versionRange="[36.2.20,)"
+    versionRange="[40.0.35,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.aoawikihelpermod]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16.5,)"
+    versionRange="[1.18.2,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.aoawikihelpermod]]
     modId="aoa3"
     mandatory=true
-    versionRange="[1.16.5-3.6-Public Alpha,)"
+    versionRange="[1.18.2,)"
     ordering="NONE"
     side="BOTH"
