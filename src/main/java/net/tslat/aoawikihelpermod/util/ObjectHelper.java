@@ -28,6 +28,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.util.LocaleUtil;
@@ -194,8 +195,10 @@ public class ObjectHelper {
 	}
 
 	public static String getBiomeName(ResourceKey<Biome> biome) {
-		ResourceLocation biomeId = biome.location();
+		return getBiomeName(biome.location());
+	}
 
+	public static String getBiomeName(ResourceLocation biomeId) {
 		if (biomeId.getNamespace().equals(AdventOfAscension.MOD_ID))
 			return StringUtil.toTitleCase(biomeId.getPath());
 
@@ -207,6 +210,13 @@ public class ObjectHelper {
 		String suffix = isItem(id) ? " (entity)" : "";
 
 		return LocaleUtil.getLocaleMessage("entity." + id.getNamespace() + "." + id.getPath()).getString() + suffix;
+	}
+
+	public static String getFluidName(Fluid fluid) {
+		if (isBlock(fluid.getRegistryName()))
+			return getBlockName(ForgeRegistries.BLOCKS.getValue(fluid.getRegistryName()));
+
+		return StringUtil.toTitleCase(fluid.getRegistryName().getPath());
 	}
 
 	public static String getBiomeCategoryName(Biome.BiomeCategory category) {
