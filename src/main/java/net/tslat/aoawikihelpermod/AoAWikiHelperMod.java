@@ -70,6 +70,7 @@ public class AoAWikiHelperMod {
 		MerchantsSkimmer.init(ev.getServer());
 		LootTableHelper.init();
 		ItemMiscUsageSkimmer.init();
+		TagDataSkimmer.init();
 	}
 
 	@SubscribeEvent
