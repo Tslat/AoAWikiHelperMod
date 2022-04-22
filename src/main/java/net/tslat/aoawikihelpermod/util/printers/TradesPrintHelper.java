@@ -30,30 +30,15 @@ public class TradesPrintHelper extends TablePrintHelper {
 	}
 
 	public static String getProfessionLevelString(int professionLevel) {
-		String profession;
-
-		switch (professionLevel) {
-			case 5:
-				profession = "Master";
-				break;
-			case 4:
-				profession = "Expert";
-				break;
-			case 3:
-				profession = "Journeyman";
-				break;
-			case 2:
-				profession = "Apprentice";
-				break;
-			case 1:
-			default:
-				profession = "Novice";
-			break;
+		String profession = switch (professionLevel) {
+			case 5 -> "Master";
+			case 4 -> "Expert";
+			case 3 -> "Journeyman";
+			case 2 -> "Apprentice";
+			default -> "Novice";
 		};
 
 		return professionLevel + " (" + profession + ")";
-
-		//return WikiTemplateHelper.makeWikiTemplateObject("LevelCell", true, professionLevel + " (" + profession + ")");
 	}
 
 	public void handleTradeMap(Int2ObjectMap<ArrayList<MerchantTradePrintHandler>> trades) {
