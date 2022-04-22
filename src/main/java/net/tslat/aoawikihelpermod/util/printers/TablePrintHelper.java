@@ -107,6 +107,10 @@ public class TablePrintHelper extends PrintHelper {
 		}
 	}
 
+	public void rowId(@Nonnull String id) {
+		write(GAP + " id=\"" + id + "\"");
+	}
+
 	public void entry(@Nonnull String... values) {
 		if (values.length != columns.length)
 			throw new IllegalArgumentException("Provided invalid number of values for table entry (" + this.name + "). Values: " + Arrays.toString(values) + ", Columns: " + Arrays.toString(columns));
