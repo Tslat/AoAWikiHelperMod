@@ -12,8 +12,10 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -30,6 +32,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.util.LocaleUtil;
 import net.tslat.aoa3.util.StringUtil;
+import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
 import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
@@ -163,7 +166,22 @@ public class ObjectHelper {
 
 	public static String getItemName(ItemLike item) {
 		ResourceLocation itemId = item.asItem().getRegistryName();
-		String suffix = isEntity(itemId) ? " (item)" : "";
+		EntityType<?> matchingEntity = ForgeRegistries.ENTITIES.getValue(itemId);
+		String suffix = "";
+
+		if (matchingEntity != EntityType.PIG) {
+			try {
+				Entity testInstance = matchingEntity.create(FakeWorld.INSTANCE);
+
+				if (testInstance != null) {
+					if (testInstance instanceof LivingEntity)
+						suffix = " (item)";
+
+					testInstance.discard();
+				}
+			}
+			catch (Exception ignored) {}
+		}
 
 		return new ItemStack(item).getHoverName().getString() + suffix;
 	}
