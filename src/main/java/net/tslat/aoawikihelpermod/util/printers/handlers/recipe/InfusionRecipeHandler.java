@@ -169,7 +169,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		String output = FormattingHelper.createLinkableText(result.formattedName, result.count > 1, !result.matches(targetItemName));
 
 		printData[0] = output;
-		printData[1] = 1 + " " + inputItemName + "+<br/>" + ingredientsHandler.getFormattedIngredientsList(targetItem);
+		printData[1] = 1 + " " + inputItemName + " +<br/>" + ingredientsHandler.getFormattedIngredientsList(targetItem);
 		printData[2] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), input.formattedName, result);
 
 		this.printoutData.put(targetItem, printData);
