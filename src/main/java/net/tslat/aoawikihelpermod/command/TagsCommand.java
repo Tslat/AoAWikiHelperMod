@@ -62,7 +62,7 @@ public class TagsCommand implements Command<CommandSourceStack> {
 
 			try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Tag", "Default Contents")) {
 				printHelper.defaultFullPageTableProperties();
-				printHelper.withProperty("class", "sortable mw-collapsible mw-collapsed");
+				printHelper.withProperty("class", "sortable mw-collapsible");
 
 				for (String[] entry : tagCategoryPrintHandler.getCategoryPrintout(namespace)) {
 					printHelper.rowId(entry[0]);
