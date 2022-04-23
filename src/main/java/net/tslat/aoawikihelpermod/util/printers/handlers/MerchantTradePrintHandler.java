@@ -45,7 +45,7 @@ public class MerchantTradePrintHandler {
 
 	public MerchantTradePrintHandler(AoATrader trader, int professionLevel, MerchantOffer trade) {
 		this.trade = trade;
-		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(trader.getType().getRegistryName().getPath()), false, false, true), professionLevel);
+		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(trader.getType().getRegistryName().getPath()), false, true), professionLevel);
 		int tradesToUnlock;
 
 		try {
@@ -62,7 +62,7 @@ public class MerchantTradePrintHandler {
 
 	public MerchantTradePrintHandler(VillagerProfession profession, int professionLevel, MerchantOffer trade) {
 		this.trade = trade;
-		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(profession.getRegistryName().getPath()), true, true, true), professionLevel);
+		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(profession.getRegistryName().getPath()), true, true), professionLevel);
 		this.tradesToUnlockAtLevel = 2;
 	}
 

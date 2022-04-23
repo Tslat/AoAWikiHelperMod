@@ -1,7 +1,6 @@
 package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
@@ -11,7 +10,6 @@ import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
-import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -72,10 +70,10 @@ public class SmeltingRecipeHandler extends RecipePrintHandler {
 		int cookingTime = GsonHelper.getAsInt(rawRecipe, "cookingtime", 200);
 
 		String[] printData = new String[5];
-		printData[0] = (output.count > 1 ? output.count + " " : "") + FormattingHelper.createLinkableText(output.formattedName, output.count > 1, output.isVanilla(), !output.matches(targetName));
+		printData[0] = (output.count > 1 ? output.count + " " : "") + FormattingHelper.createLinkableText(output.formattedName, output.count > 1, !output.matches(targetName));
 		printData[1] = NumberUtil.roundToNthDecimalPlace(cookingTime / 20f, 2);
 		printData[2] = NumberUtil.roundToNthDecimalPlace(xp, 1);
-		printData[3] = FormattingHelper.createLinkableText(input.formattedName, false, input.isVanilla(), !input.matches(targetName));
+		printData[3] = FormattingHelper.createLinkableText(input.formattedName, false, !input.matches(targetName));
 		printData[4] = WikiTemplateHelper.makeSmeltingTemplate(input.formattedName, output.formattedName);
 
 		this.printoutData.put(targetItem, printData);

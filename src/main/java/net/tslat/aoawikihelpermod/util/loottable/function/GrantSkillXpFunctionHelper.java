@@ -10,6 +10,6 @@ public class GrantSkillXpFunctionHelper extends LootFunctionHelper<GrantSkillXp>
 	@Nonnull
 	@Override
 	public String getDescription(GrantSkillXp function) {
-		return "will additionally grant " + NumberUtil.roundToNthDecimalPlace(function.getXp(), 2) + " " + FormattingHelper.createLinkableText(function.getSkill().getName().getString(), false, false, true) + " xp";
+		return "will additionally grant " + NumberUtil.roundToNthDecimalPlace(function.getXp(), 2) + " " + FormattingHelper.createLinkableText(function.getSkill().getName().getString(), false, true) + " xp";
 	}
 }

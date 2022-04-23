@@ -68,7 +68,7 @@ public class TagCategoryPrintHandler<T extends IForgeRegistryEntry<T>> {
 				if (namingFunction != null)
 					return namingFunction.apply(entry);
 
-				namingFunction = ObjectHelper.getNameFunctionForUnknownObject(entry).andThen(name -> FormattingHelper.createLinkableText(name, false, entry.getRegistryName().getNamespace().equals("minecraft"), true));
+				namingFunction = ObjectHelper.getNameFunctionForUnknownObject(entry).andThen(name -> FormattingHelper.createLinkableText(name, false, true));
 
 				return namingFunction.apply(entry);
 			}).reduce((line, newEntry) -> line += ", " + newEntry).orElse("");

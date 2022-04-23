@@ -76,13 +76,13 @@ public class CampfireRecipeHandler extends RecipePrintHandler {
 		int cookingTime = GsonHelper.getAsInt(rawRecipe, "cookingtime", 100);
 
 		String[] printData = new String[] {
-				FormattingHelper.createLinkableText(input.formattedName, true, input.isVanilla(), !input.matches(targetName)) +
+				FormattingHelper.createLinkableText(input.formattedName, true, !input.matches(targetName)) +
 						" can be cooked on a " +
 						FormattingHelper.createLinkableItem(Blocks.CAMPFIRE, false, true) +
 						" to produce " +
 						output.count +
 						" " +
-						FormattingHelper.createLinkableText(output.formattedName, output.count > 1, output.isVanilla(), !output.matches(targetName)) +
+						FormattingHelper.createLinkableText(output.formattedName, output.count > 1, !output.matches(targetName)) +
 						" and " +
 						NumberUtil.roundToNthDecimalPlace(xp, 1) +
 						"xp, taking " +

@@ -47,7 +47,7 @@ public class FormattingHelper {
 	}
 
 	public static String createLinkableItem(ItemLike object, boolean pluralise, boolean shouldLink) {
-		return createLinkableText(ObjectHelper.getItemName(object.asItem()), pluralise, object.asItem().getRegistryName().getNamespace().equals("minecraft"), shouldLink);
+		return createLinkableText(ObjectHelper.getItemName(object.asItem()), pluralise, shouldLink);
 	}
 
 	public static String createLinkableTag(String tag, ForgeRegistryEntry<?> objectFromTagTypeRegistry) {
@@ -56,16 +56,26 @@ public class FormattingHelper {
 		return tooltip(tag, "Any " + registryForObject.getRegistryName().getPath().replaceAll("_", "") + " tagged as " + tag) + " ([[Tags#" + registryForObject.getRegistryName() + ":" + tag + "|Tag]])";
 	}
 
-	public static String createLinkableText(String text, boolean pluralise, boolean isVanilla, boolean shouldLink) {
+	public static String createLinkableText(String text, boolean pluralise) {
+		return createLinkableText(text, pluralise, true);
+	}
+
+	public static String createLinkableText(String text, boolean pluralise, boolean shouldLink) {
+		return createLinkableText(text, pluralise, shouldLink, null);
+	}
+
+	public static String createLinkableText(String text, boolean pluralise, boolean shouldLink, @Nullable String customDisplayText) {
 		StringBuilder builder = new StringBuilder(shouldLink ? "[[" : "");
 		String pluralName = pluralise ? lazyPluralise(text) : text;
 
-		if (shouldLink && !pluralName.equals(text)) {
+		if (customDisplayText != null || (shouldLink && !pluralName.equals(text))) {
 			builder.append(text);
 			builder.append("|");
+
+			text = customDisplayText != null ? customDisplayText : pluralName;
 		}
 
-		builder.append(pluralName);
+		builder.append(text);
 
 		if (shouldLink)
 			builder.append("]]");

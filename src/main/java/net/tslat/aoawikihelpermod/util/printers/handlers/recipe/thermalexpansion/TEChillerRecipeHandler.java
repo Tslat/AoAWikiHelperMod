@@ -114,7 +114,7 @@ public class TEChillerRecipeHandler extends RecipePrintHandler {
 					.append(" ")
 					.append(ingredient.count)
 					.append(" ")
-					.append(FormattingHelper.createLinkableText(ingredient.formattedName, ingredient.count > 1, ingredient.isVanilla(), !ingredient.matches(targetName)));
+					.append(FormattingHelper.createLinkableText(ingredient.formattedName, ingredient.count > 1, !ingredient.matches(targetName)));
 		}
 
 		String[] printData = new String[3];

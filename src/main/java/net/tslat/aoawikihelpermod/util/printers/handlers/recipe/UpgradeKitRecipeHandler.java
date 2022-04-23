@@ -78,8 +78,8 @@ public class UpgradeKitRecipeHandler extends RecipePrintHandler {
 
 		String[] printData = new String[3];
 		printData[0] = FormattingHelper.createImageBlock(AoABlocks.DIVINE_STATION.get()) + " " + FormattingHelper.createLinkableItem(AoABlocks.DIVINE_STATION.get(), false, true);
-		printData[1] = FormattingHelper.createImageBlock(input.formattedName) + " " + FormattingHelper.createLinkableText(input.formattedName, false, input.isVanilla(), !input.matches(targetName)) + " + " + FormattingHelper.createImageBlock(upgradeKit.formattedName) + " " + FormattingHelper.createLinkableText(upgradeKit.formattedName, false, upgradeKit.isVanilla(), !upgradeKit.matches(targetName));
-		printData[2] = FormattingHelper.createImageBlock(output.formattedName) + " " + FormattingHelper.createLinkableText(output.formattedName, false, output.isVanilla(), !output.matches(targetName));
+		printData[1] = FormattingHelper.createImageBlock(input.formattedName) + " " + FormattingHelper.createLinkableText(input.formattedName, false, !input.matches(targetName)) + " + " + FormattingHelper.createImageBlock(upgradeKit.formattedName) + " " + FormattingHelper.createLinkableText(upgradeKit.formattedName, false, !upgradeKit.matches(targetName));
+		printData[2] = FormattingHelper.createImageBlock(output.formattedName) + " " + FormattingHelper.createLinkableText(output.formattedName, false, !output.matches(targetName));
 
 		this.printoutData.put(targetItem, printData);
 

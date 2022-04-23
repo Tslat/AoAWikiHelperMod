@@ -10,6 +10,6 @@ public class ApplyBonusFunctionHelper extends LootFunctionHelper<ApplyBonusCount
 	@Nonnull
 	@Override
 	public String getDescription(ApplyBonusCount function) {
-		return "will vary in quantity depending on the level of " + FormattingHelper.createLinkableText(ObjectHelper.getEnchantmentName(function.enchantment, 0), false, false, true) + " used";
+		return "will vary in quantity depending on the level of " + FormattingHelper.createLinkableText(ObjectHelper.getEnchantmentName(function.enchantment, 0), false, true) + " used";
 	}
 }

@@ -95,7 +95,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(axe, AoATools.LIMONITE_AXE.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						FormattingHelper.healthValue(damage),
 						attackSpeed,
 						harvestLevel,
@@ -134,7 +134,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(blaster, AoAWeapons.BONE_BLASTER.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						damage,
 						unholsterTime,
 						fireRate,
@@ -171,7 +171,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(bow, AoAWeapons.ALACRITY_BOW.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						damage,
 						drawTime,
 						durability,
@@ -208,7 +208,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(cannon, AoAWeapons.MINI_CANNON.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						damage,
 						unholsterTime,
 						fireRate,
@@ -244,7 +244,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(crossbow, AoAWeapons.TROLLS_CROSSBOW.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						damage,
 						durability,
 						tooltip);
@@ -278,7 +278,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(greatblade, AoAWeapons.ROYAL_GREATBLADE.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						damage,
 						attackSpeed,
 						durability,
@@ -315,7 +315,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(gun, AoAWeapons.SQUAD_GUN.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						damage,
 						unholsterTime,
 						fireRate,
@@ -353,7 +353,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(maul, AoAWeapons.CORALSTONE_MAUL.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						damage,
 						attackSpeed,
 						knockback,
@@ -391,7 +391,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(pickaxe, AoATools.LIMONITE_PICKAXE.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						FormattingHelper.healthValue(damage),
 						attackSpeed,
 						harvestLevel,
@@ -431,7 +431,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(shotgun, AoAWeapons.MINI_CANNON.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						damage,
 						pellets,
 						unholsterTime,
@@ -471,7 +471,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(shovel, AoATools.LIMONITE_SHOVEL.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						FormattingHelper.healthValue(damage),
 						attackSpeed,
 						harvestLevel,
@@ -510,7 +510,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(sniper, AoAWeapons.MINI_CANNON.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						damage,
 						unholsterTime,
 						fireRate,
@@ -549,11 +549,11 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				for (Map.Entry<Item, Integer> runeEntry : staff.getRunes().entrySet()) {
 					String name = ObjectHelper.getItemName(runeEntry.getKey());
 
-					runeArray.add(runeEntry.getValue() + "x " + FormattingHelper.createImageBlock(name) + " " + FormattingHelper.createLinkableText(name, runeEntry.getValue() > 1 , false, true));
+					runeArray.add(runeEntry.getValue() + "x " + FormattingHelper.createImageBlock(name) + " " + FormattingHelper.createLinkableText(name, runeEntry.getValue() > 1 , true));
 				}
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName, 64) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						FormattingHelper.listToString(runeArray, false),
 						durability,
 						tooltip);
@@ -587,7 +587,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(item, AoAWeapons.LIMONITE_SWORD.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						FormattingHelper.healthValue(damage),
 						attackSpeed,
 						durability,
@@ -621,7 +621,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(thrownWeapon, AoAWeapons.SQUAD_GUN.get());
 
 				printHelper.entry(
-						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, false,true)),
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						damage,
 						fireRate,
 						tooltip);

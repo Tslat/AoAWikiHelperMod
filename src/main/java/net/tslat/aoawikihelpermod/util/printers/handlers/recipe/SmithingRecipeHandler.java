@@ -78,8 +78,8 @@ public class SmithingRecipeHandler extends RecipePrintHandler {
 
 		String[] printData = new String[3];
 		printData[0] = FormattingHelper.createImageBlock(Blocks.SMITHING_TABLE) + " " + FormattingHelper.createLinkableItem(Blocks.SMITHING_TABLE, false, true);
-		printData[1] = FormattingHelper.createImageBlock(input.formattedName) + " " + FormattingHelper.createLinkableText(input.formattedName, false, input.isVanilla(), !input.matches(targetName)) + " + " + FormattingHelper.createImageBlock(input.formattedName) + " " + FormattingHelper.createLinkableText(material.formattedName, false, material.isVanilla(), !material.matches(targetName));
-		printData[2] = FormattingHelper.createImageBlock(output.formattedName) + " " + FormattingHelper.createLinkableText(output.formattedName, false, output.isVanilla(), !output.matches(targetName));
+		printData[1] = FormattingHelper.createImageBlock(input.formattedName) + " " + FormattingHelper.createLinkableText(input.formattedName, false, !input.matches(targetName)) + " + " + FormattingHelper.createImageBlock(input.formattedName) + " " + FormattingHelper.createLinkableText(material.formattedName, false, !material.matches(targetName));
+		printData[2] = FormattingHelper.createImageBlock(output.formattedName) + " " + FormattingHelper.createLinkableText(output.formattedName, false, !output.matches(targetName));
 
 		this.printoutData.put(targetItem, printData);
 

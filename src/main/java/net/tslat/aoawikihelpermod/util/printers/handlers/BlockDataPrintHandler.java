@@ -129,7 +129,7 @@ public class BlockDataPrintHandler {
 			if (strippableBlocks.size() == 1) {
 				builder.append(block);
 				builder.append(" can be made by stripping a ");
-				builder.append(FormattingHelper.createLinkableText(strippableBlocks.get(0).getName().getString(), false, strippableBlocks.get(0).getRegistryName().getNamespace().equals("minecraft"), true));
+				builder.append(FormattingHelper.createLinkableText(strippableBlocks.get(0).getName().getString(), false, true));
 				builder.append(" by using an axe on it");
 			}
 			else {
@@ -138,7 +138,7 @@ public class BlockDataPrintHandler {
 
 				for (Block strippableBlock : strippableBlocks) {
 					builder.append("* ");
-					builder.append(FormattingHelper.createLinkableText(strippableBlock.getName().getString(), false, strippableBlock.getRegistryName().getNamespace().equals("minecraft"), true));
+					builder.append(FormattingHelper.createLinkableText(strippableBlock.getName().getString(), false, true));
 				}
 			}
 
@@ -150,7 +150,7 @@ public class BlockDataPrintHandler {
 
 			builder.append(FormattingHelper.lazyPluralise(block.getName().getString()));
 			builder.append(" can be stripped into a ");
-			builder.append(FormattingHelper.createLinkableText(stripsTo.getName().getString(), false, stripsTo.getRegistryName().getNamespace().equals("minecraft"), true));
+			builder.append(FormattingHelper.createLinkableText(stripsTo.getName().getString(), false, true));
 			builder.append(" by using an axe on it.");
 
 			strippedDescription = builder.toString();

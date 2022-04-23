@@ -157,7 +157,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(ingredients.size() + 1);
 		PrintableIngredient input = ObjectHelper.getIngredientName(rawRecipe.getAsJsonObject("input"));
 		String targetItemName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
-		String inputItemName = FormattingHelper.createLinkableText(input.formattedName, false, input.isVanilla(), !input.matches(targetItemName));
+		String inputItemName = FormattingHelper.createLinkableText(input.formattedName, false, !input.matches(targetItemName));
 
 		for (JsonElement ele : ingredients) {
 			ingredientsHandler.addIngredient(ele);
@@ -166,7 +166,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		ingredientsHandler.addOutput(GsonHelper.getAsJsonObject(rawRecipe, "result"));
 
 		PrintableIngredient result = ingredientsHandler.getOutput();
-		String output = FormattingHelper.createLinkableText(result.formattedName, result.count > 1, result.isVanilla(), !result.matches(targetItemName));
+		String output = FormattingHelper.createLinkableText(result.formattedName, result.count > 1, !result.matches(targetItemName));
 
 		printData[0] = output;
 		printData[1] = 1 + " " + inputItemName + "+<br/>" + ingredientsHandler.getFormattedIngredientsList(targetItem);

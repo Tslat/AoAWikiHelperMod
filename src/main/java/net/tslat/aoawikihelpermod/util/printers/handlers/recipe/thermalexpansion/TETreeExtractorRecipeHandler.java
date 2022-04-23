@@ -2,7 +2,6 @@ package net.tslat.aoawikihelpermod.util.printers.handlers.recipe.thermalexpansio
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
@@ -111,8 +110,8 @@ public class TETreeExtractorRecipeHandler extends RecipePrintHandler {
 		}
 
 		String[] printData = new String[3];
-		printData[0] = trunk == null ? "" : FormattingHelper.createImageBlock(trunk.formattedName) + " " + FormattingHelper.createLinkableText(trunk.formattedName, false, trunk.isVanilla(), !trunk.matches(targetName));
-		printData[1] = leaves == null ? "" : FormattingHelper.createImageBlock(leaves.formattedName) + " " + FormattingHelper.createLinkableText(leaves.formattedName, false, leaves.isVanilla(), !leaves.matches(targetName));
+		printData[0] = trunk == null ? "" : FormattingHelper.createImageBlock(trunk.formattedName) + " " + FormattingHelper.createLinkableText(trunk.formattedName, false, !trunk.matches(targetName));
+		printData[1] = leaves == null ? "" : FormattingHelper.createImageBlock(leaves.formattedName) + " " + FormattingHelper.createLinkableText(leaves.formattedName, false, !leaves.matches(targetName));
 		printData[2] = output;
 
 		this.printoutData.put(targetItem, printData);

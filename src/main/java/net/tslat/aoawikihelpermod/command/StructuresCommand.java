@@ -101,7 +101,7 @@ public class StructuresCommand implements Command<CommandSourceStack> {
 				contentsBuilder
 						.append(FormattingHelper.createImageBlock(blockName))
 						.append(" ")
-						.append(FormattingHelper.createLinkableText(blockName, false, block.getRegistryName().getNamespace().equals("minecraft"), true));
+						.append(FormattingHelper.createLinkableText(blockName, false, true));
 			}
 
 			for (StructureTemplate.StructureEntityInfo entity : template.entityInfoList) {
@@ -111,7 +111,7 @@ public class StructuresCommand implements Command<CommandSourceStack> {
 					if (entities.add(entityId)) {
 						String entityName = StringUtil.toTitleCase(entityId.getPath());
 
-						entityEntries.add(FormattingHelper.createImageBlock(entityName) + " " + FormattingHelper.createLinkableText(entityName, false, entityId.getNamespace().equals("minecraft"), true));
+						entityEntries.add(FormattingHelper.createImageBlock(entityName) + " " + FormattingHelper.createLinkableText(entityName, false, true));
 					}
 				}
 			}

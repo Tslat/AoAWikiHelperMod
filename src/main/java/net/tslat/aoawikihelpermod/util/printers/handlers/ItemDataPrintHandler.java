@@ -132,7 +132,7 @@ public class ItemDataPrintHandler {
 			return composterPrintout;
 
 		if (ComposterBlock.COMPOSTABLES.containsKey(item))
-			this.composterPrintout = ObjectHelper.getItemName(item) + " can be placed in a " + FormattingHelper.createLinkableText(ObjectHelper.getBlockName(Blocks.COMPOSTER), false, true, true) + " for a " + NumberUtil.roundToNthDecimalPlace(ComposterBlock.COMPOSTABLES.getFloat(item), 2) + "% chance to raise the compost level.";
+			this.composterPrintout = ObjectHelper.getItemName(item) + " can be placed in a " + FormattingHelper.createLinkableText(ObjectHelper.getBlockName(Blocks.COMPOSTER), false, true) + " for a " + NumberUtil.roundToNthDecimalPlace(ComposterBlock.COMPOSTABLES.getFloat(item), 2) + "% chance to raise the compost level.";
 
 		return composterPrintout;
 	}

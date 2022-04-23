@@ -102,11 +102,11 @@ public class TESawmillRecipeHandler extends RecipePrintHandler {
 					.append(" ")
 					.append(ingredient.count)
 					.append(" ")
-					.append(FormattingHelper.createLinkableText(ingredient.formattedName, ingredient.count > 1, ingredient.isVanilla(), !ingredient.matches(targetName)));
+					.append(FormattingHelper.createLinkableText(ingredient.formattedName, ingredient.count > 1, !ingredient.matches(targetName)));
 		}
 
 		String[] printData = new String[3];
-		printData[0] = FormattingHelper.createImageBlock(input.formattedName) + " " + FormattingHelper.createLinkableText(input.formattedName, false, input.isVanilla(), !input.matches(targetName));
+		printData[0] = FormattingHelper.createImageBlock(input.formattedName) + " " + FormattingHelper.createLinkableText(input.formattedName, false, !input.matches(targetName));
 		printData[1] = String.valueOf(energy);
 		printData[2] = resultBuilder.toString();
 
