@@ -64,10 +64,13 @@ public abstract class RecipePrintHandler {
 				if (!ing.formattedName.isEmpty()) {
 					String slotPrefix = slotPrefixes[index];
 
-					if (ing.imageName != null)
+					if (ing.imageName != null) {
 						lines.add(slotPrefix + "image=" + ing.imageName);
-
-					lines.add(slotPrefix + "=" + ing.formattedName);
+						lines.add(slotPrefix + "=" + ing.imageName.substring(0, ing.imageName.lastIndexOf(".")));
+					}
+					else {
+						lines.add(slotPrefix + "=" + ing.formattedName);
+					}
 				}
 			}
 
@@ -102,7 +105,7 @@ public abstract class RecipePrintHandler {
 					builder.append(FormattingHelper.createLinkableTag(ing.formattedName, Items.STONE));
 				}
 				else {
-					builder.append(FormattingHelper.createLinkableText(ing.formattedName, ing.count > 1, ing.isVanilla(), targetItem == null || !ing.matches(ObjectHelper.getItemName(targetItem))));
+					builder.append(FormattingHelper.createLinkableText(ing.formattedName, ing.count > 1, targetItem == null || !ing.matches(ObjectHelper.getItemName(targetItem)), ing.formattedName.contains(" (item)") ? ing.formattedName.replace(" (item)", "") : null));
 				}
 			}
 
@@ -114,7 +117,7 @@ public abstract class RecipePrintHandler {
 		}
 
 		public String getFormattedOutput(@Nullable Item targetItem) {
-			return FormattingHelper.createLinkableText(output.formattedName, false, output.isVanilla(), (targetItem == null || !output.matches(ObjectHelper.getItemName(targetItem))));
+			return FormattingHelper.createLinkableText(output.formattedName, false, (targetItem == null || !output.matches(ObjectHelper.getItemName(targetItem))));
 		}
 
 		public void addOutput(JsonObject json) {
