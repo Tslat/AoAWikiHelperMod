@@ -66,17 +66,17 @@ public class SmeltingRecipeHandler extends RecipePrintHandler {
 			return this.printoutData.get(targetItem);
 
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
-		Pair<String, String> input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("ingredient"));
-		Triple<Integer, String, String> output = ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result"));
+		PrintableIngredient input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("ingredient"));
+		PrintableIngredient output = ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result"));
 		float xp = GsonHelper.getAsFloat(rawRecipe, "experience", 0);
 		int cookingTime = GsonHelper.getAsInt(rawRecipe, "cookingtime", 200);
 
 		String[] printData = new String[5];
-		printData[0] = (output.getLeft() > 1 ? output.getLeft() + " " : "") + FormattingHelper.createLinkableText(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName));
+		printData[0] = (output.count > 1 ? output.count + " " : "") + FormattingHelper.createLinkableText(output.formattedName, output.count > 1, output.isVanilla(), !output.matches(targetName));
 		printData[1] = NumberUtil.roundToNthDecimalPlace(cookingTime / 20f, 2);
 		printData[2] = NumberUtil.roundToNthDecimalPlace(xp, 1);
-		printData[3] = FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName));
-		printData[4] = WikiTemplateHelper.makeSmeltingTemplate(input.getSecond(), output.getRight());
+		printData[3] = FormattingHelper.createLinkableText(input.formattedName, false, input.isVanilla(), !input.matches(targetName));
+		printData[4] = WikiTemplateHelper.makeSmeltingTemplate(input.formattedName, output.formattedName);
 
 		this.printoutData.put(targetItem, printData);
 

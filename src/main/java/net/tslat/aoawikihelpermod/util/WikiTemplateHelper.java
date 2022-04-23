@@ -1,7 +1,7 @@
 package net.tslat.aoawikihelpermod.util;
 
 import net.tslat.aoawikihelpermod.util.printers.TablePrintHelper;
-import org.apache.commons.lang3.tuple.Triple;
+import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import java.util.ArrayList;
 
@@ -41,13 +41,13 @@ public class WikiTemplateHelper {
 		}
 	}
 
-	public static String makeCraftingTemplate(ArrayList<String> ingredients, Triple<Integer, String, String> output, boolean shapeless) {
+	public static String makeCraftingTemplate(ArrayList<String> ingredients, RecipePrintHandler.PrintableIngredient output, boolean shapeless) {
 		int extraLines = 1;
 
 		if (shapeless)
 			extraLines++;
 
-		if (output.getLeft() > 1)
+		if (output.count > 1)
 			extraLines++;
 
 		String[] lines = new String[ingredients.size() + extraLines];
@@ -58,10 +58,10 @@ public class WikiTemplateHelper {
 			i++;
 		}
 
-		lines[i] = "output=" + output.getRight();
+		lines[i] = "output=" + output.formattedName;
 
-		if (output.getLeft() > 1)
-			lines[++i] = "amount=" + output.getLeft();
+		if (output.count > 1)
+			lines[++i] = "amount=" + output.count;
 
 		if (shapeless)
 			lines[++i] = "shapeless=1";
@@ -73,10 +73,10 @@ public class WikiTemplateHelper {
 		return makeWikiTemplateObject("Smelting", false, "input=" + input, "output=" + output);
 	}
 
-	public static String makeInfusionTemplate(ArrayList<String> ingredients, String input, Triple<Integer, String, String> output) {
+	public static String makeInfusionTemplate(ArrayList<String> ingredients, String input, RecipePrintHandler.PrintableIngredient output) {
 		int lineCountMod = input.isEmpty() ? 2 : 3;
 
-		if (output.getLeft() > 1)
+		if (output.count > 1)
 			lineCountMod++;
 
 		String[] lines = new String[ingredients.size() + lineCountMod];
@@ -92,12 +92,12 @@ public class WikiTemplateHelper {
 			i++;
 		}
 
-		i = output.getLeft() > 1 ? 3 : 2;
+		i = output.count > 1 ? 3 : 2;
 
-		lines[lines.length - i--] = "output=" + (output == null ? "Air" : output.getRight());
+		lines[lines.length - i--] = "output=" + (output.formattedName.isEmpty() ? "Air" : output.formattedName);
 
-		if (output.getLeft() > 1)
-			lines[lines.length - i--] = "amount=" + output.getLeft();
+		if (output.count > 1)
+			lines[lines.length - i--] = "amount=" + output.count;
 
 		lines[lines.length - i] = "shapeless=1";
 

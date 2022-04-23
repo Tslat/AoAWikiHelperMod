@@ -3,7 +3,6 @@ package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
@@ -156,9 +155,9 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 
 		JsonArray ingredients = GsonHelper.getAsJsonArray(rawRecipe, "ingredients");
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(ingredients.size() + 1);
-		Pair<String, String> input = ObjectHelper.getIngredientName(rawRecipe.getAsJsonObject("input"));
+		PrintableIngredient input = ObjectHelper.getIngredientName(rawRecipe.getAsJsonObject("input"));
 		String targetItemName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
-		String inputItemName = FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetItemName));
+		String inputItemName = FormattingHelper.createLinkableText(input.formattedName, false, input.isVanilla(), !input.matches(targetItemName));
 
 		for (JsonElement ele : ingredients) {
 			ingredientsHandler.addIngredient(ele);
@@ -166,11 +165,12 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 
 		ingredientsHandler.addOutput(GsonHelper.getAsJsonObject(rawRecipe, "result"));
 
-		String output = FormattingHelper.createLinkableText(ingredientsHandler.getOutput().getRight(), ingredientsHandler.getOutput().getLeft() > 1, ingredientsHandler.getOutput().getMiddle().equals("minecraft"), !ingredientsHandler.getOutput().getRight().equals(targetItemName));
+		PrintableIngredient result = ingredientsHandler.getOutput();
+		String output = FormattingHelper.createLinkableText(result.formattedName, result.count > 1, result.isVanilla(), !result.matches(targetItemName));
 
 		printData[0] = output;
 		printData[1] = 1 + " " + inputItemName + "<br/>" + ingredientsHandler.getFormattedIngredientsList(targetItem);
-		printData[2] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), input.getSecond(), ingredientsHandler.getOutput());
+		printData[2] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), input.formattedName, result);
 
 		this.printoutData.put(targetItem, printData);
 
@@ -178,68 +178,28 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 	}
 
 	public static String getImbuingApplicableTo(ResourceLocation enchantId) {
-		switch (enchantId.toString()) {
-			case "aoa3:archmage":
-				return "Staves";
-			case "aoa3:brace":
-				return "Guns,<br/>Archerguns,<br/>Shotguns";
-			case "aoa3:control":
-				return "Guns,<br/>Archerguns,<br/>Shotguns,<br/>Snipers,<br/>Cannons";
-			case "aoa3:form":
-				return "Shotguns";
-			case "aoa3:greed":
-				return "Guns,<br/>Archerguns,<br/>Shotguns,<br/>Snipers,<br/>Cannons,<br/>Blasters,<br/>Staves";
-			case "aoa3:intervention":
-				return "Any unstackable item";
-			case "aoa3:recharge":
-				return "Blasters";
-			case "aoa3:sever":
-				return "Greatblades";
-			case "aoa3:shell":
-				return "Guns,<br/>Shotguns,<br/>Snipers";
-			case "minecraft:protection":
-			case "minecraft:fire_protection":
-			case "minecraft:blast_protection":
-			case "minecraft:projectile_protection":
-				return "Any armour";
-			case "minecraft:respiration":
-			case "minecraft:aqua_affinity":
-				return "Any helmet";
-			case "minecraft:thorns":
-				return "Any chestplate";
-			case "minecraft:feather_falling":
-			case "minecraft:depth_strider":
-			case "minecraft:frost_walker":
-				return "Any boots";
-			case "minecraft:binding_curse":
-				return "Any wearable item";
-			case "minecraft:sharpness":
-			case "minecraft:smite":
-			case "minecraft:bane_of_arthropods":
-			case "minecraft:knockback":
-			case "minecraft:fire_aspect":
-			case "minecraft:looting":
-			case "minecraft:sweeping":
-				return "Swords,<br/>Axes,<br/>Greatblades";
-			case "minecraft:efficiency":
-			case "minecraft:silk_touch":
-			case "minecraft:fortune":
-				return "Any tool";
-			case "minecraft:power":
-			case "minecraft:punch":
-			case "minecraft:flame":
-			case "minecraft:infinity":
-				return "Bows";
-			case "minecraft:luck_of_the_sea":
-			case "minecraft:lure":
-				return "Fishing Rods";
-			case "minecraft:unbreaking":
-			case "minecraft:mending":
-				return "Any damageable item";
-			case "minecraft:vanishing_curse":
-				return "Any item";
-			default:
-				return "?";
-		}
+		return switch (enchantId.toString()) {
+			case "aoa3:archmage" -> "Staves";
+			case "aoa3:brace" -> "Guns,<br/>Archerguns,<br/>Shotguns";
+			case "aoa3:control" -> "Guns,<br/>Archerguns,<br/>Shotguns,<br/>Snipers,<br/>Cannons";
+			case "aoa3:form" -> "Shotguns";
+			case "aoa3:greed" -> "Guns,<br/>Archerguns,<br/>Shotguns,<br/>Snipers,<br/>Cannons,<br/>Blasters,<br/>Staves";
+			case "aoa3:intervention" -> "Any unstackable item";
+			case "aoa3:recharge" -> "Blasters";
+			case "aoa3:sever" -> "Greatblades";
+			case "aoa3:shell" -> "Guns,<br/>Shotguns,<br/>Snipers";
+			case "minecraft:protection", "minecraft:fire_protection", "minecraft:blast_protection", "minecraft:projectile_protection" -> "Any armour";
+			case "minecraft:respiration", "minecraft:aqua_affinity" -> "Any helmet";
+			case "minecraft:thorns" -> "Any chestplate";
+			case "minecraft:feather_falling", "minecraft:depth_strider", "minecraft:frost_walker" -> "Any boots";
+			case "minecraft:binding_curse" -> "Any wearable item";
+			case "minecraft:sharpness", "minecraft:smite", "minecraft:bane_of_arthropods", "minecraft:knockback", "minecraft:fire_aspect", "minecraft:looting", "minecraft:sweeping" -> "Swords,<br/>Axes,<br/>Greatblades";
+			case "minecraft:efficiency", "minecraft:silk_touch", "minecraft:fortune" -> "Any tool";
+			case "minecraft:power", "minecraft:punch", "minecraft:flame", "minecraft:infinity" -> "Bows";
+			case "minecraft:luck_of_the_sea", "minecraft:lure" -> "Fishing Rods";
+			case "minecraft:unbreaking", "minecraft:mending" -> "Any damageable item";
+			case "minecraft:vanishing_curse" -> "Any item";
+			default -> "?";
+		};
 	}
 }

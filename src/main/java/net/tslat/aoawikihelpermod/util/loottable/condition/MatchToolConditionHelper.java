@@ -2,6 +2,7 @@ package net.tslat.aoawikihelpermod.util.loottable.condition;
 
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 
@@ -39,7 +40,7 @@ public class MatchToolConditionHelper extends LootConditionHelper<MatchTool> {
 			}
 		}
 		else if (predicate.tag != null) {
-			heldItemParticle = new StringBuilder("is anything tagged as " + FormattingHelper.createLinkableTag(predicate.tag.location().toString()));
+			heldItemParticle = new StringBuilder("is anything tagged as " + FormattingHelper.createLinkableTag(predicate.tag.location().toString(), Items.STONE));
 		}
 		else {
 			heldItemParticle = new StringBuilder("meets certain conditions");

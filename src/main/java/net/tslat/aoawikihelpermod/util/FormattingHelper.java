@@ -5,12 +5,12 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.storage.loot.providers.number.*;
+import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.tslat.aoa3.util.NumberUtil;
-import net.tslat.aoa3.util.StringUtil;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -50,20 +50,10 @@ public class FormattingHelper {
 		return createLinkableText(ObjectHelper.getItemName(object.asItem()), pluralise, object.asItem().getRegistryName().getNamespace().equals("minecraft"), shouldLink);
 	}
 
-	public static String createLinkableTag(String tag) {
-		StringBuilder builder = new StringBuilder("[[");
-		ResourceLocation tagId = new ResourceLocation(tag);
-		String tagName = StringUtil.toTitleCase(tagId.getPath());
+	public static String createLinkableTag(String tag, ForgeRegistryEntry<?> objectFromTagTypeRegistry) {
+		IForgeRegistry<?> registryForObject = ObjectHelper.getRegistryForObject(objectFromTagTypeRegistry);
 
-		//if (tagId.getNamespace().equals("minecraft"))
-		//	builder.append("mcw:"); Not redirecting mcw links anymore
-
-		builder.append(tagName);
-		builder.append("|");
-		builder.append(lazyPluralise(tagName));
-		builder.append(" (Any)]]");
-
-		return tooltip(builder.toString(), "Any item in tag collection");
+		return tooltip(tag, "Any " + registryForObject.getRegistryName().getPath().replaceAll("_", "") + " tagged as " + tag) + " ([[Tags#" + registryForObject.getRegistryName() + ":" + tag + "|Tag]])";
 	}
 
 	public static String createLinkableText(String text, boolean pluralise, boolean isVanilla, boolean shouldLink) {

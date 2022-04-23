@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -353,7 +354,7 @@ public class LootTableHelper {
 		if (!looting.isEmpty())
 			entryBuilder.append(" looting:").append(looting).append(";");
 
-		entryNotesBuilder.append("Randomly selects item from anything tagged as ").append(FormattingHelper.createLinkableTag(entry.tag.location().toString()));
+		entryNotesBuilder.append("Randomly selects item from anything tagged as ").append(FormattingHelper.createLinkableTag(entry.tag.location().toString(), Items.STONE));
 
 		if (entry.quality != 0) {
 			if (entryNotesBuilder.length() > 0)

@@ -4,13 +4,13 @@ import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -30,17 +30,19 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.RegistryManager;
+import net.minecraftforge.registries.tags.ITagManager;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.util.LocaleUtil;
 import net.tslat.aoa3.util.StringUtil;
+import net.tslat.aoawikihelpermod.dataskimmers.TagDataSkimmer;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
-import org.apache.commons.lang3.tuple.Triple;
+import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -108,7 +110,26 @@ public class ObjectHelper {
 		return (ArrayList<T>)collection.stream().sorted(Comparator.comparing(sortFunction)).collect(Collectors.toList());
 	}
 
-	public static Pair<String, String> getIngredientName(JsonObject obj) {
+	public static String getSampleElementForTag(String tag) {
+		ResourceLocation id = new ResourceLocation(tag);
+
+		for (ResourceLocation registryId : TagDataSkimmer.tagTypes()) {
+			IForgeRegistry registry = RegistryManager.ACTIVE.getRegistry(registryId);
+			ITagManager tagManager = registry.tags();
+			TagKey tagKey = TagKey.create(registry.getRegistryKey(), id);
+
+			if (tagManager.isKnownTagName(tagKey)) {
+				Optional<IForgeRegistryEntry<?>> entry = tagManager.getTag(tagKey).stream().findFirst();
+
+				if (entry.isPresent())
+					return getNameFunctionForUnknownObject(entry.get()).apply(entry.get());
+			}
+		}
+
+		return "Air";
+	}
+
+	public static RecipePrintHandler.PrintableIngredient getIngredientName(JsonObject obj) {
 		if ((obj.has("item") && obj.has("tag")) || (!obj.has("item") && !obj.has("tag")))
 			throw new JsonParseException("Invalidly formatted ingredient, unable to proceed.");
 
@@ -125,8 +146,11 @@ public class ObjectHelper {
 				ingredientName = "minecraft:" + ingredientName;
 
 			ownerId = ingredientName.split(":")[0];
+			RecipePrintHandler.PrintableIngredient ingredient = new RecipePrintHandler.PrintableIngredient(ownerId, ingredientName);
 
-			return new Pair<String, String>(ownerId, ingredientName);
+			ingredient.setCustomImageName(getSampleElementForTag(ingredientName) + ".png");
+
+			return ingredient;
 		}
 		else {
 			throw new JsonParseException("Invalidly formatted ingredient, unable to proceed.");
@@ -230,15 +254,15 @@ public class ObjectHelper {
 		return enchant.getFullname(level).getString();
 	}
 
-	public static Pair<String, String> getFormattedItemDetails(ResourceLocation id) {
+	public static RecipePrintHandler.PrintableIngredient getFormattedItemDetails(ResourceLocation id) {
 		Item item = Registry.ITEM.getOptional(id).orElse(null);
 
-		return new Pair<String, String>(id.getNamespace(), item == null ? StringUtil.toTitleCase(id.getPath()) : ObjectHelper.getItemName(item));
+		return new RecipePrintHandler.PrintableIngredient(id.getNamespace(), item == null ? StringUtil.toTitleCase(id.getPath()) : ObjectHelper.getItemName(item));
 	}
 
-	public static Triple<Integer, String, String> getStackDetailsFromJson(JsonElement element) {
-		Pair<String, String> itemName;
+	public static RecipePrintHandler.PrintableIngredient getStackDetailsFromJson(JsonElement element) {
 		int count = 1;
+		RecipePrintHandler.PrintableIngredient ingredient;
 
 		if (element.isJsonObject()) {
 			JsonObject obj = (JsonObject)element;
@@ -246,13 +270,15 @@ public class ObjectHelper {
 			if (obj.has("count"))
 				count = obj.get("count").getAsInt();
 
-			itemName = getIngredientName(obj);
+			ingredient = getIngredientName(obj);
 		}
 		else {
-			itemName = getFormattedItemDetails(new ResourceLocation(element.getAsString()));
+			ingredient = getFormattedItemDetails(new ResourceLocation(element.getAsString()));
 		}
 
-		return Triple.of(count, itemName.getFirst(), itemName.getSecond());
+		ingredient.count = count;
+
+		return ingredient;
 	}
 
 	public static String attemptToExtractItemSpecificEffects(Item item, @Nullable Item controlItem) {
@@ -320,5 +346,37 @@ public class ObjectHelper {
 		}
 
 		return matches / (float)str1.length() >= 0.75f;
+	}
+
+	public static IForgeRegistry<?> getRegistryForObject(IForgeRegistryEntry object) {
+		return RegistryManager.ACTIVE.getRegistry(object.getRegistryType());
+	}
+
+	public static Function<IForgeRegistryEntry<?>, String> getNameFunctionForUnknownObject(IForgeRegistryEntry<?> entry) {
+		Function<IForgeRegistryEntry<?>, String> namingFunction;
+
+		if (entry instanceof Item) {
+			namingFunction = item -> ObjectHelper.getItemName((Item)item);
+		}
+		else if (entry instanceof Block) {
+			namingFunction = block -> ObjectHelper.getBlockName((Block)block);
+		}
+		else if (entry instanceof EntityType) {
+			namingFunction = entityType -> ObjectHelper.getEntityName((EntityType<?>)entityType);
+		}
+		else if (entry instanceof Biome) {
+			namingFunction = biome -> ObjectHelper.getBiomeName(biome.getRegistryName());
+		}
+		else if (entry instanceof Enchantment) {
+			namingFunction = enchant -> ObjectHelper.getEnchantmentName((Enchantment)enchant, 0);
+		}
+		else if (entry instanceof Fluid) {
+			namingFunction = fluid -> ObjectHelper.getFluidName((Fluid)fluid);
+		}
+		else {
+			namingFunction = obj -> obj.getRegistryName().toString();
+		}
+
+		return namingFunction;
 	}
 }

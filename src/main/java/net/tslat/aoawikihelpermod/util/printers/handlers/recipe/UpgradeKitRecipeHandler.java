@@ -1,7 +1,6 @@
 package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
@@ -73,14 +72,14 @@ public class UpgradeKitRecipeHandler extends RecipePrintHandler {
 			return this.printoutData.get(targetItem);
 
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
-		Pair<String, String> input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("input"));
-		Pair<String, String> upgradeKit = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("upgrade_kit"));
-		Pair<String, String> output = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("result"));
+		PrintableIngredient input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("input"));
+		PrintableIngredient upgradeKit = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("upgrade_kit"));
+		PrintableIngredient output = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("result"));
 
 		String[] printData = new String[3];
 		printData[0] = FormattingHelper.createImageBlock(AoABlocks.DIVINE_STATION.get()) + " " + FormattingHelper.createLinkableItem(AoABlocks.DIVINE_STATION.get(), false, true);
-		printData[1] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) + " + " + FormattingHelper.createImageBlock(upgradeKit.getSecond()) + " " + FormattingHelper.createLinkableText(upgradeKit.getSecond(), false, upgradeKit.getFirst().equals("minecraft"), !upgradeKit.getSecond().equals(targetName));
-		printData[2] = FormattingHelper.createImageBlock(output.getSecond()) + " " + FormattingHelper.createLinkableText(output.getSecond(), false, output.getFirst().equals("minecraft"), !output.getSecond().equals(targetName));
+		printData[1] = FormattingHelper.createImageBlock(input.formattedName) + " " + FormattingHelper.createLinkableText(input.formattedName, false, input.isVanilla(), !input.matches(targetName)) + " + " + FormattingHelper.createImageBlock(upgradeKit.formattedName) + " " + FormattingHelper.createLinkableText(upgradeKit.formattedName, false, upgradeKit.isVanilla(), !upgradeKit.matches(targetName));
+		printData[2] = FormattingHelper.createImageBlock(output.formattedName) + " " + FormattingHelper.createLinkableText(output.formattedName, false, output.isVanilla(), !output.matches(targetName));
 
 		this.printoutData.put(targetItem, printData);
 

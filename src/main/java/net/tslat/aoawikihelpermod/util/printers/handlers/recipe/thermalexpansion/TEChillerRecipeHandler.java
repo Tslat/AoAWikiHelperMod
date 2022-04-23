@@ -11,7 +11,6 @@ import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
-import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -88,14 +87,14 @@ public class TEChillerRecipeHandler extends RecipePrintHandler {
 		String inputAmount = GsonHelper.getAsInt(input, "amount", 1000) + "mb";
 		String inputFluid = StringUtil.toTitleCase(new ResourceLocation(GsonHelper.getAsString(input, "fluid")).getPath());
 		int energy = GsonHelper.getAsInt(this.rawRecipe, "energy", 4000);
-		List<Triple<Integer, String, String>> result;
+		List<PrintableIngredient> result;
 
 		if (this.rawRecipe.get("result").isJsonObject()) {
 			result = Collections.singletonList(ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result")));
 		}
 		else if (this.rawRecipe.get("result").isJsonArray()) {
 			JsonArray resultArray = this.rawRecipe.get("result").getAsJsonArray();
-			result = new ArrayList<Triple<Integer, String, String>>();
+			result = new ArrayList<>();
 
 			for (JsonElement ele : resultArray) {
 				result.add(ObjectHelper.getStackDetailsFromJson(ele));
@@ -107,15 +106,15 @@ public class TEChillerRecipeHandler extends RecipePrintHandler {
 
 		StringBuilder resultBuilder = new StringBuilder();
 
-		for (Triple<Integer, String, String> resultEntry : result) {
+		for (PrintableIngredient ingredient : result) {
 			if (resultBuilder.length() > 0)
 				resultBuilder.append(" +<br/>");
 
-			resultBuilder.append(FormattingHelper.createImageBlock(resultEntry.getRight()))
+			resultBuilder.append(FormattingHelper.createImageBlock(ingredient.formattedName))
 					.append(" ")
-					.append(resultEntry.getLeft())
+					.append(ingredient.count)
 					.append(" ")
-					.append(FormattingHelper.createLinkableText(resultEntry.getRight(), resultEntry.getLeft() > 1, resultEntry.getMiddle().equals("minecraft"), !resultEntry.getRight().equals(targetName)));
+					.append(FormattingHelper.createLinkableText(ingredient.formattedName, ingredient.count > 1, ingredient.isVanilla(), !ingredient.matches(targetName)));
 		}
 
 		String[] printData = new String[3];

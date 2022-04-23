@@ -1,7 +1,6 @@
 package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
@@ -12,7 +11,6 @@ import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
-import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -72,19 +70,19 @@ public class SmokingRecipeHandler extends RecipePrintHandler {
 			return this.printoutData.get(targetItem);
 
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
-		Pair<String, String> input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("ingredient"));
-		Triple<Integer, String, String> output = ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result"));
+		PrintableIngredient input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("ingredient"));
+		PrintableIngredient output = ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result"));
 		float xp = GsonHelper.getAsFloat(rawRecipe, "experience", 0);
 		int cookingTime = GsonHelper.getAsInt(rawRecipe, "cookingtime", 100);
 
 		String[] printData = new String[] {
-				FormattingHelper.createLinkableText(input.getSecond(), true, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName)) +
+				FormattingHelper.createLinkableText(input.formattedName, true, input.isVanilla(), !input.matches(targetName)) +
 						" can be processed in a " +
 						FormattingHelper.createLinkableItem(Blocks.SMOKER, false, true) +
 						" to produce " +
-						output.getLeft() +
+						output.count +
 						" " +
-						FormattingHelper.createLinkableText(output.getRight(), output.getLeft() > 1, output.getMiddle().equals("minecraft"), !output.getRight().equals(targetName)) +
+						FormattingHelper.createLinkableText(output.formattedName, output.count > 1, output.isVanilla(), !output.matches(targetName)) +
 						" and " +
 						NumberUtil.roundToNthDecimalPlace(xp, 1) +
 						"xp, taking " +

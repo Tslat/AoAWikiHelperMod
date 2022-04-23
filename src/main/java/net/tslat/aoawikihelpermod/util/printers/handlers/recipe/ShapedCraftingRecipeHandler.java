@@ -2,7 +2,6 @@ package net.tslat.aoawikihelpermod.util.printers.handlers.recipe;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
@@ -78,9 +77,9 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 		if (this.printoutData.containsKey(targetItem))
 			return this.printoutData.get(targetItem);
 
-		HashMap<String, Pair<String, String>> ingredientMap = new HashMap<String, Pair<String, String>>();
+		HashMap<String, PrintableIngredient> ingredientMap = new HashMap<>();
 
-		ingredientMap.put(" ", new Pair<String, String>("", ""));
+		ingredientMap.put(" ", new PrintableIngredient("", ""));
 
 		for (Map.Entry<String, JsonElement> key : GsonHelper.getAsJsonObject(rawRecipe, "key").entrySet()) {
 			JsonObject value;
@@ -101,9 +100,9 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 		for (int x = 0; x < pattern.length; x++) {
 			for (int y = 0; y < pattern[x].length(); y++) {
 				String key = pattern[x].substring(y, y + 1);
-				Pair<String, String> ingredient = ingredientMap.get(key);
+				PrintableIngredient ingredient = ingredientMap.get(key);
 
-				ingredientsHandler.addIngredient(ingredient.getSecond(), ingredient.getFirst(), y + 3 * x);
+				ingredientsHandler.addIngredient(ingredient, y + 3 * x);
 			}
 		}
 

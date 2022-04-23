@@ -5,16 +5,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraftforge.registries.tags.ITag;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
-import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -39,9 +38,9 @@ public abstract class RecipePrintHandler {
 	public static class RecipeIngredientsHandler {
 		public static final String[] slotPrefixes = new String[] {"a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3"};
 
-		private final NonNullList<Triple<String, Integer, String>> ingredients;
+		private final NonNullList<PrintableIngredient> ingredients;
 		private final NonNullList<Integer> ingredientsIndex;
-		private Triple<Integer, String, String> output = null;
+		private PrintableIngredient output = null;
 
 		public RecipeIngredientsHandler(int ingredientsSize) {
 			this.ingredients = NonNullList.create();
@@ -60,10 +59,16 @@ public abstract class RecipePrintHandler {
 				if (ingredientIndex < 0)
 					continue;
 
-				String ingName = ingredients.get(ingredientIndex).getRight();
+				PrintableIngredient ing = ingredients.get(ingredientIndex);
 
-				if (!ingName.isEmpty())
-					lines.add(slotPrefixes[index] + "=" + ingName);
+				if (!ing.formattedName.isEmpty()) {
+					String slotPrefix = slotPrefixes[index];
+
+					if (ing.imageName != null)
+						lines.add(slotPrefix + "image=" + ing.imageName);
+
+					lines.add(slotPrefix + "=" + ing.formattedName);
+				}
 			}
 
 			return lines;
@@ -73,43 +78,43 @@ public abstract class RecipePrintHandler {
 			if (slot >= ingredients.size() || ingredientsIndex.get(slot) < 0)
 				return "";
 
-			return this.ingredients.get(ingredientsIndex.get(slot)).getRight();
+			return this.ingredients.get(ingredientsIndex.get(slot)).formattedName;
 		}
 
-		public ImmutableList<Triple<String, Integer, String>> getIngredients() {
+		public ImmutableList<PrintableIngredient> getIngredients() {
 			return ImmutableList.copyOf(ingredients);
 		}
 
 		public String getFormattedIngredientsList(@Nullable Item targetItem) {
 			StringBuilder builder = new StringBuilder();
 
-			for (Triple<String, Integer, String> ing : getIngredients()) {
-				if (ing.getRight().isEmpty())
+			for (PrintableIngredient ing : getIngredients()) {
+				if (ing.formattedName.isEmpty())
 					continue;
 
 				if (builder.length() > 0)
 					builder.append(" +<br/>");
 
-				builder.append(ing.getMiddle());
+				builder.append(ing.count);
 				builder.append(" ");
 
-				if (ing.getRight().contains(":")) {
-					builder.append(FormattingHelper.createLinkableTag(ing.getRight()));
+				if (ing.isTag()) {
+					builder.append(FormattingHelper.createLinkableTag(ing.formattedName, Items.STONE));
 				}
 				else {
-					builder.append(FormattingHelper.createLinkableText(ing.getRight(), ing.getMiddle() > 1, ing.getLeft().equals("minecraft"), targetItem == null || !ObjectHelper.getItemName(targetItem).equals(ing.getRight())));
+					builder.append(FormattingHelper.createLinkableText(ing.formattedName, ing.count > 1, ing.isVanilla(), targetItem == null || !ing.matches(ObjectHelper.getItemName(targetItem))));
 				}
 			}
 
 			return builder.toString();
 		}
 
-		public Triple<Integer, String, String> getOutput() {
+		public PrintableIngredient getOutput() {
 			return this.output;
 		}
 
 		public String getFormattedOutput(@Nullable Item targetItem) {
-			return FormattingHelper.createLinkableText(output.getRight(), false, output.getMiddle().equals("minecraft"), (targetItem == null || !output.getRight().equals(ObjectHelper.getItemName(targetItem))));
+			return FormattingHelper.createLinkableText(output.formattedName, false, output.isVanilla(), (targetItem == null || !output.matches(ObjectHelper.getItemName(targetItem))));
 		}
 
 		public void addOutput(JsonObject json) {
@@ -117,8 +122,8 @@ public abstract class RecipePrintHandler {
 		}
 
 		public void addOutput(ItemStack stack) {
-			Pair<String, String> names = ObjectHelper.getFormattedItemDetails(stack.getItem().getRegistryName());
-			this.output = Triple.of(stack.getCount(), names.getFirst(), names.getSecond());
+			this.output = ObjectHelper.getFormattedItemDetails(stack.getItem().getRegistryName());
+			this.output.count = stack.getCount();
 		}
 
 		public String addIngredient(JsonElement element) {
@@ -127,29 +132,28 @@ public abstract class RecipePrintHandler {
 
 			if (element.isJsonArray()) {
 				JsonArray array = element.getAsJsonArray();
-				Pair<String, String> backup = null;
 				ITag<Item> potentialTag = null;
 
 				for (JsonElement ele : array) {
 					if (ele.isJsonObject()) {
 						return addIngredient(ele.getAsJsonObject());
 					}
-					else if (ele.isJsonPrimitive() && backup == null) {
-						Pair<String, String> id = ObjectHelper.getFormattedItemDetails(new ResourceLocation(ele.getAsString()));
+					else if (ele.isJsonPrimitive()) {
+						PrintableIngredient ingredient = ObjectHelper.getFormattedItemDetails(new ResourceLocation(ele.getAsString()));
 
-						addIngredient(id.getSecond(), id.getFirst(), -1);
+						addIngredient(ingredient, -1);
 
-						return id.getSecond();
+						return ingredient.formattedName;
 					}
 				}
 			}
 
 			if (element.isJsonPrimitive()) {
-				Pair<String, String> id = ObjectHelper.getFormattedItemDetails(new ResourceLocation(element.getAsString()));
+				PrintableIngredient ingredient = ObjectHelper.getFormattedItemDetails(new ResourceLocation(element.getAsString()));
 
-				addIngredient(id.getSecond(), id.getFirst(), -1);
+				addIngredient(ingredient, -1);
 
-				return id.getSecond();
+				return ingredient.formattedName;
 			}
 
 			throw new JsonParseException("Unrecognised json type for recipe, skipping.");
@@ -160,11 +164,11 @@ public abstract class RecipePrintHandler {
 		}
 
 		public String addIngredient(JsonObject json, int position) {
-			Pair<String, String> id = ObjectHelper.getIngredientName(json);
+			PrintableIngredient ingredient = ObjectHelper.getIngredientName(json);
 
-			addIngredient(id.getSecond(), id.getFirst(), position);
+			addIngredient(ingredient, position);
 
-			return id.getSecond();
+			return ingredient.formattedName;
 		}
 
 		public void addIngredient(String ingredientName, String ownerId) {
@@ -172,8 +176,10 @@ public abstract class RecipePrintHandler {
 		}
 
 		public void addIngredient(String ingredientName, String ownerId, int position) {
-			int matchedIndex = -1;
+			addIngredient(new PrintableIngredient(ownerId, ingredientName), position);
+		}
 
+		public void addIngredient(PrintableIngredient ingredient, int position) {
 			if (position == -1) {
 				for (int i = 0; i < ingredientsIndex.size(); i++) {
 					if (ingredientsIndex.get(i) == -1) {
@@ -185,21 +191,55 @@ public abstract class RecipePrintHandler {
 			}
 
 			for (int i = 0; i < ingredients.size(); i++) {
-				if (ingredients.get(i).getRight().equals(ingredientName)) {
-					matchedIndex = i;
+				if (ingredients.get(i).matches(ingredient.formattedName)) {
+					this.ingredientsIndex.set(position, i);
+					this.ingredients.get(i).increment();
 
-					break;
+					return;
 				}
 			}
 
-			if (matchedIndex == -1) {
-				this.ingredientsIndex.set(position, this.ingredients.size());
-				this.ingredients.add(Triple.of(ownerId, 1, ingredientName));
-			}
-			else {
-				this.ingredientsIndex.set(position, matchedIndex);
-				this.ingredients.set(matchedIndex, Triple.of(ownerId, this.ingredients.get(matchedIndex).getMiddle() + 1, ingredientName));
-			}
+
+			this.ingredientsIndex.set(position, this.ingredients.size());
+			this.ingredients.add(ingredient);
+		}
+	}
+
+	public static class PrintableIngredient {
+		public final String ownerId;
+		public final String formattedName;
+		@Nullable
+		public String imageName = null;
+		public int count;
+
+		public PrintableIngredient(String ownerId, String formattedName, int count) {
+			this.ownerId = ownerId;
+			this.formattedName = formattedName;
+			this.count = count;
+		}
+
+		public PrintableIngredient(String ownerId, String formattedName) {
+			this(ownerId, formattedName, 1);
+		}
+
+		public void increment() {
+			this.count += 1;
+		}
+
+		public boolean isVanilla() {
+			return this.ownerId.equals("minecraft");
+		}
+
+		public boolean isTag() {
+			return this.formattedName.contains(":");
+		}
+
+		public boolean matches(String other) {
+			return this.formattedName.equals(other);
+		}
+
+		public void setCustomImageName(String imageName) {
+			this.imageName = imageName;
 		}
 	}
 }

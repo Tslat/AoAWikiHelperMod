@@ -71,8 +71,8 @@ public class TETreeExtractorRecipeHandler extends RecipePrintHandler {
 			return this.printoutData.get(targetItem);
 
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
-		Pair<String, String> trunk = null;
-		Pair<String, String> leaves = null;
+		PrintableIngredient trunk = null;
+		PrintableIngredient leaves = null;
 		JsonElement result = this.rawRecipe.get("result");
 		String output = "";
 
@@ -104,15 +104,15 @@ public class TETreeExtractorRecipeHandler extends RecipePrintHandler {
 			if (resultObj.has("amount"))
 				output = resultObj.get("amount").getAsInt() + " ";
 
-			output = output + ObjectHelper.getFormattedItemDetails(new ResourceLocation(resultObj.get("fluid").getAsString())).getSecond();
+			output = output + ObjectHelper.getFormattedItemDetails(new ResourceLocation(resultObj.get("fluid").getAsString())).formattedName;
 		}
 		else {
-			output = 1000 + ObjectHelper.getFormattedItemDetails(new ResourceLocation(result.getAsString())).getSecond();
+			output = 1000 + ObjectHelper.getFormattedItemDetails(new ResourceLocation(result.getAsString())).formattedName;
 		}
 
 		String[] printData = new String[3];
-		printData[0] = trunk == null ? "" : FormattingHelper.createImageBlock(trunk.getSecond()) + " " + FormattingHelper.createLinkableText(trunk.getSecond(), false, trunk.getFirst().equals("minecraft"), !trunk.getSecond().equals(targetName));
-		printData[1] = leaves == null ? "" : FormattingHelper.createImageBlock(leaves.getSecond()) + " " + FormattingHelper.createLinkableText(leaves.getSecond(), false, leaves.getFirst().equals("minecraft"), !leaves.getSecond().equals(targetName));
+		printData[0] = trunk == null ? "" : FormattingHelper.createImageBlock(trunk.formattedName) + " " + FormattingHelper.createLinkableText(trunk.formattedName, false, trunk.isVanilla(), !trunk.matches(targetName));
+		printData[1] = leaves == null ? "" : FormattingHelper.createImageBlock(leaves.formattedName) + " " + FormattingHelper.createLinkableText(leaves.formattedName, false, leaves.isVanilla(), !leaves.matches(targetName));
 		printData[2] = output;
 
 		this.printoutData.put(targetItem, printData);

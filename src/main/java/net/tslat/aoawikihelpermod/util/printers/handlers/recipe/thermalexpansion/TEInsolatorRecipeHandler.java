@@ -3,7 +3,6 @@ package net.tslat.aoawikihelpermod.util.printers.handlers.recipe.thermalexpansio
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
@@ -11,7 +10,6 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
-import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -75,10 +73,10 @@ public class TEInsolatorRecipeHandler extends RecipePrintHandler {
 			return this.printoutData.get(targetItem);
 
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
-		Pair<String, String> input = ObjectHelper.getIngredientName(GsonHelper.getAsJsonObject(this.rawRecipe, "input"));
+		PrintableIngredient input = ObjectHelper.getIngredientName(GsonHelper.getAsJsonObject(this.rawRecipe, "input"));
 		int water = GsonHelper.getAsInt(this.rawRecipe, "water", 500);
 		int energy = GsonHelper.getAsInt(this.rawRecipe, "energy", 20000);
-		List<Triple<Integer, String, String>> result;
+		List<PrintableIngredient> result;
 
 		if (this.rawRecipe.get("result").isJsonObject()) {
 			result = Collections.singletonList(ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result")));
@@ -97,19 +95,19 @@ public class TEInsolatorRecipeHandler extends RecipePrintHandler {
 
 		StringBuilder resultBuilder = new StringBuilder();
 
-		for (Triple<Integer, String, String> resultEntry : result) {
+		for (PrintableIngredient ingredient : result) {
 			if (resultBuilder.length() > 0)
 				resultBuilder.append(" +<br/>");
 
-			resultBuilder.append(FormattingHelper.createImageBlock(resultEntry.getRight()))
+			resultBuilder.append(FormattingHelper.createImageBlock(ingredient.formattedName))
 					.append(" ")
-					.append(resultEntry.getLeft())
+					.append(ingredient.count)
 					.append(" ")
-					.append(FormattingHelper.createLinkableText(resultEntry.getRight(), resultEntry.getLeft() > 1, resultEntry.getMiddle().equals("minecraft"), !resultEntry.getRight().equals(targetName)));
+					.append(FormattingHelper.createLinkableText(ingredient.formattedName, ingredient.count > 1, ingredient.isVanilla(), !ingredient.matches(targetName)));
 		}
 
 		String[] printData = new String[3];
-		printData[0] = FormattingHelper.createImageBlock(input.getSecond()) + " " + FormattingHelper.createLinkableText(input.getSecond(), false, input.getFirst().equals("minecraft"), !input.getSecond().equals(targetName));
+		printData[0] = FormattingHelper.createImageBlock(input.formattedName) + " " + FormattingHelper.createLinkableText(input.formattedName, false, input.isVanilla(), !input.matches(targetName));
 		printData[1] = water + " Water + " + energy + " Energy";
 		printData[2] = resultBuilder.toString();
 

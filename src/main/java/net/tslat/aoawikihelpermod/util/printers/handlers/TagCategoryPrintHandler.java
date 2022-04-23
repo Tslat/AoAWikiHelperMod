@@ -3,12 +3,6 @@ package net.tslat.aoawikihelpermod.util.printers.handlers;
 import com.google.common.collect.HashMultimap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.tags.ITagManager;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -25,7 +19,7 @@ public class TagCategoryPrintHandler<T extends IForgeRegistryEntry<T>> {
 	private HashMultimap<String, TagKey<T>> namespacedTags = null;
 	private HashMap<String, String[][]> cachedPrintouts = null;
 	private String[] tagNamespaces = null;
-	private Function<T, String> namingFunction = null;
+	private Function<IForgeRegistryEntry<?>, String> namingFunction = null;
 
 	public TagCategoryPrintHandler(ResourceLocation registryId, ITagManager<T> tagManager) {
 		this.registryId = registryId;
@@ -74,29 +68,7 @@ public class TagCategoryPrintHandler<T extends IForgeRegistryEntry<T>> {
 				if (namingFunction != null)
 					return namingFunction.apply(entry);
 
-				if (entry instanceof Item) {
-					namingFunction = item -> ObjectHelper.getItemName((Item)item);
-				}
-				else if (entry instanceof Block) {
-					namingFunction = block -> ObjectHelper.getBlockName((Block)block);
-				}
-				else if (entry instanceof EntityType) {
-					namingFunction = entityType -> ObjectHelper.getEntityName((EntityType<?>)entityType);
-				}
-				else if (entry instanceof Biome) {
-					namingFunction = biome -> ObjectHelper.getBiomeName(biome.getRegistryName());
-				}
-				else if (entry instanceof Enchantment) {
-					namingFunction = enchant -> ObjectHelper.getEnchantmentName((Enchantment)enchant, 0);
-				}
-				else if (entry instanceof Fluid) {
-					namingFunction = fluid -> ObjectHelper.getFluidName((Fluid)fluid);
-				}
-				else {
-					namingFunction = obj -> obj.getRegistryName().toString();
-				}
-
-				namingFunction = namingFunction.andThen(name -> FormattingHelper.createLinkableText(name, false, entry.getRegistryName().getNamespace().equals("minecraft"), true));
+				namingFunction = ObjectHelper.getNameFunctionForUnknownObject(entry).andThen(name -> FormattingHelper.createLinkableText(name, false, entry.getRegistryName().getNamespace().equals("minecraft"), true));
 
 				return namingFunction.apply(entry);
 			}).reduce((line, newEntry) -> line += ", " + newEntry).orElse("");
