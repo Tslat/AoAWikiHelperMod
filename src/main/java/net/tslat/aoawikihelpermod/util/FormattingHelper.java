@@ -130,7 +130,7 @@ public class FormattingHelper {
 
 	public static String getStringFromRange(NumberProvider range) {
 		if (range instanceof ConstantValue)
-			return String.valueOf(((ConstantValue)range).value);
+			return NumberUtil.roundToNthDecimalPlace(((ConstantValue)range).value, 2);
 
 		if (range instanceof BinomialDistributionGenerator)
 			return "0+";
