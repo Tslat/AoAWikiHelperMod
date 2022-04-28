@@ -159,7 +159,12 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 			rand.setSeed(42L);
 
 			for (BakedQuad quad : model.getQuads(this.block, face, rand, EmptyModelData.INSTANCE)) {
-				if (quad.getSprite().animatedTexture.frame != 0 || quad.getSprite().animatedTexture.subFrame != 0)
+				TextureAtlasSprite sprite = quad.getSprite();
+
+				if (sprite.animatedTexture == null)
+					continue;
+
+				if (sprite.animatedTexture.frame != 0 || sprite.animatedTexture.subFrame != 0)
 					return false;
 			}
 		}
@@ -167,7 +172,12 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 		rand.setSeed(42L);
 
 		for (BakedQuad quad : model.getQuads(this.block, null, rand, EmptyModelData.INSTANCE)) {
-			if (quad.getSprite().animatedTexture.frame != 0 || quad.getSprite().animatedTexture.subFrame != 0)
+			TextureAtlasSprite sprite = quad.getSprite();
+
+			if (sprite.animatedTexture == null)
+				continue;
+
+			if (sprite.animatedTexture.frame != 0 || sprite.animatedTexture.subFrame != 0)
 				return false;
 		}
 
@@ -177,7 +187,7 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 	private int calculateRenderTickTime() {
 		BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
 		Random rand = new Random();
-		int highestFrameTime = 0;
+		int highestFrameTime = 1;
 		BakedModel model = blockRenderer.getBlockModel(this.block);
 
 		for (Direction face : Direction.values()) {
@@ -186,6 +196,9 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 			for (BakedQuad quad : model.getQuads(this.block, face, rand, EmptyModelData.INSTANCE)) {
 				TextureAtlasSprite sprite = quad.getSprite();
 				int totalLength = 0;
+
+				if (sprite.animatedTexture == null)
+					continue;
 
 				for (TextureAtlasSprite.FrameInfo frameInfo : sprite.animatedTexture.frames) {
 					totalLength += frameInfo.time;
@@ -200,6 +213,9 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 		for (BakedQuad quad : model.getQuads(this.block, null, rand, EmptyModelData.INSTANCE)) {
 			TextureAtlasSprite sprite = quad.getSprite();
 			int totalLength = 0;
+
+			if (sprite.animatedTexture == null)
+				continue;
 
 			for (TextureAtlasSprite.FrameInfo frameInfo : sprite.animatedTexture.frames) {
 				totalLength += frameInfo.time;
