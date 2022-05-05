@@ -14,7 +14,7 @@ import net.minecraft.world.level.storage.loot.functions.*;
 import net.minecraft.world.level.storage.loot.predicates.*;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.tslat.aoa3.common.registration.AoABlocks;
+import net.tslat.aoa3.common.registration.block.AoABlocks;
 import net.tslat.aoa3.content.loottable.condition.HoldingItem;
 import net.tslat.aoa3.content.loottable.condition.PlayerHasLevel;
 import net.tslat.aoa3.content.loottable.condition.PlayerHasResource;
