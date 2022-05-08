@@ -29,7 +29,8 @@ public class WikiHelperCommand {
 					.then(StructuresCommand.register())
 					.then(BlocksCommand.register())
 					.then(ItemsCommand.register())
-					.then(TagsCommand.register());
+					.then(TagsCommand.register())
+					.then(InfoboxCommand.register());
 
 			if (FMLEnvironment.dist != Dist.DEDICATED_SERVER)
 				cmd.then(IsometricCommand.register());
