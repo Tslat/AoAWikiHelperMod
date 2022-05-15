@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.Blocks;
@@ -76,7 +77,7 @@ public class CampfireRecipeHandler extends RecipePrintHandler {
 		int cookingTime = GsonHelper.getAsInt(rawRecipe, "cookingtime", 100);
 
 		String[] printData = new String[] {
-				FormattingHelper.createLinkableText(input.formattedName, true, !input.matches(targetName)) +
+				(input.formattedName.contains(":") ? FormattingHelper.createTagIngredientDescription(input.formattedName, Items.STICK) : FormattingHelper.createLinkableText(input.formattedName, false, !input.matches(targetName))) +
 						" can be cooked on a " +
 						FormattingHelper.createLinkableItem(Blocks.CAMPFIRE, false, true) +
 						" to produce " +
@@ -87,7 +88,8 @@ public class CampfireRecipeHandler extends RecipePrintHandler {
 						NumberUtil.roundToNthDecimalPlace(xp, 1) +
 						"xp, taking " +
 						NumberUtil.roundToNthDecimalPlace(cookingTime / 20f, 2) +
-						" seconds."
+						" seconds." +
+						"</br>"
 		};
 
 		this.printoutData.put(targetItem, printData);
