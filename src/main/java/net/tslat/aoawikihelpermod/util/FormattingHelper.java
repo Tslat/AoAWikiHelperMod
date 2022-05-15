@@ -50,10 +50,16 @@ public class FormattingHelper {
 		return createLinkableText(ObjectHelper.getItemName(object.asItem()), pluralise, shouldLink);
 	}
 
-	public static String createLinkableTag(String tag, ForgeRegistryEntry<?> objectFromTagTypeRegistry) {
-		IForgeRegistry<?> registryForObject = ObjectHelper.getRegistryForObject(objectFromTagTypeRegistry);
+	public static String createLinkableTag(String tag, ForgeRegistryEntry<?> sampleObjectFromTagTypeRegistry) {
+		IForgeRegistry<?> registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
 
 		return tooltip(tag, "Any " + registryForObject.getRegistryName().getPath().replaceAll("_", "") + " tagged as " + tag) + " ([[Tags#" + registryForObject.getRegistryName() + ":" + tag + "|Tag]])";
+	}
+
+	public static String createTagIngredientDescription(String tag, ForgeRegistryEntry<?> sampleObjectFromTagTypeRegistry) {
+		IForgeRegistry<?> registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
+
+		return "Any " + registryForObject.getRegistryName().getPath().replaceAll("_", "") + " tagged as " + "[[Tags#" + registryForObject.getRegistryName() + ":" + tag + "|" + tag + "]]";
 	}
 
 	public static String createLinkableText(String text, boolean pluralise) {
