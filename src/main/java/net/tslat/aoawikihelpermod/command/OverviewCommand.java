@@ -118,7 +118,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Unholster Time", "Fire Rate", "Energy Cost", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Unholster Time", "Fire Rate", "Spirit Cost", "Durability", "Effects")) {
 			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
