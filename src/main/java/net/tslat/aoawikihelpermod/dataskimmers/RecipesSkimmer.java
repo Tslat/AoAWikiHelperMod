@@ -12,6 +12,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.tslat.aoa3.content.recipe.InfusionRecipe;
+import net.tslat.aoa3.scheduling.AoAScheduler;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 import net.tslat.aoawikihelpermod.util.printers.handlers.recipe.*;
@@ -97,13 +98,16 @@ public class RecipesSkimmer extends SimpleJsonResourceReloadListener {
 				}
 
 				RecipePrintHandler recipePrintHandler = factory.create(id, json.getAsJsonObject(), recipe);
+				Recipe<?> cachedRecipe = recipe;
 
-				if (recipe != null) {
-					populateIngredientsByRecipe(id, recipe);
-				}
-				else {
-					populateIngredientsByHandler(id, recipePrintHandler);
-				}
+				AoAScheduler.scheduleSyncronisedTask(() -> {
+					if (cachedRecipe != null) {
+						populateIngredientsByRecipe(id, cachedRecipe);
+					}
+					else {
+						populateIngredientsByHandler(id, recipePrintHandler);
+					}
+				}, 1);
 
 				RECIPE_PRINTERS.put(id, recipePrintHandler);
 			}
