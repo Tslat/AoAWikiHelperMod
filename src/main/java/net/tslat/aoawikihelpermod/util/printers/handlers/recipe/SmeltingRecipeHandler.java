@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -73,8 +74,8 @@ public class SmeltingRecipeHandler extends RecipePrintHandler {
 		printData[0] = (output.count > 1 ? output.count + " " : "") + FormattingHelper.createLinkableText(output.formattedName, output.count > 1, !output.matches(targetName));
 		printData[1] = NumberUtil.roundToNthDecimalPlace(cookingTime / 20f, 2);
 		printData[2] = NumberUtil.roundToNthDecimalPlace(xp, 1);
-		printData[3] = FormattingHelper.createLinkableText(input.formattedName, false, !input.matches(targetName));
-		printData[4] = WikiTemplateHelper.makeSmeltingTemplate(input.formattedName, output.formattedName);
+		printData[3] = input.formattedName.contains(":") ? FormattingHelper.createTagIngredientDescription(input.formattedName, Items.STICK) : FormattingHelper.createLinkableText(input.formattedName, false, !input.matches(targetName));
+		printData[4] = WikiTemplateHelper.makeSmeltingTemplate(input.formattedName, input.imageName, output.formattedName, null);
 
 		this.printoutData.put(targetItem, printData);
 
