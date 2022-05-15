@@ -84,9 +84,7 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:$project.minecraft_version-$project.forge_version"
 
-    // Disabled temporarily while in Alpha releases
-    //implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version")
-    implementation fg.deobf("libs:AoA3-1.16.5-3.6:PublicAlpha")
+    implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version")
 
     // Mixin annotation processor, just in case we need it
     if (System.getProperty("idea.sync.active") != "true") {
