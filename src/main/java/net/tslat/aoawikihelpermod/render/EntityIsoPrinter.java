@@ -83,7 +83,7 @@ public class EntityIsoPrinter extends IsometricPrinterScreen {
 			EntityRenderDispatcher renderManager = this.minecraft.getEntityRenderDispatcher();
 			MultiBufferSource.BufferSource renderBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 
-			Lighting.setupForEntityInInventory();
+			RenderUtil.setupFakeGuiLighting();
 			renderManager.setRenderShadow(false);
 
 			try {

@@ -1,9 +1,9 @@
 package net.tslat.aoawikihelpermod.render;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -38,11 +38,23 @@ public final class RenderUtil {
 	public static void translateToIsometricView(PoseStack matrix) {
 		matrix.scale(1, 1, -1);
 		matrix.translate(0, 0, 1000);
-		matrix.mulPose(Vector3f.XP.rotationDegrees(215.264f));
-		matrix.mulPose(Vector3f.YP.rotationDegrees(-45));
+		matrix.mulPose(Vector3f.XP.rotationDegrees(30)); // Dimetric Projection
+		matrix.mulPose(Vector3f.YP.rotationDegrees(225));
+		matrix.mulPose(Vector3f.ZP.rotationDegrees(180));
+	}
+
+	public static void setupFakeGuiLighting() {
+		RenderSystem.setupGui3DDiffuseLighting(
+				Util.make(
+						new Vector3f(0.5f, 1f, 0.5f), Vector3f::normalize),
+				Util.make(
+						new Vector3f(0.6f, -1.5f, -3.5f), Vector3f::normalize
+				));
 	}
 
 	public static void renderStandardisedBlock(BlockRenderDispatcher blockRenderer, PoseStack matrix, MultiBufferSource renderBuffer, BlockState block, @Nullable BlockPos pos) {
+		setupFakeGuiLighting();
+
 		RenderShape blockRenderType = block.getRenderShape();
 
 		if (blockRenderType == RenderShape.INVISIBLE) {
@@ -55,8 +67,6 @@ public final class RenderUtil {
 		if (pos == null)
 			pos = new BlockPos(0, 0, 0);
 
-		Lighting.setupForFlatItems();
-
 		switch (blockRenderType) {
 			case MODEL -> {
 				int tint = Minecraft.getInstance().getBlockColors().getColor(block, FakeWorld.INSTANCE, pos, 0);
@@ -64,7 +74,15 @@ public final class RenderUtil {
 				float green = (float)(tint >> 8 & 255) / 255f;
 				float blue = (float)(tint & 255) / 255f;
 				BakedModel blockModel = blockRenderer.getBlockModel(block);
+				/*boolean changeLighting = !blockModel.usesBlockLight();
+
+				if (changeLighting)
+					Lighting.setupForFlatItems();*/
+
 				blockRenderer.getModelRenderer().renderModel(matrix.last(), renderBuffer.getBuffer(ItemBlockRenderTypes.getRenderType(block, true)), block, blockModel, red, green, blue, 15728880, OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
+
+				/*if (changeLighting)
+					Lighting.setupFor3DItems();*/
 			}
 			case ENTITYBLOCK_ANIMATED -> {
 				ItemStack stack = new ItemStack(block.getBlock());

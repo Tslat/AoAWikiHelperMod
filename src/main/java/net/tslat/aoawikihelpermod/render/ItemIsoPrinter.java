@@ -5,7 +5,6 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -31,10 +30,12 @@ import java.util.function.Consumer;
 public class ItemIsoPrinter extends IsometricPrinterScreen {
 	protected final ArrayList<IsoRenderAdapter<ItemStack>> adapters = new ArrayList<>(1);
 	protected final ItemStack stack;
+	protected final int spriteSize;
 
 	public ItemIsoPrinter(ItemStack stack, int imageSize, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
 		super(determineImageSize(stack, imageSize), 0, commandSource, commandName, fileConsumer);
 
+		this.spriteSize = determineImageSize(stack, -1);
 		this.stack = stack;
 		this.defaultRefScale = 10f;
 		this.currentStatus = "Waiting for frame cycle to reset...";
@@ -79,15 +80,14 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 		PoseStack matrix = new PoseStack();
 
 		matrix.pushPose();
-
 		matrix.scale(this.scale, this.scale, 1);
 		matrix.translate(this.minecraft.getWindow().getGuiScaledWidth() / 2f / this.scale, this.minecraft.getWindow().getGuiScaledHeight() / 2f / this.scale, 1050);
 		matrix.scale(1, -1, 1);
 		matrix.translate(0, 0, -(100 + itemRenderer.blitOffset));
 		makePreRenderAdjustments(matrix);
 		matrix.translate(this.xAdjust, this.yAdjust, 0);
-		matrix.mulPose(Vector3f.XP.rotationDegrees(0.00001f));
 
+		RenderUtil.setupFakeGuiLighting();
 		ItemRenderer itemRenderer = this.minecraft.getItemRenderer();
 		MultiBufferSource.BufferSource renderBuffer = mc.renderBuffers().bufferSource();
 
