@@ -3,7 +3,9 @@ package net.tslat.aoawikihelpermod.util;
 import net.tslat.aoawikihelpermod.util.printers.TablePrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.List;
 
 public class WikiTemplateHelper {
 	public static String tooltip(String text, String tooltip) {
@@ -70,7 +72,23 @@ public class WikiTemplateHelper {
 	}
 
 	public static String makeSmeltingTemplate(String input, String output) {
-		return makeWikiTemplateObject("Smelting", false, "input=" + input, "output=" + output);
+		return makeSmeltingTemplate(input, null, output, null);
+	}
+
+	public static String makeSmeltingTemplate(String input, @Nullable String inputImage, String output, @Nullable String outputImage) {
+		List<String> lines = new ArrayList<>();
+
+		lines.add("input=" + input);
+
+		if (inputImage != null)
+			lines.add("inputimage=" + inputImage);
+
+		lines.add("output=" + output);
+
+		if (outputImage != null)
+			lines.add("outputimage=" + outputImage);
+
+		return makeWikiTemplateObject("Smelting", false, lines.toArray(new String[0]));
 	}
 
 	public static String makeInfusionTemplate(ArrayList<String> ingredients, String input, RecipePrintHandler.PrintableIngredient output) {
