@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.content.recipe.InfusionRecipe;
 import net.tslat.aoa3.scheduling.AoAScheduler;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
@@ -120,17 +121,17 @@ public class RecipesSkimmer extends SimpleJsonResourceReloadListener {
 	private void populateIngredientsByRecipe(ResourceLocation id, Recipe<?> recipe) {
 		for (Ingredient ingredient : recipe.getIngredients()) {
 			for (ItemStack stack : ingredient.getItems()) {
-				RECIPES_BY_INGREDIENT.put(stack.getItem().getRegistryName(), id);
+				RECIPES_BY_INGREDIENT.put(ForgeRegistries.ITEMS.getKey(stack.getItem()), id);
 			}
 
 			if (recipe instanceof InfusionRecipe infusionRecipe && !infusionRecipe.isEnchanting()) {
 				for (ItemStack stack : infusionRecipe.getRecipeInput().getItems()) {
-					RECIPES_BY_INGREDIENT.put(stack.getItem().getRegistryName(), id);
+					RECIPES_BY_INGREDIENT.put(ForgeRegistries.ITEMS.getKey(stack.getItem()), id);
 				}
 			}
 		}
 
-		RECIPES_BY_OUTPUT.put(recipe.getResultItem().getItem().getRegistryName(), id);
+		RECIPES_BY_OUTPUT.put(ForgeRegistries.ITEMS.getKey(recipe.getResultItem().getItem()), id);
 	}
 
 	private void populateIngredientsByHandler(ResourceLocation id, RecipePrintHandler recipePrintHandler) {

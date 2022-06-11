@@ -5,6 +5,7 @@ import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.content.entity.base.AoATrader;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.StringUtil;
@@ -45,7 +46,7 @@ public class MerchantTradePrintHandler {
 
 	public MerchantTradePrintHandler(AoATrader trader, int professionLevel, MerchantOffer trade) {
 		this.trade = trade;
-		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(trader.getType().getRegistryName().getPath()), false, true), professionLevel);
+		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(ForgeRegistries.ENTITIES.getKey(trader.getType()).getPath()), false, true), professionLevel);
 		int tradesToUnlock;
 
 		try {
@@ -62,7 +63,7 @@ public class MerchantTradePrintHandler {
 
 	public MerchantTradePrintHandler(VillagerProfession profession, int professionLevel, MerchantOffer trade) {
 		this.trade = trade;
-		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(profession.getRegistryName().getPath()), true, true), professionLevel);
+		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(ForgeRegistries.PROFESSIONS.getKey(profession).getPath()), true, true), professionLevel);
 		this.tradesToUnlockAtLevel = 2;
 	}
 

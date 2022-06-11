@@ -22,7 +22,7 @@ public class StructureTemplateSkimmer extends SimplePreparableReloadListener<Has
 		HashMap<ResourceLocation, Lazy<StructureTemplate>> collection = new HashMap<>();
 		templates.clear();
 
-		for (ResourceLocation file : resourceManager.listResources("structures", fileName -> fileName.endsWith(".nbt"))) {
+		for (ResourceLocation file : resourceManager.listResources("structures", fileName -> fileName.getPath().endsWith(".nbt")).keySet()) {
 			String filePath = file.getPath();
 			ResourceLocation resourcePath = new ResourceLocation(file.getNamespace(), filePath.substring(11, filePath.length() - 4));
 

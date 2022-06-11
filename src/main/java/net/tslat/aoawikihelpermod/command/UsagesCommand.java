@@ -5,12 +5,14 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.dataskimmers.BlockDataSkimmer;
 import net.tslat.aoawikihelpermod.dataskimmers.ItemDataSkimmer;
@@ -33,10 +35,10 @@ import java.util.Set;
 public class UsagesCommand implements Command<CommandSourceStack> {
 	private static final UsagesCommand CMD = new UsagesCommand();
 
-	public static ArgumentBuilder<CommandSourceStack, ?> register() {
+	public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext buildContext) {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("usages").executes(CMD);
 
-		builder.then(Commands.argument("id", ItemArgument.item()).executes(UsagesCommand::printUsages));
+		builder.then(Commands.argument("id", ItemArgument.item(buildContext)).executes(UsagesCommand::printUsages));
 
 		return builder;
 	}
@@ -57,7 +59,7 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		String baseFileName = "Usages - " + itemName;
-		Collection<ResourceLocation> containingRecipes = RecipesSkimmer.RECIPES_BY_INGREDIENT.get(item.getRegistryName());
+		Collection<ResourceLocation> containingRecipes = RecipesSkimmer.RECIPES_BY_INGREDIENT.get(ForgeRegistries.ITEMS.getKey(item));
 
 		try {
 			if (!containingRecipes.isEmpty()) {
@@ -200,7 +202,7 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		Set<MerchantTradePrintHandler> trades = MerchantsSkimmer.TRADES_BY_COST.get(item.getRegistryName());
+		Set<MerchantTradePrintHandler> trades = MerchantsSkimmer.TRADES_BY_COST.get(ForgeRegistries.ITEMS.getKey(item));
 
 		if (!trades.isEmpty()) {
 			String fileName = "Usages - " + itemName + " - Merchants";
@@ -226,7 +228,7 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 		CommandSourceStack source = cmd.getSource();
 		boolean success;
 
-		WikiHelperCommand.info(cmd.getSource(), "Usages", "Searching for usages of '" + item.getRegistryName() + "'...");
+		WikiHelperCommand.info(cmd.getSource(), "Usages", "Searching for usages of '" + ForgeRegistries.ITEMS.getKey(item) + "'...");
 
 		success = checkRecipeUsages(item, source);
 		success |= checkRepairUsages(item, source);

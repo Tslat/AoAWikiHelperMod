@@ -2,6 +2,7 @@ package net.tslat.aoawikihelpermod.dataskimmers;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.BlockDataPrintHandler;
 
@@ -13,12 +14,12 @@ public class BlockDataSkimmer {
 
 	public static void init() {
 		for (Block block : ObjectHelper.scrapeRegistryForBlocks(bl -> true)) {
-			DATA_BY_BLOCK.put(block.getRegistryName(), new BlockDataPrintHandler(block));
+			DATA_BY_BLOCK.put(ForgeRegistries.BLOCKS.getKey(block), new BlockDataPrintHandler(block));
 		}
 	}
 
 	@Nullable
 	public static BlockDataPrintHandler get(Block block) {
-		return DATA_BY_BLOCK.get(block.getRegistryName());
+		return DATA_BY_BLOCK.get(ForgeRegistries.BLOCKS.getKey(block));
 	}
 }

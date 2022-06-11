@@ -10,14 +10,15 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Random;
 import java.util.function.Consumer;
 
 public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
@@ -146,12 +147,12 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 
 	@Override
 	protected File getOutputFile() {
-		return PrintHelper.configDir.toPath().resolve("Block Renders").resolve(block.getBlock().getRegistryName().getNamespace()).resolve(block.getBlock().getName().getString() + " - " + targetSize + "px.gif").toFile();
+		return PrintHelper.configDir.toPath().resolve("Block Renders").resolve(ForgeRegistries.BLOCKS.getKey(block.getBlock()).getNamespace()).resolve(block.getBlock().getName().getString() + " - " + targetSize + "px.gif").toFile();
 	}
 
 	private boolean isOnFirstFrame() {
 		BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
-		Random rand = new Random();
+		RandomSource rand = RandomSource.create();
 		int highestFrameTime = 0;
 		BakedModel model = blockRenderer.getBlockModel(this.block);
 
@@ -186,7 +187,7 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 
 	private int calculateRenderTickTime() {
 		BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
-		Random rand = new Random();
+		RandomSource rand = RandomSource.create();
 		int highestFrameTime = 1;
 		BakedModel model = blockRenderer.getBlockModel(this.block);
 

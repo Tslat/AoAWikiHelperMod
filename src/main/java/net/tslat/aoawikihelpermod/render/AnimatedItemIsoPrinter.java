@@ -10,14 +10,15 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Random;
 import java.util.function.Consumer;
 
 public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
@@ -146,12 +147,12 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 
 	@Override
 	protected File getOutputFile() {
-		return PrintHelper.configDir.toPath().resolve("Item Renders").resolve(stack.getItem().getRegistryName().getNamespace()).resolve(stack.getItem().getName(stack).getString() + " - " + targetSize + "px.gif").toFile();
+		return PrintHelper.configDir.toPath().resolve("Item Renders").resolve(ForgeRegistries.ITEMS.getKey(stack.getItem()).getNamespace()).resolve(stack.getItem().getName(stack).getString() + " - " + targetSize + "px.gif").toFile();
 	}
 
 	private boolean isOnFirstFrame() {
 		ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-		Random rand = new Random();
+		RandomSource rand = RandomSource.create();
 		int highestFrameTime = 0;
 		BakedModel model = itemRenderer.getModel(this.stack, null, null, 0);
 
@@ -176,7 +177,7 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 
 	private int calculateRenderTickTime() {
 		ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-		Random rand = new Random();
+		RandomSource rand = RandomSource.create();
 		int highestFrameTime = 0;
 		BakedModel model = itemRenderer.getModel(this.stack, null, null, 0);
 

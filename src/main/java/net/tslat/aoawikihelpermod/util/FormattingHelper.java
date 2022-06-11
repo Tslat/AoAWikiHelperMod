@@ -2,13 +2,12 @@ package net.tslat.aoawikihelpermod.util;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.storage.loot.providers.number.*;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.tslat.aoa3.util.NumberUtil;
 
@@ -50,13 +49,13 @@ public class FormattingHelper {
 		return createLinkableText(ObjectHelper.getItemName(object.asItem()), pluralise, shouldLink);
 	}
 
-	public static String createLinkableTag(String tag, ForgeRegistryEntry<?> sampleObjectFromTagTypeRegistry) {
+	public static String createLinkableTag(String tag, Object sampleObjectFromTagTypeRegistry) {
 		IForgeRegistry<?> registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
 
 		return tooltip(tag, "Any " + registryForObject.getRegistryName().getPath().replaceAll("_", "") + " tagged as " + tag) + " ([[Tags#" + registryForObject.getRegistryName() + ":" + tag + "|Tag]])";
 	}
 
-	public static String createTagIngredientDescription(String tag, ForgeRegistryEntry<?> sampleObjectFromTagTypeRegistry) {
+	public static String createTagIngredientDescription(String tag, Object sampleObjectFromTagTypeRegistry) {
 		IForgeRegistry<?> registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
 
 		return "Any " + registryForObject.getRegistryName().getPath().replaceAll("_", "") + " tagged as " + "[[Tags#" + registryForObject.getRegistryName() + ":" + tag + "|" + tag + "]]";
@@ -95,17 +94,17 @@ public class FormattingHelper {
 
 	public static MutableComponent generateResultMessage(File file, String linkName, @Nullable String clipboardContent) {
 		String fileUrl = file.getAbsolutePath().replace("\\", "/");
-		MutableComponent component = new TextComponent("Generated data file: ")
-				.append(new TextComponent(linkName).withStyle(style -> style.withColor(ChatFormatting.BLUE)
-						.setUnderlined(true)
+		MutableComponent component = Component.literal("Generated data file: ")
+				.append(Component.literal(linkName).withStyle(style -> style.withColor(ChatFormatting.BLUE)
+						.withUnderlined(true)
 						.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, fileUrl))));
 
 		if (clipboardContent != null) {
 				component
-						.append(new TextComponent(" "))
-						.append(new TextComponent("(Copy)").withStyle(style -> style.withColor(ChatFormatting.BLUE)
+						.append(Component.literal(" "))
+						.append(Component.literal("(Copy)").withStyle(style -> style.withColor(ChatFormatting.BLUE)
 								.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, clipboardContent))
-								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Copy contents of file to clipboard")))));
+								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy contents of file to clipboard")))));
 		}
 
 		return component;

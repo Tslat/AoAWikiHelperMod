@@ -7,6 +7,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
@@ -45,16 +46,16 @@ public class SuspiciousStewRecipeHandler extends RecipePrintHandler {
 	@Override
 	public List<ResourceLocation> getIngredientsForLookup() {
 		return Arrays.asList(
-				Items.BROWN_MUSHROOM.getRegistryName(),
-				Items.RED_MUSHROOM.getRegistryName(),
-				Items.BOWL.getRegistryName(),
+				ForgeRegistries.ITEMS.getKey(Items.BROWN_MUSHROOM),
+				ForgeRegistries.ITEMS.getKey(Items.RED_MUSHROOM),
+				ForgeRegistries.ITEMS.getKey(Items.BOWL),
 				ItemTags.SMALL_FLOWERS.location()
 		);
 	}
 
 	@Override
 	public List<ResourceLocation> getOutputsForLookup() {
-		return Collections.singletonList(Items.SUSPICIOUS_STEW.getRegistryName());
+		return Collections.singletonList(ForgeRegistries.ITEMS.getKey(Items.SUSPICIOUS_STEW));
 	}
 
 	@Override

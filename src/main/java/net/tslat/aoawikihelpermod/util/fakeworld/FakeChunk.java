@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -242,12 +242,12 @@ public class FakeChunk extends ChunkAccess {
 	}
 
 	@Override
-	public Map<ConfiguredStructureFeature<?, ?>, StructureStart> getAllStarts() {
+	public Map<Structure, StructureStart> getAllStarts() {
 		return Collections.emptyMap();
 	}
 
 	@Override
-	public void setAllStarts(Map<ConfiguredStructureFeature<?, ?>, StructureStart> structureStarts) {}
+	public void setAllStarts(Map<Structure, StructureStart> structureStarts) {}
 
 	@Override
 	public void setUnsaved(boolean modified) {}
@@ -359,26 +359,26 @@ public class FakeChunk extends ChunkAccess {
 
 	@Nullable
 	@Override
-	public StructureStart getStartForFeature(ConfiguredStructureFeature<?, ?> structure) {
+	public StructureStart getStartForStructure(Structure structure) {
 		return null;
 	}
 
 	@Override
-	public void setStartForFeature(ConfiguredStructureFeature<?, ?> structure, StructureStart start) {}
+	public void setStartForStructure(Structure structure, StructureStart start) {}
 
 	@Override
-	public LongSet getReferencesForFeature(ConfiguredStructureFeature<?, ?> structure) {
+	public LongSet getReferencesForStructure(Structure structure) {
 		return new LongOpenHashSet(0);
 	}
 
 	@Override
-	public void addReferenceForFeature(ConfiguredStructureFeature<?, ?> structure, long chunkValue) {}
+	public void addReferenceForStructure(Structure structure, long chunkValue) {}
 
 	@Override
-	public Map<ConfiguredStructureFeature<?, ?>, LongSet> getAllReferences() {
+	public Map<Structure, LongSet> getAllReferences() {
 		return Collections.emptyMap();
 	}
 
 	@Override
-	public void setAllReferences(Map<ConfiguredStructureFeature<?, ?>, LongSet> structureReferences) {}
+	public void setAllReferences(Map<Structure, LongSet> structureReferences) {}
 }

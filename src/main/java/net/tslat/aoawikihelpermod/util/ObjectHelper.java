@@ -1,13 +1,13 @@
 package net.tslat.aoawikihelpermod.util;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -29,10 +29,12 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryManager;
+import net.minecraftforge.registries.tags.ITag;
 import net.minecraftforge.registries.tags.ITagManager;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.util.LocaleUtil;
@@ -119,7 +121,7 @@ public class ObjectHelper {
 			TagKey tagKey = TagKey.create(registry.getRegistryKey(), id);
 
 			if (tagManager.isKnownTagName(tagKey)) {
-				Optional<IForgeRegistryEntry<?>> entry = tagManager.getTag(tagKey).stream().findFirst();
+				Optional<ITag> entry = tagManager.getTag(tagKey).stream().findFirst();
 
 				if (entry.isPresent())
 					return getNameFunctionForUnknownObject(entry.get()).apply(entry.get());
@@ -190,13 +192,13 @@ public class ObjectHelper {
 	}
 
 	public static String getItemName(ItemLike item) {
-		ResourceLocation itemId = item.asItem().getRegistryName();
+		ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item.asItem());
 		EntityType<?> matchingEntity = ForgeRegistries.ENTITIES.getValue(itemId);
 		String suffix = "";
 
 		if (matchingEntity != EntityType.PIG) {
 			try {
-				Entity testInstance = matchingEntity.create(FakeWorld.INSTANCE);
+				Entity testInstance = matchingEntity.create(FakeWorld.INSTANCE.get());
 
 				if (testInstance != null) {
 					if (testInstance instanceof LivingEntity)
@@ -215,7 +217,7 @@ public class ObjectHelper {
 		if (block.asItem() != Items.AIR)
 			return getItemName(block);
 
-		return StringUtil.toTitleCase(block.getRegistryName().getPath());
+		return StringUtil.toTitleCase(ForgeRegistries.BLOCKS.getKey(block).getPath());
 	}
 
 	public static String getBiomeName(ResourceKey<Biome> biome) {
@@ -230,26 +232,22 @@ public class ObjectHelper {
 	}
 
 	public static String getEntityName(EntityType<?> entityType) {
-		ResourceLocation id = entityType.getRegistryName();
+		ResourceLocation id = ForgeRegistries.ENTITIES.getKey(entityType);
 		String suffix = isItem(id) ? " (entity)" : "";
 
 		return LocaleUtil.getLocaleMessage("entity." + id.getNamespace() + "." + id.getPath()).getString() + suffix;
 	}
 
 	public static String getFluidName(Fluid fluid) {
-		if (isBlock(fluid.getRegistryName()))
-			return getBlockName(ForgeRegistries.BLOCKS.getValue(fluid.getRegistryName()));
+		if (isBlock(ForgeRegistries.FLUIDS.getKey(fluid)))
+			return getBlockName(ForgeRegistries.BLOCKS.getValue(ForgeRegistries.FLUIDS.getKey(fluid)));
 
-		return StringUtil.toTitleCase(fluid.getRegistryName().getPath());
-	}
-
-	public static String getBiomeCategoryName(Biome.BiomeCategory category) {
-		return StringUtil.toTitleCase(category.getName());
+		return StringUtil.toTitleCase(ForgeRegistries.FLUIDS.getKey(fluid).getPath());
 	}
 
 	public static String getEnchantmentName(Enchantment enchant, int level) {
 		if (level <= 0)
-			return new TranslatableComponent(enchant.getDescriptionId()).getString();
+			return Component.translatable(enchant.getDescriptionId()).getString();
 
 		return enchant.getFullname(level).getString();
 	}
@@ -282,7 +280,7 @@ public class ObjectHelper {
 	}
 
 	public static String attemptToExtractItemSpecificEffects(Item item, @Nullable Item controlItem) {
-		TextComponent dummyComponent = new TextComponent("");
+		MutableComponent dummyComponent = Component.literal("");
 
 		List<Component> itemTooltip = new ArrayList<Component>();
 		List<Component> controlItemTooltip = new ArrayList<Component>();
@@ -348,12 +346,20 @@ public class ObjectHelper {
 		return matches / (float)str1.length() >= 0.75f;
 	}
 
-	public static IForgeRegistry<?> getRegistryForObject(IForgeRegistryEntry object) {
-		return RegistryManager.ACTIVE.getRegistry(object.getRegistryType());
+	@Nullable
+	public static IForgeRegistry<?> getRegistryForObject(Object object) {
+		BiMap<ResourceLocation, ForgeRegistry<Object>> registries = ObfuscationReflectionHelper.getPrivateValue(RegistryManager.class, RegistryManager.ACTIVE, "registries");
+
+		for (ForgeRegistry<Object> registry : registries.values()) {
+			if (registry.containsValue(object))
+				return registry;
+		}
+
+		return null;
 	}
 
-	public static Function<IForgeRegistryEntry<?>, String> getNameFunctionForUnknownObject(IForgeRegistryEntry<?> entry) {
-		Function<IForgeRegistryEntry<?>, String> namingFunction;
+	public static Function<Object, String> getNameFunctionForUnknownObject(Object entry) {
+		Function<Object, String> namingFunction = obj -> "???";
 
 		if (entry instanceof Item) {
 			namingFunction = item -> ObjectHelper.getItemName((Item)item);
@@ -365,7 +371,7 @@ public class ObjectHelper {
 			namingFunction = entityType -> ObjectHelper.getEntityName((EntityType<?>)entityType);
 		}
 		else if (entry instanceof Biome) {
-			namingFunction = biome -> ObjectHelper.getBiomeName(biome.getRegistryName());
+			namingFunction = biome -> ObjectHelper.getBiomeName(ForgeRegistries.BIOMES.getKey((Biome)biome));
 		}
 		else if (entry instanceof Enchantment) {
 			namingFunction = enchant -> ObjectHelper.getEnchantmentName((Enchantment)enchant, 0);
@@ -374,7 +380,7 @@ public class ObjectHelper {
 			namingFunction = fluid -> ObjectHelper.getFluidName((Fluid)fluid);
 		}
 		else {
-			namingFunction = obj -> obj.getRegistryName().toString();
+			((ForgeRegistry<Object>)getRegistryForObject(entry)).getKey(entry);
 		}
 
 		return namingFunction;

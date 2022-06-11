@@ -1,30 +1,14 @@
 package net.tslat.aoawikihelpermod.render;
 
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.JigsawBlock;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.entity.JigsawBlockEntity;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.FlatLevelSource;
-import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
-import net.minecraft.world.level.levelgen.structure.StructureSet;
-import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
-import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.tslat.aoa3.common.registration.AoADimensions;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.dataskimmers.StructureTemplateSkimmer;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
@@ -33,7 +17,6 @@ import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 
 public class StructureIsoPrinter extends IsometricPrinterScreen {
@@ -64,23 +47,8 @@ public class StructureIsoPrinter extends IsometricPrinterScreen {
 			return;
 		}
 
-		FakeWorld world = FakeWorld.INSTANCE;
+		FakeWorld world = FakeWorld.INSTANCE.get();
 		boolean placeBlocks = true;
-
-		if (expandJigsaw) {
-			for (StructureTemplate.StructureBlockInfo block : template.palettes.get(0).blocks()) {
-				if (block.state.getBlock() instanceof JigsawBlock) {
-					world.setBlock(block.pos, block.state, 0);
-
-					JigsawBlockEntity tile = (JigsawBlockEntity)world.getBlockEntity(block.pos);
-
-					if (tile.getPool() != null) {
-						generateJigsawPiece(template, tile);
-						placeBlocks = false;
-					}
-				}
-			}
-		}
 
 		if (placeBlocks) {
 			for (StructureTemplate.StructureBlockInfo block : template.palettes.get(0).blocks()) {
@@ -138,24 +106,6 @@ public class StructureIsoPrinter extends IsometricPrinterScreen {
 	public void onClose() {
 		super.onClose();
 
-		FakeWorld.INSTANCE.reset();
-	}
-
-	protected void generateJigsawPiece(StructureTemplate template, JigsawBlockEntity tileEntity) {
-		Random rand = tileEntity.getLevel().getRandom();
-		BlockPos pos = tileEntity.getBlockPos();
-		List<PoolElementStructurePiece> pieces = Lists.newArrayList();
-		StructureManager templateManager = AoADimensions.OVERWORLD.getWorld().getStructureManager();
-		Registry<StructureSet> structureSetRegistry = FakeWorld.INSTANCE.registryAccess().registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
-		ChunkGenerator chunkGenerator = new FlatLevelSource(structureSetRegistry, FlatLevelGeneratorSettings.getDefault(FakeWorld.INSTANCE.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), structureSetRegistry));
-		PoolElementStructurePiece villagePiece = new PoolElementStructurePiece(templateManager, new SinglePoolElement(template), new BlockPos(0, 0, 0), 1, Rotation.NONE, new BoundingBox(pos));
-
-		JigsawPlacement.addPieces(FakeWorld.INSTANCE.registryAccess(), villagePiece, 10, PoolElementStructurePiece::new, chunkGenerator, templateManager, pieces, rand, tileEntity.getLevel());
-
-		pieces.add(villagePiece);
-
-		for (PoolElementStructurePiece piece : pieces) {
-			piece.place((FakeWorld)tileEntity.getLevel(), FakeWorld.INSTANCE.getStructureManager(), chunkGenerator, rand, BoundingBox.infinite(), pos, false);
-		}
+		FakeWorld.INSTANCE.get().reset();
 	}
 }

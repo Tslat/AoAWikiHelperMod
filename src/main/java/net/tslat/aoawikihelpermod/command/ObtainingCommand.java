@@ -5,12 +5,14 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.dataskimmers.*;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -29,10 +31,10 @@ import java.util.Set;
 public class ObtainingCommand implements Command<CommandSourceStack> {
 	private static final ObtainingCommand CMD = new ObtainingCommand();
 
-	public static ArgumentBuilder<CommandSourceStack, ?> register() {
+	public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext buildContext) {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("obtaining").executes(CMD);
 
-		builder.then(Commands.argument("id", ItemArgument.item()).executes(ObtainingCommand::printSources));
+		builder.then(Commands.argument("id", ItemArgument.item(buildContext)).executes(ObtainingCommand::printSources));
 
 		return builder;
 	}
@@ -53,7 +55,7 @@ public class ObtainingCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		String baseFileName = "Obtaining - " + itemName;
-		Collection<ResourceLocation> resultingRecipes = RecipesSkimmer.RECIPES_BY_OUTPUT.get(item.getRegistryName());
+		Collection<ResourceLocation> resultingRecipes = RecipesSkimmer.RECIPES_BY_OUTPUT.get(ForgeRegistries.ITEMS.getKey(item));
 
 		try {
 			if (!resultingRecipes.isEmpty()) {
@@ -102,7 +104,7 @@ public class ObtainingCommand implements Command<CommandSourceStack> {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		Set<MerchantTradePrintHandler> trades = MerchantsSkimmer.TRADES_BY_ITEM.get(item.getRegistryName());
+		Set<MerchantTradePrintHandler> trades = MerchantsSkimmer.TRADES_BY_ITEM.get(ForgeRegistries.ITEMS.getKey(item));
 
 		if (!trades.isEmpty()) {
 			String fileName = "Obtaining - " + itemName + " - Merchants";
@@ -152,7 +154,7 @@ public class ObtainingCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		String fileName = "Obtaining - " + itemName + " - Hauling";
-		Collection<ResourceLocation> haulingTables = HaulingFishTableSkimmer.TABLES_BY_LOOT.get(item.getRegistryName());
+		Collection<ResourceLocation> haulingTables = HaulingFishTableSkimmer.TABLES_BY_LOOT.get(ForgeRegistries.ITEMS.getKey(item));
 
 		if (!haulingTables.isEmpty()) {
 			ArrayList<HaulingTablePrintHandler> sortedTables = new ArrayList<HaulingTablePrintHandler>();
@@ -188,7 +190,7 @@ public class ObtainingCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		String baseFileName = "Obtaining - " + itemName;
-		Collection<ResourceLocation> resultingLootTables = LootTablesSkimmer.TABLES_BY_LOOT.get(item.getRegistryName());
+		Collection<ResourceLocation> resultingLootTables = LootTablesSkimmer.TABLES_BY_LOOT.get(ForgeRegistries.ITEMS.getKey(item));
 
 		if (!resultingLootTables.isEmpty()) {
 			String fileName = baseFileName + " - Loot Tables";
@@ -216,7 +218,7 @@ public class ObtainingCommand implements Command<CommandSourceStack> {
 		CommandSourceStack source = cmd.getSource();
 		boolean success;
 
-		WikiHelperCommand.info(cmd.getSource(), "Obtaining", "Searching for sources of '" + item.getRegistryName() + "'...");
+		WikiHelperCommand.info(cmd.getSource(), "Obtaining", "Searching for sources of '" + ForgeRegistries.ITEMS.getKey(item) + "'...");
 
 		success = checkRecipeSources(item, source);
 		success |= checkLootTableSources(item, source);

@@ -59,7 +59,7 @@ public final class RenderUtil {
 
 		if (blockRenderType == RenderShape.INVISIBLE) {
 			if (block.getBlock() instanceof LiquidBlock)
-				StaticFluidRenderer.renderFluid(matrix.last(), pos, FakeWorld.INSTANCE, renderBuffer.getBuffer(RenderType.translucent()), block);
+				StaticFluidRenderer.renderFluid(matrix.last(), pos, FakeWorld.INSTANCE.get(), renderBuffer.getBuffer(RenderType.translucent()), block);
 
 			return;
 		}
@@ -69,7 +69,7 @@ public final class RenderUtil {
 
 		switch (blockRenderType) {
 			case MODEL -> {
-				int tint = Minecraft.getInstance().getBlockColors().getColor(block, FakeWorld.INSTANCE, pos, 0);
+				int tint = Minecraft.getInstance().getBlockColors().getColor(block, FakeWorld.INSTANCE.get(), pos, 0);
 				float red = (float)(tint >> 16 & 255) / 255f;
 				float green = (float)(tint >> 8 & 255) / 255f;
 				float blue = (float)(tint & 255) / 255f;

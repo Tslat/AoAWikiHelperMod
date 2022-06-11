@@ -11,6 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.tags.ITag;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
@@ -125,7 +126,7 @@ public abstract class RecipePrintHandler {
 		}
 
 		public void addOutput(ItemStack stack) {
-			this.output = ObjectHelper.getFormattedItemDetails(stack.getItem().getRegistryName());
+			this.output = ObjectHelper.getFormattedItemDetails(ForgeRegistries.ITEMS.getKey(stack.getItem()));
 			this.output.count = stack.getCount();
 		}
 

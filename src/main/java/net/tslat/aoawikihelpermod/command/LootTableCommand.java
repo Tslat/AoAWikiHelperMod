@@ -46,7 +46,7 @@ public class LootTableCommand implements Command<CommandSourceStack> {
 		Block block = BlocksCommand.BlockArgument.getBlock(cmd, "block").getBlock();
 
 		if (block.getLootTable() == null) {
-			WikiHelperCommand.warn(cmd.getSource(), "LootTable", "Block '" + block.getRegistryName() + "' has no attached loot table");
+			WikiHelperCommand.warn(cmd.getSource(), "LootTable", "Block '" + ForgeRegistries.BLOCKS.getKey(block) + "' has no attached loot table");
 
 			return 1;
 		}

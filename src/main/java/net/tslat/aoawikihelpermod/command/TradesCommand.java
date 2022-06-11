@@ -14,7 +14,6 @@ import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
@@ -28,7 +27,7 @@ import java.util.ArrayList;
 
 public class TradesCommand implements Command<CommandSourceStack> {
 	private static final TradesCommand CMD = new TradesCommand();
-	private static final SuggestionProvider<CommandSourceStack> PROFESSIONS_SUGGESTIONS_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "merchant_trades"), (context, builder) -> SharedSuggestionProvider.suggestResource(MerchantsSkimmer.TRADE_PRINTERS_BY_PROFESSION.keySet().stream().map(ForgeRegistryEntry::getRegistryName), builder));
+	private static final SuggestionProvider<CommandSourceStack> PROFESSIONS_SUGGESTIONS_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "merchant_trades"), (context, builder) -> SharedSuggestionProvider.suggestResource(MerchantsSkimmer.TRADE_PRINTERS_BY_PROFESSION.keySet().stream().map(ForgeRegistries.PROFESSIONS::getKey), builder));
 	private static final SuggestionProvider<CommandSourceStack> AOA_TRADERS_SUGGESTIONS_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "aoa_traders"), (context, builder) -> SharedSuggestionProvider.suggestResource(MerchantsSkimmer.TRADE_PRINTERS_BY_AOA_TRADER.keySet().stream(), builder));
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {

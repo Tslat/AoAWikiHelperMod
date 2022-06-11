@@ -6,6 +6,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 
@@ -143,7 +144,7 @@ public class BlockInfoboxPrintHelper extends PrintHelper {
         write("|tool=" + determineToolType(block, tags));
         write("|harvestlevel=" + determineHarvestLevel(block, tags));
         write("|raritycolor=" + convertRarityColor(itemStack.getRarity()));
-        write("|id=" + block.getRegistryName());
+        write("|id=" + ForgeRegistries.BLOCKS.getKey(block));
         write("|versionadded=");
         write(END);
     }

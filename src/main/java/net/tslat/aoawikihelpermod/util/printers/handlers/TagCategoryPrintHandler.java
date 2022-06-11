@@ -3,7 +3,6 @@ package net.tslat.aoawikihelpermod.util.printers.handlers;
 import com.google.common.collect.HashMultimap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.tags.ITagManager;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
@@ -12,14 +11,14 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.function.Function;
 
-public class TagCategoryPrintHandler<T extends IForgeRegistryEntry<T>> {
+public class TagCategoryPrintHandler<T> {
 	private final ResourceLocation registryId;
 	private final ITagManager<T> tagManager;
 
 	private HashMultimap<String, TagKey<T>> namespacedTags = null;
 	private HashMap<String, String[][]> cachedPrintouts = null;
 	private String[] tagNamespaces = null;
-	private Function<IForgeRegistryEntry<?>, String> namingFunction = null;
+	private Function<T, String> namingFunction = null;
 
 	public TagCategoryPrintHandler(ResourceLocation registryId, ITagManager<T> tagManager) {
 		this.registryId = registryId;
@@ -68,7 +67,7 @@ public class TagCategoryPrintHandler<T extends IForgeRegistryEntry<T>> {
 				if (namingFunction != null)
 					return namingFunction.apply(entry);
 
-				namingFunction = ObjectHelper.getNameFunctionForUnknownObject(entry).andThen(name -> FormattingHelper.createLinkableText(name, false, true));
+				namingFunction = (Function<T, String>)ObjectHelper.getNameFunctionForUnknownObject(entry).andThen(name -> FormattingHelper.createLinkableText(name, false, true));
 
 				return namingFunction.apply(entry);
 			}).reduce((line, newEntry) -> line += ", " + newEntry).orElse("");

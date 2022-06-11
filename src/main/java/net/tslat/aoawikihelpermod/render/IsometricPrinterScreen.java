@@ -12,7 +12,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.tslat.aoa3.util.ColourUtil;
@@ -51,7 +51,7 @@ public abstract class IsometricPrinterScreen extends Screen {
 	protected float defaultRefScale = 1;
 
 	protected IsometricPrinterScreen(int maxSize, float rotationAdjust, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
-		super(new TextComponent("Isometric Rendering"));
+		super(Component.literal("Isometric Rendering"));
 
 		this.fileConsumer = fileConsumer;
 		this.commandSource = commandSource;

@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.ItemArgument;
@@ -20,10 +21,10 @@ import java.io.File;
 public class ItemsCommand implements Command<CommandSourceStack> {
 	private static final ItemsCommand CMD = new ItemsCommand();
 
-	public static ArgumentBuilder<CommandSourceStack, ?> register() {
+	public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext buildContext) {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("items").executes(CMD);
 
-		builder.then(Commands.argument("item", ItemArgument.item())
+		builder.then(Commands.argument("item", ItemArgument.item(buildContext))
 				.then(LiteralArgumentBuilder.<CommandSourceStack>literal("tags").executes(ItemsCommand::printTags)));
 
 		return builder;

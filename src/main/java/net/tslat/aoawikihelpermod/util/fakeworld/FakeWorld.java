@@ -30,6 +30,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.BlackholeTickAccess;
 import net.minecraft.world.ticks.LevelTickAccess;
@@ -44,7 +45,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class FakeWorld extends Level implements WorldGenLevel {
-	public static final FakeWorld INSTANCE = new FakeWorld();
+	public static final Lazy<FakeWorld> INSTANCE = FakeWorld::new;
 
 	private static final Scoreboard scoreboard = new Scoreboard();
 	private static final RecipeManager recipeManager = new RecipeManager();
@@ -56,7 +57,7 @@ public class FakeWorld extends Level implements WorldGenLevel {
 	public static void init() {}
 
 	protected FakeWorld() {
-		super(new FakeSpawnInfo(), Level.OVERWORLD, Holder.direct(AoADimensions.OVERWORLD.getWorld().dimensionType()), () -> InactiveProfiler.INSTANCE, true, false, 0);
+		super(new FakeSpawnInfo(), Level.OVERWORLD, AoADimensions.OVERWORLD.getWorld().dimensionTypeRegistration(), () -> InactiveProfiler.INSTANCE, true, false, 0, 0);
 	}
 
 	@Override
@@ -164,6 +165,11 @@ public class FakeWorld extends Level implements WorldGenLevel {
 	public void levelEvent(@Nullable Player player, int type, BlockPos pos, int data) {}
 
 	@Override
+	public void gameEvent(GameEvent p_220404_, Vec3 p_220405_, GameEvent.Context p_220406_) {
+
+	}
+
+	@Override
 	public void gameEvent(@Nullable Entity entity, GameEvent event, BlockPos pos) {}
 
 	@Nonnull
@@ -210,7 +216,7 @@ public class FakeWorld extends Level implements WorldGenLevel {
 
 	@Override
 	public DifficultyInstance getCurrentDifficultyAt(BlockPos pos) {
-		return new DifficultyInstance(Difficulty.PEACEFUL, FakeWorld.INSTANCE.getGameTime(), 0, 0);
+		return new DifficultyInstance(Difficulty.PEACEFUL, FakeWorld.INSTANCE.get().getGameTime(), 0, 0);
 	}
 
 	@Override
@@ -223,6 +229,12 @@ public class FakeWorld extends Level implements WorldGenLevel {
 
 		return getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL).getFluidState(pos);
 	}
+
+	@Override
+	public void playSeededSound(@Nullable Player player, double posX, double posY, double posZ, SoundEvent sound, SoundSource category, float volume, float pitch, long seed) {}
+
+	@Override
+	public void playSeededSound(@Nullable Player player, Entity source, SoundEvent sound, SoundSource category, float volume, float pitch, long seed) {}
 
 	@Override
 	public BlockState getBlockState(BlockPos pos) {

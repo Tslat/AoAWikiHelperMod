@@ -53,7 +53,7 @@ public class FakeChunkProvider extends ChunkSource {
 	@Nonnull
 	@Override
 	public FakeWorld getLevel() {
-		return FakeWorld.INSTANCE;
+		return FakeWorld.INSTANCE.get();
 	}
 
 	public void reset() {

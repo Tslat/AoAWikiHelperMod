@@ -2,6 +2,7 @@ package net.tslat.aoawikihelpermod.dataskimmers;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.ItemDataPrintHandler;
 
@@ -13,12 +14,12 @@ public class ItemDataSkimmer {
 
 	public static void init() {
 		for (Item item : ObjectHelper.scrapeRegistryForItems(bl -> true)) {
-			DATA_BY_ITEM.put(item.getRegistryName(), new ItemDataPrintHandler(item));
+			DATA_BY_ITEM.put(ForgeRegistries.ITEMS.getKey(item), new ItemDataPrintHandler(item));
 		}
 	}
 
 	@Nullable
 	public static ItemDataPrintHandler get(Item item) {
-		return DATA_BY_ITEM.get(item.getRegistryName());
+		return DATA_BY_ITEM.get(ForgeRegistries.ITEMS.getKey(item));
 	}
 }

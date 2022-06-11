@@ -10,6 +10,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.Util;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -20,7 +21,7 @@ import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -32,9 +33,9 @@ import javax.annotation.Nullable;
 
 public class IsometricCommand implements Command<CommandSourceStack> {
 	private static final IsometricCommand CMD = new IsometricCommand();
-	public static final SuggestionProvider<CommandSourceStack> ENTITY_ID_SUGGESTIONS = SuggestionProviders.register(new ResourceLocation("all_entities"), (context, suggestionBuilder) -> SharedSuggestionProvider.suggestResource(Registry.ENTITY_TYPE.stream(), suggestionBuilder, EntityType::getKey, (entityType) -> new TranslatableComponent(Util.makeDescriptionId("entity", EntityType.getKey(entityType)))));
+	public static final SuggestionProvider<CommandSourceStack> ENTITY_ID_SUGGESTIONS = SuggestionProviders.register(new ResourceLocation("all_entities"), (context, suggestionBuilder) -> SharedSuggestionProvider.suggestResource(Registry.ENTITY_TYPE.stream(), suggestionBuilder, EntityType::getKey, (entityType) -> Component.translatable(Util.makeDescriptionId("entity", EntityType.getKey(entityType)))));
 
-	public static ArgumentBuilder<CommandSourceStack, ?> register() {
+	public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext buildContext) {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("iso").requires(source -> source.getEntity() instanceof Player).executes(CMD);
 
 		builder.then(Commands.literal("entity")
@@ -72,7 +73,7 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 												.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
 														.executes(context -> printEntityIso(context, null, IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust")))))))));
 		builder.then(Commands.literal("block")
-				.then(Commands.argument("block_id", BlockStateArgument.block())
+				.then(Commands.argument("block_id", BlockStateArgument.block(buildContext))
 						.executes(context -> printBlockIso(context, 300, false, 0))
 						.then(Commands.argument("animated", BoolArgumentType.bool())
 								.executes(context -> printBlockIso(context, 300, BoolArgumentType.getBool(context, "animated"), 0))
@@ -90,7 +91,7 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 								.executes(context -> printBlockIso(context, 300, false, FloatArgumentType.getFloat(context, "rotation_adjust"))))));
 
 		builder.then(Commands.literal("structure")
-						.then(Commands.argument("template_id", net.tslat.aoawikihelpermod.command.StructuresCommand.TemplateIdArgument.instance())
+						.then(Commands.argument("template_id", ResourceLocationArgument.id()).suggests(StructuresCommand.SUGGEST_TEMPLATES)
 								.executes(context -> printStructureIso(context, 1000, 0, false))
 								.then(Commands.argument("image_size", IntegerArgumentType.integer(0, 1000))
 										.executes(context -> printStructureIso(context, IntegerArgumentType.getInteger(context, "image_size"), 0, false))
@@ -104,7 +105,7 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 										.executes(context -> printStructureIso(context, 1000, 0, BoolArgumentType.getBool(context, "do_full_structure"))))));
 
 		builder.then(Commands.literal("item")
-						.then(Commands.argument("stack", ItemArgument.item())
+						.then(Commands.argument("stack", ItemArgument.item(buildContext))
 								.executes(context -> printItemIso(context, -1, false))
 								.then(Commands.argument("image_size", IntegerArgumentType.integer(0, 1000))
 										.executes(context -> printItemIso(context, IntegerArgumentType.getInteger(context, "image_size"), false))

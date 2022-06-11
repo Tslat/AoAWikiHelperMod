@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapter;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
@@ -25,7 +26,7 @@ public class BlockIsoPrinter extends IsometricPrinterScreen {
 
 		this.block = block;
 
-		FakeWorld.INSTANCE.setBlock(new BlockPos(0, 0, 0), block, 0);
+		FakeWorld.INSTANCE.get().setBlock(new BlockPos(0, 0, 0), block, 0);
 	}
 
 	@Override
@@ -41,7 +42,7 @@ public class BlockIsoPrinter extends IsometricPrinterScreen {
 
 	@Override
 	protected File getOutputFile() {
-		return PrintHelper.configDir.toPath().resolve("Block Renders").resolve(block.getBlock().getRegistryName().getNamespace()).resolve(block.getBlock().getName().getString() + " - " + targetSize + "px.png").toFile();
+		return PrintHelper.configDir.toPath().resolve("Block Renders").resolve(ForgeRegistries.BLOCKS.getKey(block.getBlock()).getNamespace()).resolve(block.getBlock().getName().getString() + " - " + targetSize + "px.png").toFile();
 	}
 
 	@Override
@@ -89,6 +90,6 @@ public class BlockIsoPrinter extends IsometricPrinterScreen {
 	public void onClose() {
 		super.onClose();
 
-		FakeWorld.INSTANCE.reset();
+		FakeWorld.INSTANCE.get().reset();
 	}
 }

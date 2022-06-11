@@ -2,6 +2,8 @@ package net.tslat.aoawikihelpermod;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -14,6 +16,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.FileUtils;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.tslat.aoa3.common.registration.AoARegistries;
+import net.tslat.aoawikihelpermod.command.BlocksCommand;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.dataskimmers.*;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapters;
@@ -47,6 +51,11 @@ public class AoAWikiHelperMod {
 		MinecraftForge.EVENT_BUS.addListener(this::registerRecipeSkimmer);
 		MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::loadFinished);
+
+		SingletonArgumentInfo argumentInfo = SingletonArgumentInfo.contextAware(BlocksCommand.BlockArgument::block);
+
+		ArgumentTypeInfos.registerByClass(BlocksCommand.BlockArgument.class, argumentInfo);
+		AoARegistries.ARGUMENT_TYPES.register("wikihelper_block", () -> argumentInfo);
 	}
 
 	@SubscribeEvent

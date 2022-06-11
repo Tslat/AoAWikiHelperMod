@@ -9,6 +9,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -134,6 +135,10 @@ public class BlocksCommand implements Command<CommandSourceStack> {
 
 		public static BlockArgument block() {
 			return new BlockArgument();
+		}
+
+		public static BlockArgument block(CommandBuildContext buildContext) {
+			return block();
 		}
 
 		@Override

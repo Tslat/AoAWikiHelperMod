@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
@@ -43,7 +44,7 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
 
-		WikiHelperCommand.info(cmd.getSource(), "Infobox", "Printing block infobox for '" + block.getRegistryName() + "'...");
+		WikiHelperCommand.info(cmd.getSource(), "Infobox", "Printing block infobox for '" + ForgeRegistries.BLOCKS.getKey(block) + "'...");
 		String fileName = "Block Infobox - " + ObjectHelper.getBlockName(block);
 
 		try (BlockInfoboxPrintHelper printHelper = BlockInfoboxPrintHelper.open(fileName)) {

@@ -6,6 +6,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
@@ -43,15 +44,15 @@ public class FireworkRecipeHandler extends RecipePrintHandler {
 	@Override
 	public List<ResourceLocation> getIngredientsForLookup() {
 		return Arrays.asList(
-				Items.PAPER.getRegistryName(),
-				Items.GUNPOWDER.getRegistryName(),
-				Items.FIREWORK_STAR.getRegistryName()
+				ForgeRegistries.ITEMS.getKey(Items.PAPER),
+				ForgeRegistries.ITEMS.getKey(Items.GUNPOWDER),
+				ForgeRegistries.ITEMS.getKey(Items.FIREWORK_STAR)
 		);
 	}
 
 	@Override
 	public List<ResourceLocation> getOutputsForLookup() {
-		return Collections.singletonList(Items.FIREWORK_ROCKET.getRegistryName());
+		return Collections.singletonList(ForgeRegistries.ITEMS.getKey(Items.FIREWORK_ROCKET));
 	}
 
 	@Override

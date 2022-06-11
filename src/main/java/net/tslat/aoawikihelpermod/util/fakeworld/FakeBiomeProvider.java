@@ -24,11 +24,6 @@ public class FakeBiomeProvider extends BiomeSource {
 	}
 
 	@Override
-	public BiomeSource withSeed(long seed) {
-		return this;
-	}
-
-	@Override
 	public Holder<Biome> getNoiseBiome(int p_204238_, int p_204239_, int p_204240_, Climate.Sampler p_204241_) {
 		return this.biome;
 	}

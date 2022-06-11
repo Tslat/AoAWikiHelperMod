@@ -1,18 +1,10 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.parchmentmc.org' } // Parchment
-        maven { url = 'https://maven.minecraftforge.net/' }
-        mavenCentral()
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-    }
-    dependencies {
-        classpath(group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true) { exclude group: 'org.apache.logging.log4j' }
-        classpath 'org.apache.logging.log4j:log4j-api:2.11.2'
-        classpath 'org.apache.logging.log4j:log4j-core:2.11.2'
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-        classpath 'org.parchmentmc:librarian:1.+' // Parchment
-    }
+plugins {
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'com.github.johnrengelman.shadow' version '7.1.0' // Shadowing
+    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT' // Mixins
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+' // Parchment
 }
+
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle' // Parchment
 apply plugin: 'eclipse'
@@ -62,6 +54,7 @@ minecraft {
         }
     }
 }
+
 sourceSets {
     main.resources.srcDir 'src/generated/resources'
 }
@@ -90,7 +83,6 @@ dependencies {
     minecraft "net.minecraftforge:forge:$project.minecraft_version-$project.forge_version"
 
     implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version")
-    implementation fg.deobf("software.bernie.geckolib:geckolib-$project.geckolib_version")
 
     // Mixin annotation processor, just in case we need it
     if (System.getProperty("idea.sync.active") != "true") {
@@ -103,7 +95,7 @@ jar {
         attributes([
             "Specification-Title": "aoawikihelpermod",
             "Specification-Vendor": "Tslat",
-            "Specification-Version": "1.18.2",
+            "Specification-Version": "1.19",
             "Implementation-Title": project.name,
             "Implementation-Version": "${mod_version}",
             "Implementation-Vendor" :"Tslat",
@@ -113,3 +105,7 @@ jar {
 }
 
 jar.finalizedBy('reobfJar')
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

@@ -34,8 +34,8 @@ public final class AnimatedEntityIsoPrinter extends EntityIsoPrinter {
 
 		this.renderTicks = recordLength;
 		this.lastTick = this.mc.level.getGameTime();
-		this.cachedFPS = this.mc.options.framerateLimit;
-		this.mc.options.framerateLimit = 50;
+		this.cachedFPS = this.mc.options.framerateLimit().get();
+		this.mc.options.framerateLimit().set(50);
 		this.currentStatus = "Determining best scale for render...";
 	}
 
@@ -140,7 +140,7 @@ public final class AnimatedEntityIsoPrinter extends EntityIsoPrinter {
 
 	@Override
 	public void onClose() {
-		this.mc.options.framerateLimit = this.cachedFPS;
+		this.mc.options.framerateLimit().set(this.cachedFPS);
 		this.gifWriter.exit();
 
 		super.onClose();

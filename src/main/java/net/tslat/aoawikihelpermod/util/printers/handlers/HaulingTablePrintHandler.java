@@ -7,7 +7,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.common.registration.custom.AoASkills;
@@ -157,20 +156,20 @@ public class HaulingTablePrintHandler {
 				}
 			}
 
-			if (rawTable.has("categories")) {
-				JsonArray biomeCategories = rawTable.getAsJsonArray("categories");
+			if (rawTable.has("tags")) {
+				JsonArray biomeCategories = rawTable.getAsJsonArray("tags");
 
 				if (biomeCategories.size() == 1) {
-					notesBuilder.append("If not overridden by another table with a relevant biome, this table applies all biomes marked as ").append(ObjectHelper.getBiomeCategoryName(Biome.BiomeCategory.byName(biomeCategories.get(0).getAsString())));
+					notesBuilder.append("If not overridden by another table with a relevant biome, this table applies all biomes tagged as ").append(biomeCategories.get(0).getAsString());
 				}
 				else {
-					notesBuilder.append("This table to applies to any biome marked as any of the following categories:\n");
+					notesBuilder.append("This table to applies to any biome tagged as any of the following categories:\n");
 
 					for (int i = 0; i < biomeCategories.size(); i++) {
 						if (i > 0)
 							notesBuilder.append("\n");
 
-						notesBuilder.append("* ").append(ObjectHelper.getBiomeCategoryName(Biome.BiomeCategory.byName(biomeCategories.get(i).getAsString())));
+						notesBuilder.append("* ").append(biomeCategories.get(i).getAsString());
 					}
 				}
 			}
