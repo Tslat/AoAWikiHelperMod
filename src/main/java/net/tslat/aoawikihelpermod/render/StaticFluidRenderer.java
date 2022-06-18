@@ -37,7 +37,7 @@ public class StaticFluidRenderer {
 		FluidState fluidState = world.getFluidState(pos);
 		boolean isLava = fluidState.is(FluidTags.LAVA);
 		TextureAtlasSprite[] fluidSprites = ForgeHooksClient.getFluidSprites(world, pos, fluidState);
-		int fluidColour = fluidState.getType().getAttributes().getColor(world, pos);
+		int fluidColour = 0;//fluidState.getType().getAttributes().getColor(world, pos);
 		float fluidAlpha = (float)(fluidColour >> 24 & 255) / 255f;
 		float fluidTintRed = (float)(fluidColour >> 16 & 255) / 255f;
 		float fluidTintGreen = (float)(fluidColour >> 8 & 255) / 255f;

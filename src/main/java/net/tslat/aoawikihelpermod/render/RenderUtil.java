@@ -7,7 +7,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -59,7 +58,7 @@ public final class RenderUtil {
 
 		if (blockRenderType == RenderShape.INVISIBLE) {
 			if (block.getBlock() instanceof LiquidBlock)
-				StaticFluidRenderer.renderFluid(matrix.last(), pos, FakeWorld.INSTANCE.get(), renderBuffer.getBuffer(RenderType.translucent()), block);
+				//StaticFluidRenderer.renderFluid(matrix.last(), pos, FakeWorld.INSTANCE.get(), renderBuffer.getBuffer(RenderType.translucent()), block);
 
 			return;
 		}
