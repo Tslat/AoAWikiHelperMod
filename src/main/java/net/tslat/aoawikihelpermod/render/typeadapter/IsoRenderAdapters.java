@@ -8,6 +8,7 @@ import net.tslat.aoa3.content.entity.base.AbstractLavaFishEntity;
 import net.tslat.aoa3.content.entity.projectile.gun.BaseBullet;
 import net.tslat.aoawikihelpermod.render.IsometricPrinterScreen;
 import net.tslat.aoawikihelpermod.render.typeadapter.block.DoublePlantBlockRenderAdapter;
+import net.tslat.aoawikihelpermod.render.typeadapter.block.MultiBlockCropRenderAdapter;
 
 public final class IsoRenderAdapters {
 	public static void init() {
@@ -26,6 +27,7 @@ public final class IsoRenderAdapters {
 				block.getBlock() instanceof BedBlock,
 				Vector3f.YP, -180f));
 		IsometricPrinterScreen.registerBlockAdapter(new DoublePlantBlockRenderAdapter());
+		IsometricPrinterScreen.registerBlockAdapter(new MultiBlockCropRenderAdapter());
 		IsometricPrinterScreen.registerEntityAdapter(new SimpleScaleRenderAdapter<>(entity ->
 				entity instanceof BaseBullet,
 				5f));
