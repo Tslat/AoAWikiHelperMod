@@ -82,8 +82,7 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:$project.minecraft_version-$project.forge_version"
 
-    implementation fg.deobf("libs:AoA3-1.19:3.6.7") // Temporary for working build
-   //implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version")
+    implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version")
     implementation fg.deobf("software.bernie.geckolib:geckolib-$project.geckolib_version")
 
     // Mixin annotation processor, just in case we need it
