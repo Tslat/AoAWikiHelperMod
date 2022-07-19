@@ -56,7 +56,7 @@ public class LootTableCommand implements Command<CommandSourceStack> {
 
 	private static int printEntityTable(CommandContext<CommandSourceStack> cmd) {
 		ResourceLocation id = ResourceLocationArgument.getId(cmd, "entity");
-		EntityType<?> entity = ForgeRegistries.ENTITIES.getValue(id);
+		EntityType<?> entity = ForgeRegistries.ENTITY_TYPES.getValue(id);
 
 		if (entity == null || (!id.toString().equals("minecraft:pig") && entity == EntityType.PIG)) {
 			WikiHelperCommand.warn(cmd.getSource(), "LootTable", "Invalid entity id '" + id + "'");

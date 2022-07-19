@@ -43,13 +43,13 @@ public class EntityIsoPrinter extends IsometricPrinterScreen {
 		if (!super.preRenderingCheck())
 			return false;
 
-		if (!ForgeRegistries.ENTITIES.containsKey(this.entityId)) {
+		if (!ForgeRegistries.ENTITY_TYPES.containsKey(this.entityId)) {
 			WikiHelperCommand.error(this.commandSource, this.commandName, "Entity by ID: '" + this.entityId + "' does not appear to exist.");
 
 			return false;
 		}
 
-		this.cachedEntity = this.nbt == null ? ForgeRegistries.ENTITIES.getValue(this.entityId).create(FakeWorld.INSTANCE.get()) : EntityType.loadEntityRecursive(this.nbt, FakeWorld.INSTANCE.get(), entity -> entity);
+		this.cachedEntity = this.nbt == null ? ForgeRegistries.ENTITY_TYPES.getValue(this.entityId).create(FakeWorld.INSTANCE.get()) : EntityType.loadEntityRecursive(this.nbt, FakeWorld.INSTANCE.get(), entity -> entity);
 
 		if (this.cachedEntity == null) {
 			WikiHelperCommand.error(this.commandSource, this.commandName, "Unable to instantiate entity of type: '" + this.entityId + "'. Could be an invalid entity or a bug.");
@@ -112,7 +112,7 @@ public class EntityIsoPrinter extends IsometricPrinterScreen {
 
 	@Override
 	protected File getOutputFile() {
-		return PrintHelper.configDir.toPath().resolve("Entity Renders").resolve(ForgeRegistries.ENTITIES.getKey(cachedEntity.getType()).getNamespace()).resolve(cachedEntity.getDisplayName().getString() + " - " + targetSize + "px.png").toFile();
+		return PrintHelper.configDir.toPath().resolve("Entity Renders").resolve(ForgeRegistries.ENTITY_TYPES.getKey(cachedEntity.getType()).getNamespace()).resolve(cachedEntity.getDisplayName().getString() + " - " + targetSize + "px.png").toFile();
 	}
 
 	protected boolean customRenderEntity(PoseStack matrix, MultiBufferSource.BufferSource renderBuffer) {

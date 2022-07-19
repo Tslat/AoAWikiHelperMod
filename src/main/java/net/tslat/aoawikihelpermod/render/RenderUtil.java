@@ -7,21 +7,18 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.RenderProperties;
-import net.minecraftforge.client.model.FluidModel;
-import net.minecraftforge.client.model.ForgeModelBakery;
-import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.minecraftforge.client.model.data.ModelData;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
 import org.lwjgl.opengl.GL11;
 
@@ -73,30 +70,21 @@ public final class RenderUtil {
 				float green = (float)(tint >> 8 & 255) / 255f;
 				float blue = (float)(tint & 255) / 255f;
 				BakedModel blockModel = blockRenderer.getBlockModel(block);
+				RenderType renderType = ItemBlockRenderTypes.getRenderType(block, true);
 				/*boolean changeLighting = !blockModel.usesBlockLight();
 
 				if (changeLighting)
 					Lighting.setupForFlatItems();*/
 
-				blockRenderer.getModelRenderer().renderModel(matrix.last(), renderBuffer.getBuffer(ItemBlockRenderTypes.getRenderType(block, true)), block, blockModel, red, green, blue, 15728880, OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
+				blockRenderer.getModelRenderer().renderModel(matrix.last(), renderBuffer.getBuffer(renderType), block, blockModel, red, green, blue, 15728880, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, renderType);
 
 				/*if (changeLighting)
 					Lighting.setupFor3DItems();*/
 			}
 			case ENTITYBLOCK_ANIMATED -> {
 				ItemStack stack = new ItemStack(block.getBlock());
-				RenderProperties.get(stack).getItemStackRenderer().renderByItem(stack, ItemTransforms.TransformType.NONE, matrix, renderBuffer, 15728880, OverlayTexture.NO_OVERLAY);
+				IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemTransforms.TransformType.NONE, matrix, renderBuffer, 15728880, OverlayTexture.NO_OVERLAY);
 			}
 		}
-	}
-
-	private static BakedModel getFluidModel() {
-		return FluidModel.WATER.bake(null,
-				null,
-				ForgeModelBakery.defaultTextureGetter(),
-				BlockModelRotation.X0_Y0,
-				null,
-				new ResourceLocation("block/water.json")
-				);
 	}
 }

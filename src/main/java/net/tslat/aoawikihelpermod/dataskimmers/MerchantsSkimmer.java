@@ -51,7 +51,7 @@ public class MerchantsSkimmer {
 		TRADE_PRINTERS_BY_PROFESSION.clear();
 		TRADE_PRINTERS_BY_AOA_TRADER.clear();
 
-		for (Map.Entry<ResourceKey<VillagerProfession>, VillagerProfession> entry : ForgeRegistries.PROFESSIONS.getEntries()) {
+		for (Map.Entry<ResourceKey<VillagerProfession>, VillagerProfession> entry : ForgeRegistries.VILLAGER_PROFESSIONS.getEntries()) {
 			ResourceLocation id = entry.getKey().location();
 			Int2ObjectMap<VillagerTrades.ItemListing[]> trades = VillagerTrades.TRADES.get(entry.getValue());
 
@@ -67,7 +67,7 @@ public class MerchantsSkimmer {
 			}
 		}
 
-		for (EntityType<?> entityType : ObjectHelper.scrapeRegistryForEntities(type -> ForgeRegistries.ENTITIES.getKey(type).getNamespace().equals(AdventOfAscension.MOD_ID))) {
+		for (EntityType<?> entityType : ObjectHelper.scrapeRegistryForEntities(type -> ForgeRegistries.ENTITY_TYPES.getKey(type).getNamespace().equals(AdventOfAscension.MOD_ID))) {
 			try {
 				Entity entity = entityType.create(world, null, null, null, new BlockPos(0, 100, 0), MobSpawnType.TRIGGERED, false, false);
 
@@ -112,12 +112,12 @@ public class MerchantsSkimmer {
 
 	private static void mapTradeToIngredients(AoATrader trader, int professionLevel, MerchantOffer offer) {
 		MerchantTradePrintHandler handler = new MerchantTradePrintHandler(trader, professionLevel, offer);
-		Int2ObjectMap<ArrayList<MerchantTradePrintHandler>> tradeMap = TRADE_PRINTERS_BY_AOA_TRADER.get(ForgeRegistries.ENTITIES.getKey(trader.getType()));
+		Int2ObjectMap<ArrayList<MerchantTradePrintHandler>> tradeMap = TRADE_PRINTERS_BY_AOA_TRADER.get(ForgeRegistries.ENTITY_TYPES.getKey(trader.getType()));
 
 		if (tradeMap == null) {
 			tradeMap = new Int2ObjectOpenHashMap<>();
 
-			TRADE_PRINTERS_BY_AOA_TRADER.put(ForgeRegistries.ENTITIES.getKey(trader.getType()), tradeMap);
+			TRADE_PRINTERS_BY_AOA_TRADER.put(ForgeRegistries.ENTITY_TYPES.getKey(trader.getType()), tradeMap);
 		}
 
 		ArrayList<MerchantTradePrintHandler> tieredTrades = tradeMap.get(professionLevel);

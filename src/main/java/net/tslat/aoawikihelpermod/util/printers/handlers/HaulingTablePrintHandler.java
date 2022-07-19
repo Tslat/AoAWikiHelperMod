@@ -66,7 +66,7 @@ public class HaulingTablePrintHandler {
 					name = ObjectHelper.getItemName(ForgeRegistries.ITEMS.getValue(id));
 				}
 				else {
-					name = ObjectHelper.getEntityName(ForgeRegistries.ENTITIES.getValue(new ResourceLocation(obj.get("entity").getAsString())));
+					name = ObjectHelper.getEntityName(ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(obj.get("entity").getAsString())));
 				}
 			}
 

@@ -12,7 +12,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
@@ -159,7 +159,7 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 		for (Direction face : Direction.values()) {
 			rand.setSeed(42L);
 
-			for (BakedQuad quad : model.getQuads(null, face, rand, EmptyModelData.INSTANCE)) {
+			for (BakedQuad quad : model.getQuads(null, face, rand, ModelData.EMPTY, null)) {
 				if (quad.getSprite().animatedTexture.frame != 0 || quad.getSprite().animatedTexture.subFrame != 0)
 					return false;
 			}
@@ -167,7 +167,7 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 
 		rand.setSeed(42L);
 
-		for (BakedQuad quad : model.getQuads(null, null, rand, EmptyModelData.INSTANCE)) {
+		for (BakedQuad quad : model.getQuads(null, null, rand, ModelData.EMPTY, null)) {
 			if (quad.getSprite().animatedTexture.frame != 0 || quad.getSprite().animatedTexture.subFrame != 0)
 				return false;
 		}
@@ -184,7 +184,7 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 		for (Direction face : Direction.values()) {
 			rand.setSeed(42L);
 
-			for (BakedQuad quad : model.getQuads(null, face, rand, EmptyModelData.INSTANCE)) {
+			for (BakedQuad quad : model.getQuads(null, face, rand, ModelData.EMPTY, null)) {
 				TextureAtlasSprite sprite = quad.getSprite();
 				int totalLength = 0;
 
@@ -198,7 +198,7 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 
 		rand.setSeed(42L);
 
-		for (BakedQuad quad : model.getQuads(null, null, rand, EmptyModelData.INSTANCE)) {
+		for (BakedQuad quad : model.getQuads(null, null, rand, ModelData.EMPTY, null)) {
 			TextureAtlasSprite sprite = quad.getSprite();
 			int totalLength = 0;
 

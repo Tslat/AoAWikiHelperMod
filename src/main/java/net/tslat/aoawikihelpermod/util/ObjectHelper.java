@@ -72,7 +72,7 @@ public class ObjectHelper {
 	}
 
 	public static List<EntityType<?>> scrapeRegistryForEntities(Predicate<EntityType<?>> filter) {
-		return ForgeRegistries.ENTITIES.getValues().stream().filter(filter).collect(Collectors.toList());
+		return ForgeRegistries.ENTITY_TYPES.getValues().stream().filter(filter).collect(Collectors.toList());
 	}
 
 	public static Multimap<Attribute, AttributeModifier> getAttributesForItem(Item item) {
@@ -188,12 +188,12 @@ public class ObjectHelper {
 	}
 
 	public static boolean isEntity(ResourceLocation id) {
-		return ForgeRegistries.ENTITIES.getValue(id) != EntityType.PIG;
+		return ForgeRegistries.ENTITY_TYPES.getValue(id) != EntityType.PIG;
 	}
 
 	public static String getItemName(ItemLike item) {
 		ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item.asItem());
-		EntityType<?> matchingEntity = ForgeRegistries.ENTITIES.getValue(itemId);
+		EntityType<?> matchingEntity = ForgeRegistries.ENTITY_TYPES.getValue(itemId);
 		String suffix = "";
 
 		if (matchingEntity != EntityType.PIG) {
@@ -232,7 +232,7 @@ public class ObjectHelper {
 	}
 
 	public static String getEntityName(EntityType<?> entityType) {
-		ResourceLocation id = ForgeRegistries.ENTITIES.getKey(entityType);
+		ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
 		String suffix = isItem(id) ? " (entity)" : "";
 
 		return LocaleUtil.getLocaleMessage("entity." + id.getNamespace() + "." + id.getPath()).getString() + suffix;

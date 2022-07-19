@@ -36,7 +36,7 @@ import net.minecraft.world.ticks.BlackholeTickAccess;
 import net.minecraft.world.ticks.LevelTickAccess;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.tslat.aoa3.common.registration.AoADimensions;
+import net.tslat.aoa3.common.registration.worldgen.AoADimensions;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

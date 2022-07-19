@@ -46,7 +46,7 @@ public class MerchantTradePrintHandler {
 
 	public MerchantTradePrintHandler(AoATrader trader, int professionLevel, MerchantOffer trade) {
 		this.trade = trade;
-		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(ForgeRegistries.ENTITIES.getKey(trader.getType()).getPath()), false, true), professionLevel);
+		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(ForgeRegistries.ENTITY_TYPES.getKey(trader.getType()).getPath()), false, true), professionLevel);
 		int tradesToUnlock;
 
 		try {
@@ -63,7 +63,7 @@ public class MerchantTradePrintHandler {
 
 	public MerchantTradePrintHandler(VillagerProfession profession, int professionLevel, MerchantOffer trade) {
 		this.trade = trade;
-		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(ForgeRegistries.PROFESSIONS.getKey(profession).getPath()), true, true), professionLevel);
+		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(ForgeRegistries.VILLAGER_PROFESSIONS.getKey(profession).getPath()), true, true), professionLevel);
 		this.tradesToUnlockAtLevel = 2;
 	}
 
