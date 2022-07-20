@@ -166,15 +166,15 @@ public class TablePrintHelper extends PrintHelper {
 		if (this.styles.size() > 0)
 			propertiesBuilder.append(stylesBuilder);
 
-		if (sortable)
-			headerBuilder.append(" data-sort-type=number |");
-
 		for (String column : this.columns) {
 			if (columnsBuilder.length() > 2)
 				columnsBuilder.append(" !! ");
 
 			columnsBuilder.append(column);
 		}
+
+		if (sortable)
+			headerBuilder.append(" data-sort-type=number |");
 
 		edit(0, line -> propertiesBuilder.toString());
 		edit(1, line -> headerBuilder.toString());
