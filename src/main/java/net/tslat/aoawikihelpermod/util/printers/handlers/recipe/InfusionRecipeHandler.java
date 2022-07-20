@@ -143,7 +143,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		printData[2] = String.valueOf(infusionReq);
 		printData[3] = (minXp != maxXp) ? minXp + "-" + maxXp : String.valueOf(minXp);
 		printData[4] = ingredientsHandler.getFormattedIngredientsList(targetItem);
-		printData[5] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), "", null);
+		printData[5] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), "", new PrintableIngredient("", "", 0));
 
 		this.printoutData.put(targetItem, printData);
 
