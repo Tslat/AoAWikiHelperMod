@@ -103,7 +103,7 @@ public class StructureIsoPrinter extends IsometricPrinterScreen {
 
 	@Override
 	protected File getOutputFile() {
-		return PrintHelper.configDir.toPath().resolve("Structure Renders").resolve(this.templateId.getNamespace()).resolve("test" + " - " + targetSize + "px.png").toFile();
+		return PrintHelper.configDir.toPath().resolve("Structure Renders").resolve(this.templateId.getNamespace()).resolve(templateId.toString().replaceAll("/", "-") + " - " + targetSize + "px.png").toFile();
 	}
 
 	@Override
