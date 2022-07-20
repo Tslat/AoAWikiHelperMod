@@ -42,12 +42,12 @@ public class StonecuttingRecipeHandler extends RecipePrintHandler {
 
 	@Override
 	public boolean isPlainTextPrintout() {
-		return true;
+		return false;
 	}
 
 	@Override
 	public String[] getColumnTitles() {
-		return null;
+		return new String[] {"Block", "Ingredients", "Item"};
 	}
 
 	@Override
@@ -71,10 +71,13 @@ public class StonecuttingRecipeHandler extends RecipePrintHandler {
 		PrintableIngredient input = ObjectHelper.getIngredientName(this.rawRecipe.getAsJsonObject("ingredient"));
 		PrintableIngredient output = ObjectHelper.getStackDetailsFromJson(this.rawRecipe.get("result"));
 
+		if (this.rawRecipe.has("count"))
+			output.count = this.rawRecipe.get("count").getAsInt();
+
 		String[] printData = new String[3];
 		printData[0] = FormattingHelper.createImageBlock(Blocks.STONECUTTER) + " " + FormattingHelper.createLinkableItem(Blocks.STONECUTTER, false, true);
 		printData[1] = FormattingHelper.createImageBlock(input.formattedName) + " " + FormattingHelper.createLinkableText(input.formattedName, false, !input.matches(targetName));
-		printData[2] = FormattingHelper.createImageBlock(output.formattedName) + " " + FormattingHelper.createLinkableText(output.formattedName, false, !output.matches(targetName));
+		printData[2] = (output.count > 1 ? output.count + " " : "") + FormattingHelper.createImageBlock(output.formattedName) + " " + FormattingHelper.createLinkableText(output.formattedName, false, !output.matches(targetName));
 
 		this.printoutData.put(targetItem, printData);
 
