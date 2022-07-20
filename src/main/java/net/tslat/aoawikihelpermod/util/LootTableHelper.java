@@ -165,10 +165,9 @@ public class LootTableHelper {
 		StringBuilder builder = new StringBuilder("This ").append(target).append(" ");
 		int initialLength = builder.length();
 		LootItemFunction[] functionsArray = functions.toArray(new LootItemFunction[0]);
+		int index = 0;
 
-		for (int i = 0; i < functionsArray.length; i++) {
-			LootItemFunction function = functionsArray[i];
-
+		for (LootItemFunction function : functionsArray) {
 			if (function instanceof SetItemCountFunction || function instanceof LootingEnchantFunction)
 				continue;
 
@@ -177,7 +176,7 @@ public class LootTableHelper {
 			if (functionDescription.isEmpty())
 				continue;
 
-			if (i > 0)
+			if (index++ > 0)
 				builder.append(", and<br/>");
 
 			builder.append(functionDescription);
