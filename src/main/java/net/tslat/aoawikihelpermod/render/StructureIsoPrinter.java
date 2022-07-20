@@ -31,6 +31,7 @@ public class StructureIsoPrinter extends IsometricPrinterScreen {
 		if (templateId.getPath().startsWith("structures/"))
 			templateId = new ResourceLocation(templateId.getNamespace(), templateId.getPath().replaceFirst("structures/", ""));
 
+		this.defaultRefScale = 0.25f;
 		this.templateId = templateId;
 		this.rotation = rotation;
 		this.blocks = new ArrayList<>();
@@ -50,10 +51,13 @@ public class StructureIsoPrinter extends IsometricPrinterScreen {
 		FakeWorld world = FakeWorld.INSTANCE.get();
 		boolean placeBlocks = true;
 
-		if (placeBlocks) {
+		if (!expandJigsaw) {
 			for (StructureTemplate.StructureBlockInfo block : template.palettes.get(0).blocks()) {
 				world.setBlock(block.pos, block.state, 0);
 			}
+		}
+		else {
+
 		}
 
 		Pair<Vec3i, List<StructureTemplate.StructureBlockInfo>> renderInfo = world.getChunkSource().compileBlocksIntoList();
