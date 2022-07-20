@@ -5,6 +5,8 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
+import com.mojang.math.Vector4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -32,14 +34,19 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 	protected final ArrayList<IsoRenderAdapter<ItemStack>> adapters = new ArrayList<>(1);
 	protected final ItemStack stack;
 	protected final int spriteSize;
+	protected final boolean renderIngameModel;
 
-	public ItemIsoPrinter(ItemStack stack, int imageSize, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
+	public ItemIsoPrinter(ItemStack stack, int imageSize, boolean renderIngameModel, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
 		super(determineImageSize(stack, imageSize), 0, commandSource, commandName, fileConsumer);
 
 		this.spriteSize = determineImageSize(stack, -1);
 		this.stack = stack;
+		this.renderIngameModel = renderIngameModel;
 		this.defaultRefScale = 10f;
 		this.currentStatus = "Waiting for frame cycle to reset...";
+
+		if (!this.renderIngameModel)
+			this.scale = 1;
 	}
 
 	@Override
@@ -61,11 +68,11 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 	@Override
 	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		if (isOnFirstFrame()) {
-			if (determineScaleAndPosition()) {
+			if (!this.renderIngameModel || determineScaleAndPosition()) {
 				RenderUtil.clearRenderBuffer();
 				renderObject();
 
-				NativeImage image = extractSubRange(captureImage(), null);
+				NativeImage image = extractSubRange(captureImage(), renderIngameModel ? null : new Vector4f(0, 0, this.targetSize - 1, this.targetSize - 1));
 
 				if (image != null)
 					fileConsumer.accept(saveImage(image));
@@ -81,20 +88,40 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 		PoseStack matrix = new PoseStack();
 
 		matrix.pushPose();
-		matrix.scale(this.scale, this.scale, 1);
-		matrix.translate(this.minecraft.getWindow().getGuiScaledWidth() / 2f / this.scale, this.minecraft.getWindow().getGuiScaledHeight() / 2f / this.scale, 1050);
-		matrix.scale(1, -1, 1);
-		matrix.translate(0, 0, -(100 + itemRenderer.blitOffset));
-		makePreRenderAdjustments(matrix);
-		matrix.translate(this.xAdjust, this.yAdjust, 0);
 
-		RenderUtil.setupFakeGuiLighting();
+		if (this.renderIngameModel) {
+			matrix.scale(this.scale, this.scale, 1);
+			matrix.translate(this.minecraft.getWindow().getGuiScaledWidth() / 2f / this.scale, this.mc.getWindow().getGuiScaledHeight() / 2f / this.scale, 1050);
+			matrix.scale(1, -1, 1);
+			matrix.translate(0, 0, -(100 + itemRenderer.blitOffset));
+			makePreRenderAdjustments(matrix);
+			matrix.translate(this.xAdjust, this.yAdjust, 0);
+
+			RenderUtil.setupFakeGuiLighting();
+		}
+
 		ItemRenderer itemRenderer = this.minecraft.getItemRenderer();
-		MultiBufferSource.BufferSource renderBuffer = mc.renderBuffers().bufferSource();
+		MultiBufferSource.BufferSource renderBuffer = this.mc.renderBuffers().bufferSource();
 
 		try {
-			if (!customRenderStack(itemRenderer, matrix, renderBuffer))
-				renderItemStack(itemRenderer, matrix, renderBuffer, this.stack);
+			if (!this.renderIngameModel) {
+				PoseStack modelViewPoseStack = RenderSystem.getModelViewStack();
+
+				modelViewPoseStack.pushPose();
+				modelViewPoseStack.scale(0.5f, 0.5f, 0.5f);
+
+				if (this.targetSize != this.spriteSize) {
+					float relativeScale = this.targetSize / (float)this.spriteSize;
+
+					modelViewPoseStack.scale(relativeScale, relativeScale, relativeScale);
+				}
+
+				itemRenderer.renderAndDecorateItem(this.mc.player, this.stack, 0, 0, 100);
+				modelViewPoseStack.popPose();
+			}
+			else if (!customRenderStack(itemRenderer, matrix, renderBuffer)) {
+				renderModelledItemStack(itemRenderer, matrix, renderBuffer, this.stack);
+			}
 		}
 		catch (Exception ex) {
 			WikiHelperCommand.error(this.commandSource, this.commandName, "Encountered an error while rendering the item. Likely a non-standard item. Likely of some sort. Check the log for more details.");
@@ -133,7 +160,7 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 			largestFrameSize = Math.max(largestFrameSize, Math.max(quad.getSprite().getHeight(), quad.getSprite().getWidth()));
 		}
 
-		return largestFrameSize > 0 ? largestFrameSize : 32;
+		return (largestFrameSize > 0 ? largestFrameSize : 16) * 2;
 	}
 
 	@Override
@@ -152,7 +179,7 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 		return false;
 	}
 
-	protected void renderItemStack(ItemRenderer itemRenderer, PoseStack matrix, MultiBufferSource.BufferSource renderBuffer, ItemStack stack) {
+	protected void renderModelledItemStack(ItemRenderer itemRenderer, PoseStack matrix, MultiBufferSource.BufferSource renderBuffer, ItemStack stack) {
 		Minecraft.getInstance().textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
 		RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
 		RenderSystem.enableBlend();
@@ -165,6 +192,7 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 		modelViewPose.translate(8, 8, 0);
 		modelViewPose.scale(1, -1, 1);
 		modelViewPose.scale(16, 16, 16);
+		matrix.mulPose(Vector3f.XP.rotationDegrees(0.0000001f));
 
 		RenderSystem.applyModelViewMatrix();
 

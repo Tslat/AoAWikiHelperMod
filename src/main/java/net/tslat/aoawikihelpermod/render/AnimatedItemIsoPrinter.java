@@ -35,8 +35,8 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 
 	private final NativeImageGifWriter gifWriter;
 
-	public AnimatedItemIsoPrinter(ItemStack item, int imageSize, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
-		super(item, imageSize, commandSource, commandName, fileConsumer);
+	public AnimatedItemIsoPrinter(ItemStack item, int imageSize, boolean renderIngameModel, CommandSourceStack commandSource, String commandName, Consumer<File> fileConsumer) {
+		super(item, imageSize, renderIngameModel, commandSource, commandName, fileConsumer);
 
 		this.renderTicks = calculateRenderTickTime();
 		this.lastTick = Minecraft.getInstance().level.getGameTime();
@@ -188,6 +188,9 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 				TextureAtlasSprite sprite = quad.getSprite();
 				int totalLength = 0;
 
+				if (sprite.animatedTexture == null)
+					continue;
+
 				for (TextureAtlasSprite.FrameInfo frameInfo : sprite.animatedTexture.frames) {
 					totalLength += frameInfo.time;
 				}
@@ -201,6 +204,9 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 		for (BakedQuad quad : model.getQuads(null, null, rand, ModelData.EMPTY, null)) {
 			TextureAtlasSprite sprite = quad.getSprite();
 			int totalLength = 0;
+
+			if (sprite.animatedTexture == null)
+				continue;
 
 			for (TextureAtlasSprite.FrameInfo frameInfo : sprite.animatedTexture.frames) {
 				totalLength += frameInfo.time;

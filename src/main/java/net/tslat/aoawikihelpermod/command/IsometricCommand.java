@@ -106,13 +106,17 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 
 		builder.then(Commands.literal("item")
 						.then(Commands.argument("stack", ItemArgument.item(buildContext))
-								.executes(context -> printItemIso(context, -1, false))
+								.executes(context -> printItemIso(context, -1, false, false))
 								.then(Commands.argument("image_size", IntegerArgumentType.integer(0, 1000))
-										.executes(context -> printItemIso(context, IntegerArgumentType.getInteger(context, "image_size"), false))
+										.executes(context -> printItemIso(context, IntegerArgumentType.getInteger(context, "image_size"), false, false))
+										.then(Commands.argument("render_ingame_model", BoolArgumentType.bool())
+												.executes(context -> printItemIso(context, IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "render_ingame_model"), false))
+												.then(Commands.argument("animated", BoolArgumentType.bool())
+														.executes(context -> printItemIso(context, IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "render_ingame_model"), BoolArgumentType.getBool(context, "animated"))))))
+								.then(Commands.argument("render_ingame_model", BoolArgumentType.bool())
+										.executes(context -> printItemIso(context, -1, BoolArgumentType.getBool(context, "render_ingame_model"), false))
 										.then(Commands.argument("animated", BoolArgumentType.bool())
-												.executes(context -> printItemIso(context, IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated")))))
-								.then(Commands.argument("animated", BoolArgumentType.bool())
-										.executes(context -> printItemIso(context, -1, BoolArgumentType.getBool(context, "animated"))))));
+												.executes(context -> printItemIso(context, -1, BoolArgumentType.getBool(context, "render_ingame_model"), BoolArgumentType.getBool(context, "animated")))))));
 
 		return builder;
 	}
@@ -128,7 +132,7 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 		return 1;
 	}
 
-	private static int printItemIso(CommandContext<CommandSourceStack> context, int imageSize, boolean animated) throws CommandSyntaxException {
+	private static int printItemIso(CommandContext<CommandSourceStack> context, int imageSize, boolean renderIngameModel, boolean animated) throws CommandSyntaxException {
 		context.getSource().getPlayerOrException();
 
 		IsometricPrinterScreen.queuePrintTask(() -> {
@@ -136,6 +140,7 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 				return new AnimatedItemIsoPrinter(
 						new ItemStack(ItemArgument.getItem(context, "stack").getItem()),
 						imageSize,
+						renderIngameModel,
 						context.getSource(),
 						CMD.commandName(),
 						file -> WikiHelperCommand.success(context.getSource(), "Iso", FormattingHelper.generateResultMessage(file, file.getName(), null)));
@@ -144,6 +149,7 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 				return new ItemIsoPrinter(
 						new ItemStack(ItemArgument.getItem(context, "stack").getItem()),
 						imageSize,
+						renderIngameModel,
 						context.getSource(),
 						CMD.commandName(),
 						file -> WikiHelperCommand.success(context.getSource(), "Iso", FormattingHelper.generateResultMessage(file, file.getName(), null)));
@@ -213,23 +219,26 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 	private static int printStructureIso(CommandContext<CommandSourceStack> context, int imageSize, float rotation, boolean doFullStructure) throws CommandSyntaxException {
 		context.getSource().getPlayerOrException();
 
-		IsometricPrinterScreen.queuePrintTask(() -> {
-			try {
-				return new StructureIsoPrinter(
-						StructuresCommand.TemplateIdArgument.getTemplateId(context, "template_id"),
+		ResourceLocation templateId;
+
+		try {
+			templateId = StructuresCommand.TemplateIdArgument.getTemplateId(context, "template_id");
+		}
+		catch (Exception ex) {
+			WikiHelperCommand.error(context.getSource(), "Iso", ex.getMessage());
+
+			return 1;
+		}
+
+		IsometricPrinterScreen.queuePrintTask(() ->
+				new StructureIsoPrinter(
+						templateId,
 						doFullStructure,
 						rotation,
 						imageSize,
 						context.getSource(),
 						CMD.commandName(),
-						file -> WikiHelperCommand.success(context.getSource(), "Iso", FormattingHelper.generateResultMessage(file, file.getName(), null)));
-			}
-			catch (CommandSyntaxException ex) {
-				ex.printStackTrace();
-			}
-
-			return null;
-		});
+						file -> WikiHelperCommand.success(context.getSource(), "Iso", FormattingHelper.generateResultMessage(file, file.getName(), null))));
 
 		return 1;
 	}
