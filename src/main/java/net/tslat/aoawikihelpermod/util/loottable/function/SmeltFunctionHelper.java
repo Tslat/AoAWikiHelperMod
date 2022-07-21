@@ -8,6 +8,6 @@ public class SmeltFunctionHelper extends LootFunctionHelper<SmeltItemFunction> {
 	@Nonnull
 	@Override
 	public String getDescription(SmeltItemFunction function) {
-		return "will be converted into its smelted/cooked version on drop if possible";
+		return "will be converted into its smelted/cooked form if dropped while the target is burning";
 	}
 }
