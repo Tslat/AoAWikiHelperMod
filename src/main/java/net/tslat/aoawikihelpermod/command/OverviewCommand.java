@@ -12,6 +12,7 @@ import net.minecraft.world.item.*;
 import net.tslat.aoa3.common.registration.item.AoATools;
 import net.tslat.aoa3.common.registration.item.AoAWeapons;
 import net.tslat.aoa3.content.item.tool.axe.BaseAxe;
+import net.tslat.aoa3.content.item.tool.hoe.BaseHoe;
 import net.tslat.aoa3.content.item.tool.pickaxe.BasePickaxe;
 import net.tslat.aoa3.content.item.tool.shovel.BaseShovel;
 import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
@@ -57,6 +58,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 		builder.then(Commands.literal("snipers").executes(OverviewCommand::printSnipers));
 		builder.then(Commands.literal("staves").executes(OverviewCommand::printStaves));
 		builder.then(Commands.literal("swords").executes(OverviewCommand::printSwords));
+		builder.then(Commands.literal("hoes").executes(OverviewCommand::printHoes));
 		builder.then(Commands.literal("thrownWeapons").executes(OverviewCommand::printThrownWeapons));
 
 		return builder;
@@ -585,6 +587,41 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
 				String durability = String.valueOf(sword.getTier().getUses());
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(item, AoAWeapons.LIMONITE_SWORD.get());
+
+				printHelper.entry(
+						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
+						FormattingHelper.healthValue(damage),
+						attackSpeed,
+						durability,
+						tooltip);
+			}
+
+			outputFile = printHelper.getOutputFile();
+		}
+
+		WikiHelperCommand.success(cmd.getSource(), "Overview", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+
+		return 1;
+	}
+
+	private static int printHoes(CommandContext<CommandSourceStack> cmd) {
+		List<Item> hoes = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseHoe);
+		String fileName = "Overview - Hoes";
+		File outputFile;
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Durability", "Effects")) {
+			printHelper.defaultFullPageTableProperties();
+			printHelper.withProperty("class", "sortable");
+			printHelper.withClipboardOutput(clipboardContent);
+
+			for (Item item : hoes) {
+				BaseHoe sword = (BaseHoe)item;
+				String itemName = ObjectHelper.getItemName(item);
+				float damage = (float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_DAMAGE);
+				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
+				String durability = String.valueOf(sword.getTier().getUses());
+				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(item, AoATools.LIMONITE_HOE.get());
 
 				printHelper.entry(
 						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
