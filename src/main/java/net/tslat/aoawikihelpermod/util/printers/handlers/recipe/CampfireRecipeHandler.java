@@ -88,8 +88,7 @@ public class CampfireRecipeHandler extends RecipePrintHandler {
 						NumberUtil.roundToNthDecimalPlace(xp, 1) +
 						"xp, taking " +
 						NumberUtil.roundToNthDecimalPlace(cookingTime / 20f, 2) +
-						" seconds." +
-						"</br>"
+						" seconds."
 		};
 
 		this.printoutData.put(targetItem, printData);
