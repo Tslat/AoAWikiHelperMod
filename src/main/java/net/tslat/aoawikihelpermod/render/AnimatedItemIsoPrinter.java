@@ -76,7 +76,7 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 				renderObject();
 
 				Vector4f bounds = getBoundsForRenderedImage(captureImage());
-				this.definedBounds = new Vector4f(Math.min(bounds.x(), this.definedBounds.x()), Math.min(bounds.y(), this.definedBounds.y()), Math.max(bounds.z(), this.definedBounds.z()), Math.max(bounds.w(), this.definedBounds.w()));
+				this.definedBounds = renderIngameModel ? new Vector4f(Math.min(bounds.x(), this.definedBounds.x()), Math.min(bounds.y(), this.definedBounds.y()), Math.max(bounds.z(), this.definedBounds.z()), Math.max(bounds.w(), this.definedBounds.w())) : new Vector4f(0, 0, this.targetSize - 1, this.targetSize - 1);
 				this.currentStatus = "Determining image alignment...";
 
 				if (Minecraft.getInstance().level.getGameTime() != lastTick) {
@@ -111,7 +111,7 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 			}
 		}
 		else {
-			if (determineScaleAndPosition()) {
+			if (!this.renderIngameModel || determineScaleAndPosition()) {
 				if (Minecraft.getInstance().level.getGameTime() != lastTick) {
 					this.currentFrame++;
 					this.lastTick = Minecraft.getInstance().level.getGameTime();
@@ -121,7 +121,7 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 					this.definedMinScale = this.scale;
 					this.definedXOffset = this.xAdjust;
 					this.definedYOffset = this.yAdjust;
-					this.definedBounds = getBoundsForRenderedImage(captureImage());
+					this.definedBounds = renderIngameModel ? getBoundsForRenderedImage(captureImage()) : new Vector4f(0, 0, this.targetSize - 1, this.targetSize - 1);
 				}
 			}
 		}
