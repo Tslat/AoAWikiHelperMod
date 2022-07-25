@@ -102,12 +102,7 @@ public abstract class RecipePrintHandler {
 				builder.append(ing.count);
 				builder.append(" ");
 
-				if (ing.isTag()) {
-					builder.append(FormattingHelper.createLinkableTag(ing.formattedName, Items.STONE));
-				}
-				else {
-					builder.append(FormattingHelper.createLinkableText(ing.formattedName, ing.count > 1, targetItem == null || !ing.matches(ObjectHelper.getItemName(targetItem)), ing.formattedName.contains(" (item)") ? ing.formattedName.replace(" (item)", "") : null));
-				}
+				builder.append(getFormattedIngredient(ing, targetItem));
 			}
 
 			return builder.toString();
@@ -119,6 +114,13 @@ public abstract class RecipePrintHandler {
 
 		public String getFormattedOutput(@Nullable Item targetItem) {
 			return FormattingHelper.createLinkableText(output.formattedName, false, (targetItem == null || !output.matches(ObjectHelper.getItemName(targetItem))));
+		}
+
+		public String getFormattedIngredient(PrintableIngredient ing, @Nullable Item targetItem) {
+			if (ing.isTag())
+				return FormattingHelper.createLinkableTag(ing.formattedName, Items.STONE);
+
+			return FormattingHelper.createLinkableText(ing.formattedName, ing.count > 1, targetItem == null || !ing.matches(ObjectHelper.getItemName(targetItem)), ing.formattedName.contains(" (item)") ? ing.formattedName.replace(" (item)", "") : null);
 		}
 
 		public void addOutput(JsonObject json) {
@@ -210,6 +212,8 @@ public abstract class RecipePrintHandler {
 	}
 
 	public static class PrintableIngredient {
+		public static final PrintableIngredient EMPTY = new PrintableIngredient("", "", 0);
+
 		public final String ownerId;
 		public final String formattedName;
 		@Nullable

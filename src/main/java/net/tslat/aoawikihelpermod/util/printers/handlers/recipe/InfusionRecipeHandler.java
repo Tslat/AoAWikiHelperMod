@@ -143,7 +143,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		printData[2] = String.valueOf(infusionReq);
 		printData[3] = (minXp != maxXp) ? minXp + "-" + maxXp : String.valueOf(minXp);
 		printData[4] = ingredientsHandler.getFormattedIngredientsList(targetItem);
-		printData[5] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), "", new PrintableIngredient("", "", 0));
+		printData[5] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), PrintableIngredient.EMPTY, PrintableIngredient.EMPTY);
 
 		this.printoutData.put(targetItem, printData);
 
@@ -157,7 +157,6 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(ingredients.size() + 1);
 		PrintableIngredient input = ObjectHelper.getIngredientName(rawRecipe.getAsJsonObject("input"));
 		String targetItemName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
-		String inputItemName = FormattingHelper.createLinkableText(input.formattedName, false, !input.matches(targetItemName));
 
 		for (JsonElement ele : ingredients) {
 			ingredientsHandler.addIngredient(ele);
@@ -169,8 +168,8 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		String output = FormattingHelper.createLinkableText(result.formattedName, result.count > 1, !result.matches(targetItemName));
 
 		printData[0] = output;
-		printData[1] = 1 + " " + inputItemName + " +<br/>" + ingredientsHandler.getFormattedIngredientsList(targetItem);
-		printData[2] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), input.formattedName, result);
+		printData[1] = 1 + " " + ingredientsHandler.getFormattedIngredient(input, targetItem) + " +<br/>" + ingredientsHandler.getFormattedIngredientsList(targetItem);
+		printData[2] = WikiTemplateHelper.makeInfusionTemplate(ingredientsHandler.getIngredientsWithSlots(), input, result);
 
 		this.printoutData.put(targetItem, printData);
 

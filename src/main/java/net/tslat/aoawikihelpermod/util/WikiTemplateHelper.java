@@ -91,18 +91,26 @@ public class WikiTemplateHelper {
 		return makeWikiTemplateObject("Smelting", false, lines.toArray(new String[0]));
 	}
 
-	public static String makeInfusionTemplate(ArrayList<String> ingredients, String input, RecipePrintHandler.PrintableIngredient output) {
-		int lineCountMod = input.isEmpty() ? 2 : 3;
+	public static String makeInfusionTemplate(ArrayList<String> ingredients, RecipePrintHandler.PrintableIngredient input, RecipePrintHandler.PrintableIngredient output) {
+		int lineCountMod = input.count == 0 ? 2 : 3;
 
 		if (output.count > 1)
+			lineCountMod++;
+
+		if (input.imageName != null)
 			lineCountMod++;
 
 		String[] lines = new String[ingredients.size() + lineCountMod];
 		int i = 0;
 
-		if (!input.isEmpty()) {
-			i = 1;
-			lines[0] = "input=" + input;
+		if (input != RecipePrintHandler.PrintableIngredient.EMPTY) {
+			if (input.imageName != null) {
+				lines[i++] = "inputimage=" + input.imageName;
+				lines[i++] = "input=" + input.imageName.substring(0, input.imageName.lastIndexOf("."));
+			}
+			else {
+				lines[i++] = "input=" + input.formattedName;
+			}
 		}
 
 		for (String ingredient : ingredients) {
