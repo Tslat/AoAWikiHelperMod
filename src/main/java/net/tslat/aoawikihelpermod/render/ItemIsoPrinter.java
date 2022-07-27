@@ -106,8 +106,12 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 		try {
 			if (!this.renderIngameModel) {
 				PoseStack modelViewPoseStack = RenderSystem.getModelViewStack();
+				int guiScale = mc.options.guiScale().get();
 
 				modelViewPoseStack.pushPose();
+
+				if (guiScale != 0)
+					modelViewPoseStack.scale(4f / guiScale, 4f / guiScale, 4f / guiScale);
 
 				if (this.stack.getItem() instanceof BlockItem || this.spriteSize <= 32) // Literally no clue why this fixes things but I'm tired and it fixes stuff so deal with it
 					modelViewPoseStack.scale(0.5f, 0.5f, 0.5f);
