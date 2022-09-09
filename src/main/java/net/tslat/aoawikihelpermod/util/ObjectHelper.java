@@ -356,12 +356,12 @@ public class ObjectHelper {
 		if (!REGISTRY_KEYS.isEmpty())
 			return REGISTRY_KEYS;
 
-		for (ResourceKey<? extends Registry<?>> key : ServerLifecycleHooks.getCurrentServer().registryAccess().registries().map(RegistryAccess.RegistryEntry::key).sorted().toList()) {
-			REGISTRY_KEYS.put(key, true);
-		}
-
 		for (ResourceKey<? extends Registry<?>> key : ((BiMap<ResourceLocation, ForgeRegistry<Object>>)ObfuscationReflectionHelper.getPrivateValue(RegistryManager.class, RegistryManager.ACTIVE, "registries")).values().stream().map(ForgeRegistry::getRegistryKey).sorted().toList()) {
 			REGISTRY_KEYS.put(key, false);
+		}
+
+		for (ResourceKey<? extends Registry<?>> key : ServerLifecycleHooks.getCurrentServer().registryAccess().registries().map(RegistryAccess.RegistryEntry::key).sorted().toList()) {
+			REGISTRY_KEYS.put(key, true);
 		}
 
 		return REGISTRY_KEYS;
