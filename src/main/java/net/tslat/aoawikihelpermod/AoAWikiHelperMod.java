@@ -16,6 +16,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.FileUtils;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.common.registration.AoARegistries;
 import net.tslat.aoawikihelpermod.command.BlocksCommand;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
@@ -33,7 +34,7 @@ import static net.tslat.aoawikihelpermod.AoAWikiHelperMod.MOD_ID;
 
 @Mod(MOD_ID)
 public class AoAWikiHelperMod {
-	public static final String VERSION = "2.9.13";
+	public static final String VERSION = "2.9.14";
 	public static final String MOD_ID = "aoawikihelpermod";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
@@ -79,14 +80,11 @@ public class AoAWikiHelperMod {
 		MerchantsSkimmer.init(ev.getServer());
 		LootTableHelper.init();
 		ItemMiscUsageSkimmer.init();
-		TagDataSkimmer.init();
+		TagDataSkimmer.init(ev.getServer());
 	}
 
 	@SubscribeEvent
 	public void loadFinished(final FMLLoadCompleteEvent ev) {
-		//if (VersionChecker.getResult(ModList.get().getModFileById(AdventOfAscension.MOD_ID).getMods().get(0)).status == VersionChecker.Status.OUTDATED)
-		//	isOutdatedAoA = true;
-
 		IsoRenderAdapters.init();
 	}
 
@@ -97,5 +95,9 @@ public class AoAWikiHelperMod {
 		catch (Exception ex) {
 			LOGGER.error("Failed to patch in support for opening files from chat. Skipping", ex);
 		}
+	}
+
+	public static String getAoAVersion() {
+		return AdventOfAscension.VERSION;
 	}
 }

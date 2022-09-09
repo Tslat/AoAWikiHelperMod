@@ -96,7 +96,7 @@ jar {
         attributes([
             "Specification-Title": "aoawikihelpermod",
             "Specification-Vendor": "Tslat",
-            "Specification-Version": "1.19",
+            "Specification-Version": "1.19.2",
             "Implementation-Title": project.name,
             "Implementation-Version": "${mod_version}",
             "Implementation-Vendor" :"Tslat",
