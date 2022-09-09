@@ -48,7 +48,7 @@ public class TagsCommand implements Command<CommandSourceStack> {
 
 	private static int printTags(CommandContext<CommandSourceStack> cmd) {
 		ResourceLocation tagType = ResourceLocationArgument.getId(cmd, "tag_type");
-		TagCategoryPrintHandler<?> tagCategoryPrintHandler = TagDataSkimmer.get(tagType);
+		TagCategoryPrintHandler tagCategoryPrintHandler = TagDataSkimmer.get(tagType);
 
 		if (tagCategoryPrintHandler == null) {
 			WikiHelperCommand.error(cmd.getSource(), "Tags", "Unable to find tags for registry type: " + tagType);
@@ -70,6 +70,12 @@ public class TagsCommand implements Command<CommandSourceStack> {
 				}
 
 				outputFile = printHelper.getOutputFile();
+			}
+			catch (Exception ex) {
+				WikiHelperCommand.error(cmd.getSource(), "Tags", ex.getMessage());
+				ex.printStackTrace();
+
+				return 1;
 			}
 
 			WikiHelperCommand.success(cmd.getSource(), "Tags", FormattingHelper.generateResultMessage(outputFile, fileName, null));

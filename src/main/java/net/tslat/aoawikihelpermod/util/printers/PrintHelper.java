@@ -1,6 +1,5 @@
 package net.tslat.aoawikihelpermod.util.printers;
 
-import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -49,7 +48,7 @@ public class PrintHelper implements AutoCloseable {
 	}
 
 	private static String formatFileName(String fileName) {
-		return fileName + " Printout " + AdventOfAscension.VERSION + ".txt";
+		return fileName.replaceAll("[\\\\\\/\\:\\*\\?\\\"\\<\\>\\|]", ".") + " Printout " + AoAWikiHelperMod.getAoAVersion() + ".txt";
 	}
 
 	public File getOutputFile() {

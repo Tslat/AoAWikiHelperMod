@@ -1,10 +1,13 @@
 package net.tslat.aoawikihelpermod.util;
 
+import com.mojang.datafixers.util.Either;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.storage.loot.providers.number.*;
@@ -50,15 +53,17 @@ public class FormattingHelper {
 	}
 
 	public static String createLinkableTag(String tag, Object sampleObjectFromTagTypeRegistry) {
-		IForgeRegistry<?> registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
+		Either<Registry<?>, IForgeRegistry<?>> registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
+		ResourceLocation registryId = registryForObject.map(Registry::key, IForgeRegistry::getRegistryKey).location();
 
-		return tooltip(tag, "Any " + registryForObject.getRegistryName().getPath().replaceAll("_", "") + " tagged as " + tag) + " ([[Tags#" + registryForObject.getRegistryName() + ":" + tag + "|Tag]])";
+		return tooltip(tag, "Any " + registryId.getPath().replaceAll("_", "") + " tagged as " + tag) + " ([[Tags#" + registryId + ":" + tag + "|Tag]])";
 	}
 
 	public static String createTagIngredientDescription(String tag, Object sampleObjectFromTagTypeRegistry) {
-		IForgeRegistry<?> registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
+		Either<Registry<?>, IForgeRegistry<?>> registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
+		ResourceLocation registryId = registryForObject.map(Registry::key, IForgeRegistry::getRegistryKey).location();
 
-		return "Any " + registryForObject.getRegistryName().getPath().replaceAll("_", "") + " tagged as " + "[[Tags#" + registryForObject.getRegistryName() + ":" + tag + "|" + tag + "]]";
+		return "Any " + registryId.getPath().replaceAll("_", "") + " tagged as " + "[[Tags#" + registryId + ":" + tag + "|" + tag + "]]";
 	}
 
 	public static String createLinkableText(String text, boolean pluralise) {

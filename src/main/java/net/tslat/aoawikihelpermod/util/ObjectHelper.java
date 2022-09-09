@@ -5,7 +5,11 @@ import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.mojang.datafixers.util.Either;
+import it.unimi.dsi.fastutil.objects.Object2BooleanAVLTreeMap;
+import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -36,6 +40,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
 import net.minecraftforge.registries.tags.ITag;
 import net.minecraftforge.registries.tags.ITagManager;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.util.LocaleUtil;
 import net.tslat.aoa3.util.StringUtil;
@@ -51,6 +56,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ObjectHelper {
+	private static final Object2BooleanAVLTreeMap<ResourceKey<? extends Registry<?>>> REGISTRY_KEYS = new Object2BooleanAVLTreeMap<>();
 	private static final ArrayList<Pattern> TOOLTIP_BLACKLIST = new ArrayList<Pattern>();
 
 	static {
@@ -346,20 +352,48 @@ public class ObjectHelper {
 		return matches / (float)str1.length() >= 0.75f;
 	}
 
-	@Nullable
-	public static IForgeRegistry<?> getRegistryForObject(Object object) {
-		BiMap<ResourceLocation, ForgeRegistry<Object>> registries = ObfuscationReflectionHelper.getPrivateValue(RegistryManager.class, RegistryManager.ACTIVE, "registries");
+	public static Object2BooleanAVLTreeMap<ResourceKey<? extends Registry<?>>> getAllRegistries() {
+		if (!REGISTRY_KEYS.isEmpty())
+			return REGISTRY_KEYS;
 
-		for (ForgeRegistry<Object> registry : registries.values()) {
-			if (registry.containsValue(object))
-				return registry;
+		for (ResourceKey<? extends Registry<?>> key : ServerLifecycleHooks.getCurrentServer().registryAccess().registries().map(RegistryAccess.RegistryEntry::key).sorted().toList()) {
+			REGISTRY_KEYS.put(key, true);
+		}
+
+		for (ResourceKey<? extends Registry<?>> key : ((BiMap<ResourceLocation, ForgeRegistry<Object>>)ObfuscationReflectionHelper.getPrivateValue(RegistryManager.class, RegistryManager.ACTIVE, "registries")).values().stream().map(ForgeRegistry::getRegistryKey).sorted().toList()) {
+			REGISTRY_KEYS.put(key, false);
+		}
+
+		return REGISTRY_KEYS;
+	}
+
+	public static Either<Registry<?>, IForgeRegistry<?>> getRegistry(ResourceKey<? extends Registry<?>> key) {
+		return getAllRegistries().getBoolean(key) ? Either.left(ServerLifecycleHooks.getCurrentServer().registryAccess().registry(key).get()) : Either.right(RegistryManager.ACTIVE.getRegistry(key.location()));
+	}
+
+	@Nullable
+	public static Either<Registry<?>, IForgeRegistry<?>> getRegistryForObject(Object object) {
+		for (ResourceKey<? extends Registry<?>> key : getAllRegistries().keySet()) {
+			Either<Registry<? extends Object>, IForgeRegistry<?>> dynamicOrFixedRegistry = getRegistry(key);
+
+			if (dynamicOrFixedRegistry.left().isPresent()) {
+				Registry registry = dynamicOrFixedRegistry.left().get();
+				ResourceLocation id = registry.getKey(object);
+
+				if (id != null && (!(registry instanceof DefaultedRegistry<?> defaultedRegistry) || defaultedRegistry.getDefaultKey() != id))
+					return Either.left(registry);
+			}
+			else if (dynamicOrFixedRegistry.right().isPresent()) {
+				if (((IForgeRegistry)dynamicOrFixedRegistry.right().get()).containsValue(object))
+					return Either.right(dynamicOrFixedRegistry.right().get());
+			}
 		}
 
 		return null;
 	}
 
 	public static Function<Object, String> getNameFunctionForUnknownObject(Object entry) {
-		Function<Object, String> namingFunction = obj -> "???";
+		Function<Object, String> namingFunction;
 
 		if (entry instanceof Item) {
 			namingFunction = item -> ObjectHelper.getItemName((Item)item);
@@ -371,7 +405,7 @@ public class ObjectHelper {
 			namingFunction = entityType -> ObjectHelper.getEntityName((EntityType<?>)entityType);
 		}
 		else if (entry instanceof Biome) {
-			namingFunction = biome -> ObjectHelper.getBiomeName(ForgeRegistries.BIOMES.getKey((Biome)biome));
+			namingFunction = biome -> ObjectHelper.getBiomeName(ServerLifecycleHooks.getCurrentServer().registryAccess().registry(Registry.BIOME_REGISTRY).get().getKey((Biome)biome));
 		}
 		else if (entry instanceof Enchantment) {
 			namingFunction = enchant -> ObjectHelper.getEnchantmentName((Enchantment)enchant, 0);
@@ -380,7 +414,20 @@ public class ObjectHelper {
 			namingFunction = fluid -> ObjectHelper.getFluidName((Fluid)fluid);
 		}
 		else {
-			((ForgeRegistry<Object>)getRegistryForObject(entry)).getKey(entry);
+			namingFunction = unknownObject -> {
+				Either<Registry<?>, IForgeRegistry<?>> registry = getRegistryForObject(unknownObject);
+
+				if (registry == null)
+					return "???";
+
+				if (registry.left().isPresent())
+					return ((Registry)registry.left().get()).getKey(unknownObject).toString();
+
+				if (registry.right().isPresent())
+					return ((IForgeRegistry)registry.right().get()).getKey(unknownObject).toString();
+
+				return "???";
+			};
 		}
 
 		return namingFunction;

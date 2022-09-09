@@ -3,26 +3,29 @@ package net.tslat.aoawikihelpermod.util.printers.handlers;
 import com.google.common.collect.HashMultimap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraftforge.registries.tags.ITagManager;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 
 import java.util.HashMap;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-public class TagCategoryPrintHandler<T> {
+public class TagCategoryPrintHandler {
 	private final ResourceLocation registryId;
-	private final ITagManager<T> tagManager;
+	private final Supplier<Stream<TagKey<?>>> tags;
+	private final Function<TagKey<?>, Stream<?>> tagContentsRetriever;
 
-	private HashMultimap<String, TagKey<T>> namespacedTags = null;
+	private HashMultimap<String, TagKey<?>> namespacedTags = null;
 	private HashMap<String, String[][]> cachedPrintouts = null;
 	private String[] tagNamespaces = null;
-	private Function<T, String> namingFunction = null;
+	private Function<Object, String> namingFunction = null;
 
-	public TagCategoryPrintHandler(ResourceLocation registryId, ITagManager<T> tagManager) {
+	public TagCategoryPrintHandler(ResourceLocation registryId, Supplier<Stream<TagKey<?>>> tags, Function<TagKey<?>, Stream<?>> tagContentsRetriever) {
 		this.registryId = registryId;
-		this.tagManager = tagManager;
+		this.tags = tags;
+		this.tagContentsRetriever = tagContentsRetriever;
 	}
 
 	private void prepTags() {
@@ -30,7 +33,7 @@ public class TagCategoryPrintHandler<T> {
 			return;
 
 		namespacedTags = HashMultimap.create();
-		tagManager.getTagNames().forEachOrdered(tagKey -> namespacedTags.put(tagKey.location().getNamespace(), tagKey));
+		tags.get().forEachOrdered(tagKey -> namespacedTags.put(tagKey.location().getNamespace(), tagKey));
 	}
 
 	public String[] getNameSpaces() {
@@ -53,21 +56,21 @@ public class TagCategoryPrintHandler<T> {
 
 		prepTags();
 
-		Set<TagKey<T>> tags = namespacedTags.get(namespace);
+		Set<TagKey<?>> tags = namespacedTags.get(namespace);
 		String[][] printout = new String[tags.size()][3];
 		int index = 0;
 
-		for (TagKey<T> tagKey : tags) {
+		for (TagKey tagKey : tags) {
 			String[] contents = new String[3];
 			String tagName = tagKey.location().toString();
 
 			contents[0] = registryId + ":" + tagName;
 			contents[1] = "<code>" + tagName + "</code>";
-			contents[2] = tagManager.getTag(tagKey).stream().map(entry -> {
+			contents[2] = this.tagContentsRetriever.apply(tagKey).map(entry -> {
 				if (namingFunction != null)
 					return namingFunction.apply(entry);
 
-				namingFunction = (Function<T, String>)ObjectHelper.getNameFunctionForUnknownObject(entry).andThen(name -> FormattingHelper.createLinkableText(name, false, true));
+				namingFunction = ObjectHelper.getNameFunctionForUnknownObject(entry).andThen(name -> FormattingHelper.createLinkableText(name, false, true));
 
 				return namingFunction.apply(entry);
 			}).reduce((line, newEntry) -> line += ", " + newEntry).orElse("");
