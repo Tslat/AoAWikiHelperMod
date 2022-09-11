@@ -41,7 +41,6 @@ import net.minecraftforge.registries.RegistryManager;
 import net.minecraftforge.registries.tags.ITag;
 import net.minecraftforge.registries.tags.ITagManager;
 import net.minecraftforge.server.ServerLifecycleHooks;
-import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.util.LocaleUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.dataskimmers.TagDataSkimmer;
@@ -231,10 +230,13 @@ public class ObjectHelper {
 	}
 
 	public static String getBiomeName(ResourceLocation biomeId) {
-		if (biomeId.getNamespace().equals(AdventOfAscension.MOD_ID))
+		String key = "biome." + biomeId.getNamespace() + "." + biomeId.getPath();
+		String name = LocaleUtil.getLocaleString(key);
+
+		if (name.equals(key))
 			return StringUtil.toTitleCase(biomeId.getPath());
 
-		return biomeId.toString();
+		return name;
 	}
 
 	public static String getEntityName(EntityType<?> entityType) {
