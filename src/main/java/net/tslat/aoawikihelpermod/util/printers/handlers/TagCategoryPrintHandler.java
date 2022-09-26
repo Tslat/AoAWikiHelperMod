@@ -1,11 +1,13 @@
 package net.tslat.aoawikihelpermod.util.printers.handlers;
 
 import com.google.common.collect.HashMultimap;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.function.Function;
@@ -34,6 +36,21 @@ public class TagCategoryPrintHandler {
 
 		namespacedTags = HashMultimap.create();
 		tags.get().forEachOrdered(tagKey -> namespacedTags.put(tagKey.location().getNamespace(), tagKey));
+	}
+
+	@Nullable
+	public Object getSampleElement(ResourceLocation tagId) {
+		prepTags();
+
+		if (!this.namespacedTags.containsKey(tagId.getNamespace()))
+			return null;
+
+		TagKey<?> tagKey = TagKey.create(ResourceKey.createRegistryKey(registryId), tagId);
+
+		if (this.namespacedTags.get(tagId.getNamespace()).contains(tagKey))
+			return tagContentsRetriever.apply(tagKey).findAny().orElse(null);
+
+		return null;
 	}
 
 	public String[] getNameSpaces() {

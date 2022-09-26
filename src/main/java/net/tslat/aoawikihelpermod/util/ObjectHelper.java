@@ -14,7 +14,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -38,17 +37,19 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
-import net.minecraftforge.registries.tags.ITag;
-import net.minecraftforge.registries.tags.ITagManager;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import net.tslat.aoa3.util.LocaleUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.dataskimmers.TagDataSkimmer;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
+import net.tslat.aoawikihelpermod.util.printers.handlers.TagCategoryPrintHandler;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -117,20 +118,15 @@ public class ObjectHelper {
 		return (ArrayList<T>)collection.stream().sorted(Comparator.comparing(sortFunction)).collect(Collectors.toList());
 	}
 
-	public static String getSampleElementForTag(String tag) {
-		ResourceLocation id = new ResourceLocation(tag);
-
+	public static String getSampleElementForTag(ResourceLocation id) {
 		for (ResourceLocation registryId : TagDataSkimmer.tagTypes()) {
-			IForgeRegistry registry = RegistryManager.ACTIVE.getRegistry(registryId);
-			ITagManager tagManager = registry.tags();
-			TagKey tagKey = TagKey.create(registry.getRegistryKey(), id);
+			TagCategoryPrintHandler tagHandler = TagDataSkimmer.get(registryId);
+			Object sampleElement = tagHandler.getSampleElement(id);
 
-			if (tagManager.isKnownTagName(tagKey)) {
-				Optional<ITag> entry = tagManager.getTag(tagKey).stream().findFirst();
+			if (sampleElement == null)
+				continue;
 
-				if (entry.isPresent())
-					return getNameFunctionForUnknownObject(entry.get()).apply(entry.get());
-			}
+			return getNameFunctionForUnknownObject(sampleElement).apply(sampleElement);
 		}
 
 		return "Air";
@@ -155,7 +151,7 @@ public class ObjectHelper {
 			ownerId = ingredientName.split(":")[0];
 			RecipePrintHandler.PrintableIngredient ingredient = new RecipePrintHandler.PrintableIngredient(ownerId, ingredientName);
 
-			ingredient.setCustomImageName(getSampleElementForTag(ingredientName) + ".png");
+			ingredient.setCustomImageName(getSampleElementForTag(new ResourceLocation(ingredientName)) + ".png");
 
 			return ingredient;
 		}
