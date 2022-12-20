@@ -1,7 +1,7 @@
 package net.tslat.aoawikihelpermod.render.typeadapter.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -12,7 +12,7 @@ import net.tslat.aoawikihelpermod.render.typeadapter.SimpleRotationRenderAdapter
 
 public class MultiBlockCropRenderAdapter extends SimpleRotationRenderAdapter<BlockState> {
 	public MultiBlockCropRenderAdapter() {
-		super(block -> block.getBlock() instanceof MultiBlockCrop, Vector3f.YP, 0f);
+		super(block -> block.getBlock() instanceof MultiBlockCrop, Axis.YP, 0f);
 	}
 
 	@Override

@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "net.tslat.aoawikihelpermod.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "aoawikihelpermod.refmap.json",
+  "mixins": [
+    "TextureAtlasSpriteMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1,
+    "maxShiftBy": 5
+  },
+  "minVersion": "0.8"
+}

@@ -34,7 +34,7 @@ import static net.tslat.aoawikihelpermod.AoAWikiHelperMod.MOD_ID;
 
 @Mod(MOD_ID)
 public class AoAWikiHelperMod {
-	public static final String VERSION = "2.9.15";
+	public static final String VERSION = "2.9.16";
 	public static final String MOD_ID = "aoawikihelpermod";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
@@ -61,7 +61,7 @@ public class AoAWikiHelperMod {
 
 	@SubscribeEvent
 	public void registerCommands(RegisterCommandsEvent ev) {
-		WikiHelperCommand.registerSubCommands(ev.getDispatcher());
+		WikiHelperCommand.registerSubCommands(ev.getDispatcher(), ev.getBuildContext());
 	}
 
 	@SubscribeEvent

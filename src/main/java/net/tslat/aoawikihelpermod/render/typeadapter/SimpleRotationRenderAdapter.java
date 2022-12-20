@@ -1,17 +1,17 @@
 package net.tslat.aoawikihelpermod.render.typeadapter;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 import java.util.function.Predicate;
 
 public class SimpleRotationRenderAdapter<T> implements IsoRenderAdapter<T> {
 	private final Predicate<T> predicate;
-	private final Vector3f axis;
+	private final Axis axis;
 	private final float rotation;
 
-	public SimpleRotationRenderAdapter(Predicate<T> predicate, Vector3f axis, float amount) {
+	public SimpleRotationRenderAdapter(Predicate<T> predicate, Axis axis, float amount) {
 		this.predicate = predicate;
 		this.axis = axis;
 		this.rotation = amount;

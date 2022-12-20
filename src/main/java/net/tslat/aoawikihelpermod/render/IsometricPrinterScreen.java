@@ -6,8 +6,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
+import com.mojang.math.Axis;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -18,6 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.tslat.aoa3.util.ColourUtil;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapter;
+import org.joml.Vector4f;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -316,7 +316,7 @@ public abstract class IsometricPrinterScreen extends Screen {
 		matrix.translate(this.minecraft.getWindow().getGuiScaledWidth() / 2f / this.scale, this.minecraft.getWindow().getGuiScaledHeight() / 2f / this.scale, 1050);
 		RenderUtil.translateToIsometricView(matrix);
 		makePreRenderAdjustments(matrix);
-		matrix.mulPose(Vector3f.YP.rotationDegrees(this.rotationAdjust));
+		matrix.mulPose(Axis.YP.rotationDegrees(this.rotationAdjust));
 		matrix.translate(this.xAdjust, this.yAdjust, 0);
 
 		renderOps.run();

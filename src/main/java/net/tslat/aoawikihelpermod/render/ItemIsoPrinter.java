@@ -5,14 +5,14 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.commands.CommandSourceStack;
@@ -25,6 +25,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapter;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
+import org.joml.Vector4f;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -156,14 +157,14 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 			rand.setSeed(42L);
 
 			for (BakedQuad quad : model.getQuads(null, face, rand, ModelData.EMPTY, null)) {
-				largestFrameSize = Math.max(largestFrameSize, Math.max(quad.getSprite().getHeight(), quad.getSprite().getWidth()));
+				largestFrameSize = Math.max(largestFrameSize, Math.max(quad.getSprite().contents().height(), quad.getSprite().contents().width()));
 			}
 		}
 
 		rand.setSeed(42L);
 
 		for (BakedQuad quad : model.getQuads(null, null, rand, ModelData.EMPTY, null)) {
-			largestFrameSize = Math.max(largestFrameSize, Math.max(quad.getSprite().getHeight(), quad.getSprite().getWidth()));
+			largestFrameSize = Math.max(largestFrameSize, Math.max(quad.getSprite().contents().height(), quad.getSprite().contents().width()));
 		}
 
 		return (largestFrameSize > 0 ? largestFrameSize : 16) * 2;
@@ -198,7 +199,7 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 		modelViewPose.translate(8, 8, 0);
 		modelViewPose.scale(1, -1, 1);
 		modelViewPose.scale(16, 16, 16);
-		matrix.mulPose(Vector3f.XP.rotationDegrees(0.0000001f));
+		matrix.mulPose(Axis.XP.rotationDegrees(0.0000001f));
 
 		RenderSystem.applyModelViewMatrix();
 
@@ -228,8 +229,15 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 			rand.setSeed(42L);
 
 			for (BakedQuad quad : model.getQuads(null, face, rand, ModelData.EMPTY, null)) {
+				if (quad.getSprite().contents().animatedTexture == null)
+					continue;
 
-				if (quad.getSprite().animatedTexture != null && (quad.getSprite().animatedTexture.frame != 0 || quad.getSprite().animatedTexture.subFrame != 0))
+				SpriteContents.Ticker ticker = RenderUtil.getTickerForTexture(quad.getSprite().contents().animatedTexture);
+
+				if (ticker == null)
+					continue;
+
+				if (ticker.frame != 0 || ticker.subFrame != 0)
 					return false;
 			}
 		}
@@ -237,7 +245,15 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 		rand.setSeed(42L);
 
 		for (BakedQuad quad : model.getQuads(null, null, rand, ModelData.EMPTY, null)) {
-			if (quad.getSprite().animatedTexture != null && (quad.getSprite().animatedTexture.frame != 0 || quad.getSprite().animatedTexture.subFrame != 0))
+			if (quad.getSprite().contents().animatedTexture == null)
+				continue;
+
+			SpriteContents.Ticker ticker = RenderUtil.getTickerForTexture(quad.getSprite().contents().animatedTexture);
+
+			if (ticker == null)
+				continue;
+
+			if (ticker.frame != 0 || ticker.subFrame != 0)
 				return false;
 		}
 

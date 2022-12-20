@@ -5,7 +5,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.Entity;
@@ -46,7 +46,7 @@ public class FakeChunk extends ChunkAccess {
 	private final FakeBiomeProvider biomeProvider;
 
 	public FakeChunk(Level level, ChunkPos pos) {
-		super(pos, UpgradeData.EMPTY, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), 0, null, null);
+		super(pos, UpgradeData.EMPTY, level, level.registryAccess().registryOrThrow(Registries.BIOME), 0, null, null);
 		this.level = level;
 		this.biomeProvider = new FakeBiomeProvider(FakeWorld.PLAINS_BIOME.get());
 	}

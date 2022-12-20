@@ -2,7 +2,8 @@ package net.tslat.aoawikihelpermod.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -11,6 +12,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
@@ -20,11 +22,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.client.model.data.ModelData;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 public final class RenderUtil {
+	private static final Map<SpriteContents.AnimatedTexture, SpriteContents.Ticker> ANIMATED_TEXTURE_TICKERS = new Object2ObjectOpenHashMap<>();
+
 	public static void clearRenderBuffer() {
 		RenderSystem.clearColor(0, 0, 0, 0);
 		RenderSystem.clear(GL11.GL_COLOR_BUFFER_BIT, Minecraft.ON_OSX);
@@ -34,9 +40,9 @@ public final class RenderUtil {
 	public static void translateToIsometricView(PoseStack matrix) {
 		matrix.scale(1, 1, -1);
 		matrix.translate(0, 0, 1000);
-		matrix.mulPose(Vector3f.XP.rotationDegrees(30)); // Dimetric Projection
-		matrix.mulPose(Vector3f.YP.rotationDegrees(225));
-		matrix.mulPose(Vector3f.ZP.rotationDegrees(180));
+		matrix.mulPose(Axis.XP.rotationDegrees(30)); // Dimetric Projection
+		matrix.mulPose(Axis.YP.rotationDegrees(225));
+		matrix.mulPose(Axis.ZP.rotationDegrees(180));
 	}
 
 	public static void setupFakeGuiLighting() {
@@ -86,5 +92,13 @@ public final class RenderUtil {
 				IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemTransforms.TransformType.NONE, matrix, renderBuffer, 15728880, OverlayTexture.NO_OVERLAY);
 			}
 		}
+	}
+
+	public static void addSpriteTicker(SpriteContents.Ticker ticker) {
+		ANIMATED_TEXTURE_TICKERS.put(ticker.animationInfo, ticker);
+	}
+
+	public static SpriteContents.Ticker getTickerForTexture(SpriteContents.AnimatedTexture texture) {
+		return ANIMATED_TEXTURE_TICKERS.get(texture);
 	}
 }

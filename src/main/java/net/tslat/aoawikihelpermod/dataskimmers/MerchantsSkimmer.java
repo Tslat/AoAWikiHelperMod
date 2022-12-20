@@ -69,7 +69,7 @@ public class MerchantsSkimmer {
 
 		for (EntityType<?> entityType : ObjectHelper.scrapeRegistryForEntities(type -> ForgeRegistries.ENTITY_TYPES.getKey(type).getNamespace().equals(AdventOfAscension.MOD_ID))) {
 			try {
-				Entity entity = entityType.create(world, null, null, null, new BlockPos(0, 100, 0), MobSpawnType.TRIGGERED, false, false);
+				Entity entity = entityType.create(world, null, null, new BlockPos(0, 100, 0), MobSpawnType.TRIGGERED, false, false);
 
 				if (entity == null)
 					continue;

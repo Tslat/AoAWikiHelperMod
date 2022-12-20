@@ -2,10 +2,10 @@ package net.tslat.aoawikihelpermod.render;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.commands.CommandSourceStack;
@@ -16,6 +16,7 @@ import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
+import org.joml.Vector4f;
 
 import java.io.File;
 import java.io.IOException;
@@ -160,7 +161,15 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 			rand.setSeed(42L);
 
 			for (BakedQuad quad : model.getQuads(null, face, rand, ModelData.EMPTY, null)) {
-				if (quad.getSprite().animatedTexture.frame != 0 || quad.getSprite().animatedTexture.subFrame != 0)
+				if (quad.getSprite().contents().animatedTexture == null)
+					continue;
+
+				SpriteContents.Ticker ticker = RenderUtil.getTickerForTexture(quad.getSprite().contents().animatedTexture);
+
+				if (ticker == null)
+					continue;
+
+				if (ticker.frame != 0 || ticker.subFrame != 0)
 					return false;
 			}
 		}
@@ -168,7 +177,15 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 		rand.setSeed(42L);
 
 		for (BakedQuad quad : model.getQuads(null, null, rand, ModelData.EMPTY, null)) {
-			if (quad.getSprite().animatedTexture.frame != 0 || quad.getSprite().animatedTexture.subFrame != 0)
+			if (quad.getSprite().contents().animatedTexture == null)
+				continue;
+
+			SpriteContents.Ticker ticker = RenderUtil.getTickerForTexture(quad.getSprite().contents().animatedTexture);
+
+			if (ticker == null)
+				continue;
+
+			if (ticker.frame != 0 || ticker.subFrame != 0)
 				return false;
 		}
 
@@ -188,10 +205,10 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 				TextureAtlasSprite sprite = quad.getSprite();
 				int totalLength = 0;
 
-				if (sprite.animatedTexture == null)
+				if (sprite.contents().animatedTexture == null)
 					continue;
 
-				for (TextureAtlasSprite.FrameInfo frameInfo : sprite.animatedTexture.frames) {
+				for (SpriteContents.FrameInfo frameInfo : sprite.contents().animatedTexture.frames) {
 					totalLength += frameInfo.time;
 				}
 
@@ -205,10 +222,10 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 			TextureAtlasSprite sprite = quad.getSprite();
 			int totalLength = 0;
 
-			if (sprite.animatedTexture == null)
+			if (sprite.contents().animatedTexture == null)
 				continue;
 
-			for (TextureAtlasSprite.FrameInfo frameInfo : sprite.animatedTexture.frames) {
+			for (SpriteContents.FrameInfo frameInfo : sprite.contents().animatedTexture.frames) {
 				totalLength += frameInfo.time;
 			}
 

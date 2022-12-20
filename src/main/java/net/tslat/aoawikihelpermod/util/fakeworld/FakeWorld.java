@@ -2,15 +2,21 @@ package net.tslat.aoawikihelpermod.util.fakeworld;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
@@ -36,6 +42,7 @@ import net.minecraft.world.ticks.BlackholeTickAccess;
 import net.minecraft.world.ticks.LevelTickAccess;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import net.tslat.aoa3.common.registration.worldgen.AoADimensions;
 
 import javax.annotation.Nonnull;
@@ -129,15 +136,13 @@ public class FakeWorld extends Level implements WorldGenLevel {
 			}
 
 			@Override
-			public <U extends Entity> void get(EntityTypeTest<Entity, U> predicate, Consumer<U> consumer) {}
+			public <U extends Entity> void get(EntityTypeTest<Entity, U> test, AbortableIterationConsumer<U> consumer) {}
 
 			@Override
-			public void get(AABB boundingBox, Consumer<Entity> consumer) {
-
-			}
+			public void get(AABB boundingBox, Consumer<Entity> consumer) {}
 
 			@Override
-			public <U extends Entity> void get(EntityTypeTest<Entity, U> predicate, AABB boundingBox, Consumer<U> consumer) {}
+			public <U extends Entity> void get(EntityTypeTest<Entity, U> test, AABB bounds, AbortableIterationConsumer<U> consumer) {}
 		};
 	}
 
@@ -165,9 +170,7 @@ public class FakeWorld extends Level implements WorldGenLevel {
 	public void levelEvent(@Nullable Player player, int type, BlockPos pos, int data) {}
 
 	@Override
-	public void gameEvent(GameEvent p_220404_, Vec3 p_220405_, GameEvent.Context p_220406_) {
-
-	}
+	public void gameEvent(GameEvent event, Vec3 position, GameEvent.Context context) {}
 
 	@Override
 	public void gameEvent(@Nullable Entity entity, GameEvent event, BlockPos pos) {}
@@ -175,7 +178,12 @@ public class FakeWorld extends Level implements WorldGenLevel {
 	@Nonnull
 	@Override
 	public RegistryAccess registryAccess() {
-		return Minecraft.getInstance().level != null ? Minecraft.getInstance().level.registryAccess() : RegistryAccess.BUILTIN.get();
+		return Minecraft.getInstance().level != null ? Minecraft.getInstance().level.registryAccess() : ServerLifecycleHooks.getCurrentServer().registryAccess();
+	}
+
+	@Override
+	public FeatureFlagSet enabledFeatures() {
+		return null;
 	}
 
 	@Override
@@ -211,7 +219,7 @@ public class FakeWorld extends Level implements WorldGenLevel {
 	@Nonnull
 	@Override
 	public Holder<Biome> getUncachedNoiseBiome(int x, int y, int z) {
-		return Holder.direct(registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getOrThrow(Biomes.PLAINS));
+		return Holder.direct(registryAccess().registryOrThrow(Registries.BIOME).getOrThrow(Biomes.PLAINS));
 	}
 
 	@Override
@@ -231,10 +239,13 @@ public class FakeWorld extends Level implements WorldGenLevel {
 	}
 
 	@Override
-	public void playSeededSound(@Nullable Player player, double posX, double posY, double posZ, SoundEvent sound, SoundSource category, float volume, float pitch, long seed) {}
+	public void playSeededSound(@org.jetbrains.annotations.Nullable Player player, double x, double y, double z, Holder<SoundEvent> sound, SoundSource source, float volume, float pitch, long seed) {}
 
 	@Override
-	public void playSeededSound(@Nullable Player player, Entity source, SoundEvent sound, SoundSource category, float volume, float pitch, long seed) {}
+	public void playSeededSound(@Nullable Player player, double posX, double posY, double posZ, SoundEvent sound, SoundSource source, float volume, float pitch, long seed) {}
+
+	@Override
+	public void playSeededSound(@org.jetbrains.annotations.Nullable Player player, Entity entity, Holder<SoundEvent> sound, SoundSource source, float volume, float pitch, long seed) {}
 
 	@Override
 	public BlockState getBlockState(BlockPos pos) {

@@ -1,6 +1,6 @@
 package net.tslat.aoawikihelpermod.render.typeadapter;
 
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.animal.Pufferfish;
 import net.minecraft.world.level.block.*;
@@ -15,17 +15,17 @@ public final class IsoRenderAdapters {
 		IsometricPrinterScreen.registerEntityAdapter(new SimpleRotationRenderAdapter<>(entity ->
 				entity instanceof AbstractFish ||
 				entity instanceof AbstractLavaFishEntity,
-				Vector3f.ZP, 90f));
+				Axis.ZP, 90f));
 		IsometricPrinterScreen.registerBlockAdapter(new SimpleRotationRenderAdapter<>(block ->
 				block.getBlock() instanceof SaplingBlock ||
 				block.getBlock() instanceof WebBlock ||
 				block.getBlock() instanceof SugarCaneBlock ||
 				block.getBlock() instanceof FlowerBlock ||
 				block.getBlock() instanceof TallGrassBlock,
-				Vector3f.YP, -45f));
+				Axis.YP, -45f));
 		IsometricPrinterScreen.registerBlockAdapter(new SimpleRotationRenderAdapter<>(block ->
 				block.getBlock() instanceof BedBlock,
-				Vector3f.YP, -180f));
+				Axis.YP, -180f));
 		IsometricPrinterScreen.registerBlockAdapter(new DoublePlantBlockRenderAdapter());
 		IsometricPrinterScreen.registerBlockAdapter(new MultiBlockCropRenderAdapter());
 		IsometricPrinterScreen.registerEntityAdapter(new SimpleScaleRenderAdapter<>(entity ->
@@ -34,10 +34,10 @@ public final class IsoRenderAdapters {
 		IsometricPrinterScreen.registerEntityAdapter(new SimpleScaleAndRotateRenderAdapter<>(entity ->
 				entity instanceof Pufferfish,
 				5f,
-				Vector3f.ZP,
+				Axis.ZP,
 				-90f));
 		IsometricPrinterScreen.registerBlockAdapter(new SimpleRotationRenderAdapter<>(block ->
 				block.getBlock() instanceof StairBlock,
-				Vector3f.YP, 90f));
+				Axis.YP, 90f));
 	}
 }

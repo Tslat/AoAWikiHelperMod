@@ -1,7 +1,7 @@
 package net.tslat.aoawikihelpermod.render.typeadapter.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -13,7 +13,7 @@ import net.tslat.aoawikihelpermod.render.typeadapter.SimpleRotationRenderAdapter
 
 public class DoublePlantBlockRenderAdapter extends SimpleRotationRenderAdapter<BlockState> {
 	public DoublePlantBlockRenderAdapter() {
-		super(block -> block.getBlock() instanceof DoublePlantBlock, Vector3f.YP, -45f);
+		super(block -> block.getBlock() instanceof DoublePlantBlock, Axis.YP, -45f);
 	}
 
 	@Override

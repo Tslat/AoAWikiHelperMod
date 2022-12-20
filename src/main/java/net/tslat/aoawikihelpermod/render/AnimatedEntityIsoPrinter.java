@@ -2,12 +2,12 @@ package net.tslat.aoawikihelpermod.render;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector4f;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
+import org.joml.Vector4f;
 
 import javax.annotation.Nullable;
 import java.io.File;

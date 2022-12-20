@@ -7,7 +7,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -15,26 +14,25 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 
 public class WikiHelperCommand {
-	public static void registerSubCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
+	public static void registerSubCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context) {
 		LiteralArgumentBuilder<CommandSourceStack> cmd = Commands.literal("wikihelper");
-		CommandBuildContext buildContext = new CommandBuildContext(RegistryAccess.BUILTIN.get());
 
 		if (!AoAWikiHelperMod.isOutdatedAoA) {
 			cmd.then(OverviewCommand.register())
-					.then(UsagesCommand.register(buildContext))
-					.then(ObtainingCommand.register(buildContext))
+					.then(UsagesCommand.register(context))
+					.then(ObtainingCommand.register(context))
 					.then(RecipeCommand.register())
 					.then(LootTableCommand.register())
 					.then(HaulingTableCommand.register())
 					.then(TradesCommand.register())
 					.then(StructuresCommand.register())
 					.then(BlocksCommand.register())
-					.then(ItemsCommand.register(buildContext))
+					.then(ItemsCommand.register(context))
 					.then(TagsCommand.register())
 					.then(InfoboxCommand.register());
 
 			if (FMLEnvironment.dist != Dist.DEDICATED_SERVER)
-				cmd.then(IsometricCommand.register(buildContext));
+				cmd.then(IsometricCommand.register(context));
 		}
 		else {
 			cmd.executes(WikiHelperCommand::outdatedCommand);

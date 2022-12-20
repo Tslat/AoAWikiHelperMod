@@ -14,9 +14,10 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.item.ItemParser;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.dataskimmers.BlockDataSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -144,7 +145,7 @@ public class BlocksCommand implements Command<CommandSourceStack> {
 		@Override
 		public BlockInput parse(StringReader reader) throws CommandSyntaxException {
 			ResourceLocation id = ResourceLocation.read(reader);
-			Block block = Registry.BLOCK.getOptional(id).orElseThrow(() -> ItemParser.ERROR_UNKNOWN_ITEM.createWithContext(reader, id.toString()));
+			Block block = BuiltInRegistries.BLOCK.getOptional(id).orElseThrow(() -> ItemParser.ERROR_UNKNOWN_ITEM.createWithContext(reader, id.toString()));
 
 			return new BlockInput(block);
 		}
@@ -159,7 +160,7 @@ public class BlocksCommand implements Command<CommandSourceStack> {
 
 			reader.setCursor(builder.getStart());
 
-			return SharedSuggestionProvider.suggestResource(Registry.BLOCK.keySet(), builder.createOffset(reader.getCursor()));
+			return SharedSuggestionProvider.suggestResource(ForgeRegistries.BLOCKS.getKeys(), builder.createOffset(reader.getCursor()));
 		}
 
 		@Override

@@ -106,8 +106,8 @@ public class StaticFluidRenderer {
 
 				float averageU = (renderUMin + flowAdjustedUMin + renderUMax + flowAdjustedUMax) / 4f;
 				float averageV = (renderVMin + renderVMax + flowAdjustedVMax + flowAdjustmentVMin) / 4f;
-				float renderWidthStretch = (float)fluidSprites[0].getWidth() / (fluidSprites[0].getU1() - fluidSprites[0].getU0());
-				float renderHeightStretch = (float)fluidSprites[0].getHeight() / (fluidSprites[0].getV1() - fluidSprites[0].getV0());
+				float renderWidthStretch = (float)fluidSprites[0].contents().width() / (fluidSprites[0].getU1() - fluidSprites[0].getU0());
+				float renderHeightStretch = (float)fluidSprites[0].contents().height() / (fluidSprites[0].getV1() - fluidSprites[0].getV0());
 				float maxStretch = 4f / Math.max(renderHeightStretch, renderWidthStretch);
 				renderUMin = Mth.lerp(maxStretch, renderUMin, averageU);
 				flowAdjustedUMin = Mth.lerp(maxStretch, flowAdjustedUMin, averageU);

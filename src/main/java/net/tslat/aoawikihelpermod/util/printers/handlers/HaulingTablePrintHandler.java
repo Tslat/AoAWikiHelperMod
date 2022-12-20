@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -142,7 +143,7 @@ public class HaulingTablePrintHandler {
 				JsonArray biomeArray = rawTable.getAsJsonArray("biomes");
 
 				if (biomeArray.size() == 1) {
-					notesBuilder.append("This table applies to the ").append(ObjectHelper.getBiomeName(ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(biomeArray.get(0).getAsString())))).append(" biome");
+					notesBuilder.append("This table applies to the ").append(ObjectHelper.getBiomeName(ResourceKey.create(Registries.BIOME, new ResourceLocation(biomeArray.get(0).getAsString())))).append(" biome");
 				}
 				else {
 					notesBuilder.append("This table to applies to the following biomes:\n");
@@ -151,7 +152,7 @@ public class HaulingTablePrintHandler {
 						if (i > 0)
 							notesBuilder.append("\n");
 
-						notesBuilder.append("* ").append(ObjectHelper.getBiomeName(ResourceKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(biomeArray.get(i).getAsString()))));
+						notesBuilder.append("* ").append(ObjectHelper.getBiomeName(ResourceKey.create(Registries.BIOME, new ResourceLocation(biomeArray.get(i).getAsString()))));
 					}
 				}
 			}

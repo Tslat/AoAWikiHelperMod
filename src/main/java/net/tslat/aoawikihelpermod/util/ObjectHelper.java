@@ -10,6 +10,8 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanAVLTreeMap;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -257,7 +259,7 @@ public class ObjectHelper {
 	}
 
 	public static RecipePrintHandler.PrintableIngredient getFormattedItemDetails(ResourceLocation id) {
-		Item item = Registry.ITEM.getOptional(id).orElse(null);
+		Item item = BuiltInRegistries.ITEM.getOptional(id).orElse(null);
 
 		return new RecipePrintHandler.PrintableIngredient(id.getNamespace(), item == null ? StringUtil.toTitleCase(id.getPath()) : ObjectHelper.getItemName(item));
 	}
@@ -403,7 +405,7 @@ public class ObjectHelper {
 			namingFunction = entityType -> ObjectHelper.getEntityName((EntityType<?>)entityType);
 		}
 		else if (entry instanceof Biome) {
-			namingFunction = biome -> ObjectHelper.getBiomeName(ServerLifecycleHooks.getCurrentServer().registryAccess().registry(Registry.BIOME_REGISTRY).get().getKey((Biome)biome));
+			namingFunction = biome -> ObjectHelper.getBiomeName(ServerLifecycleHooks.getCurrentServer().registryAccess().registry(Registries.BIOME).get().getKey((Biome)biome));
 		}
 		else if (entry instanceof Enchantment) {
 			namingFunction = enchant -> ObjectHelper.getEnchantmentName((Enchantment)enchant, 0);

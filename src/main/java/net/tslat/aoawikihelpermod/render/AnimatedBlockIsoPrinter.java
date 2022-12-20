@@ -2,10 +2,10 @@ package net.tslat.aoawikihelpermod.render;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.commands.CommandSourceStack;
@@ -16,6 +16,7 @@ import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
+import org.joml.Vector4f;
 
 import java.io.File;
 import java.io.IOException;
@@ -162,10 +163,15 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 			for (BakedQuad quad : model.getQuads(this.block, face, rand, ModelData.EMPTY, null)) {
 				TextureAtlasSprite sprite = quad.getSprite();
 
-				if (sprite.animatedTexture == null)
+				if (sprite.contents().animatedTexture == null)
 					continue;
 
-				if (sprite.animatedTexture.frame != 0 || sprite.animatedTexture.subFrame != 0)
+				SpriteContents.Ticker ticker = RenderUtil.getTickerForTexture(sprite.contents().animatedTexture);
+
+				if (ticker == null)
+					continue;
+
+				if (ticker.frame != 0 || ticker.subFrame != 0)
 					return false;
 			}
 		}
@@ -175,10 +181,15 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 		for (BakedQuad quad : model.getQuads(this.block, null, rand, ModelData.EMPTY, null)) {
 			TextureAtlasSprite sprite = quad.getSprite();
 
-			if (sprite.animatedTexture == null)
+			if (sprite.contents().animatedTexture == null)
 				continue;
 
-			if (sprite.animatedTexture.frame != 0 || sprite.animatedTexture.subFrame != 0)
+			SpriteContents.Ticker ticker = RenderUtil.getTickerForTexture(sprite.contents().animatedTexture);
+
+			if (ticker == null)
+				continue;
+
+			if (ticker.frame != 0 || ticker.subFrame != 0)
 				return false;
 		}
 
@@ -198,10 +209,10 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 				TextureAtlasSprite sprite = quad.getSprite();
 				int totalLength = 0;
 
-				if (sprite.animatedTexture == null)
+				if (sprite.contents().animatedTexture == null)
 					continue;
 
-				for (TextureAtlasSprite.FrameInfo frameInfo : sprite.animatedTexture.frames) {
+				for (SpriteContents.FrameInfo frameInfo : sprite.contents().animatedTexture.frames) {
 					totalLength += frameInfo.time;
 				}
 
@@ -215,10 +226,10 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 			TextureAtlasSprite sprite = quad.getSprite();
 			int totalLength = 0;
 
-			if (sprite.animatedTexture == null)
+			if (sprite.contents().animatedTexture == null)
 				continue;
 
-			for (TextureAtlasSprite.FrameInfo frameInfo : sprite.animatedTexture.frames) {
+			for (SpriteContents.FrameInfo frameInfo : sprite.contents().animatedTexture.frames) {
 				totalLength += frameInfo.time;
 			}
 
