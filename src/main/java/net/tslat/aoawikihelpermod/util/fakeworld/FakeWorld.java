@@ -183,7 +183,7 @@ public class FakeWorld extends Level implements WorldGenLevel {
 
 	@Override
 	public FeatureFlagSet enabledFeatures() {
-		return null;
+		return Minecraft.getInstance().level.enabledFeatures();
 	}
 
 	@Override
