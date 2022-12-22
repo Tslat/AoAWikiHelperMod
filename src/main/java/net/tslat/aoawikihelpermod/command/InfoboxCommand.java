@@ -22,7 +22,14 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("infobox").executes(CMD);
 
 		// Only supports blocks for now
-		builder.then(Commands.argument("id", BlocksCommand.BlockArgument.block()).executes(InfoboxCommand::printBlockInfobox));
+		builder.then(
+				Commands.literal("block")
+						.then(Commands.argument("id", BlocksCommand.BlockArgument.block()))
+		).executes(InfoboxCommand::printBlockInfobox);
+		builder.then(
+				Commands.literal("item")
+						.then(Commands.argument("id", BlocksCommand.BlockArgument.block()))
+		).executes(InfoboxCommand::printBlockInfobox);
 
 		return builder;
 	}
