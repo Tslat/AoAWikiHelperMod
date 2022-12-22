@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
@@ -28,8 +29,8 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 		).executes(InfoboxCommand::printBlockInfobox);
 		builder.then(
 				Commands.literal("item")
-						.then(Commands.argument("id", BlocksCommand.BlockArgument.block()))
-		).executes(InfoboxCommand::printBlockInfobox);
+						.then(Commands.argument("id", ItemsCommand.ItemArgument.item()))
+		).executes(InfoboxCommand::printItemInfobox);
 
 		return builder;
 	}
@@ -62,6 +63,18 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 		}
 
 		WikiHelperCommand.success(source, "Infobox", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+		return 1;
+	}
+
+	private static int printItemInfobox(CommandContext<CommandSourceStack> cmd) {
+		Item item = ItemsCommand.ItemArgument.getItem(cmd, "id").getItem();
+		CommandSourceStack source = cmd.getSource();
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+
+		WikiHelperCommand.info(cmd.getSource(), "Infobox", "Printing item infobox for '" + ForgeRegistries.ITEMS.getKey(item) + "'...");
+		String fileName = "Item Infobox - " + ObjectHelper.getItemName(item);
+
+		WikiHelperCommand.success(source, "Infobox", "super cool stuff");
 		return 1;
 	}
 }

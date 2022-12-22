@@ -126,8 +126,8 @@ public class BlocksCommand implements Command<CommandSourceStack> {
 			return this.block;
 		}
 
-		public boolean test(Block bl) {
-			return bl == block;
+		public boolean test(Block block) {
+			return block == this.block;
 		}
 	}
 
