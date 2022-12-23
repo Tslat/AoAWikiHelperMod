@@ -83,7 +83,7 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 
 		try (ItemInfoboxPrintHelper printHelper = ItemInfoboxPrintHelper.open(fileName)) {
 			printHelper.withClipboardOutput(clipboardContent);
-			printHelper.printItemInfobox(item);
+			printHelper.printItemInfobox(item, cmd.getSource().getEntity());
 
 			outputFile = printHelper.getOutputFile();
 		}

@@ -2,6 +2,8 @@ package net.tslat.aoawikihelpermod.util.printers.infoboxes;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Item;
@@ -55,21 +57,21 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		}
 	}
 
-	private static String getHunger(ItemStack itemStack) {
-		if(itemStack.getFoodProperties(null) == null) {
-			return "" + itemStack.getFoodProperties(null).getNutrition();
+	private static String getHunger(ItemStack itemStack, Entity entity) {
+		if (itemStack.getFoodProperties((LivingEntity) entity) == null) {
+			return "";
 		}
-		return "";
+		return "" + itemStack.getFoodProperties((LivingEntity) entity).getNutrition();
 	}
 
-	private static String getSaturation(ItemStack itemStack) {
-		if(itemStack.getFoodProperties(null) == null) {
-			return "" + itemStack.getFoodProperties(null).getSaturationModifier();
+	private static String getSaturation(ItemStack itemStack, Entity entity) {
+		if (itemStack.getFoodProperties((LivingEntity) entity) == null) {
+			return "";
 		}
-		return "";
+		return "" + itemStack.getFoodProperties((LivingEntity) entity).getSaturationModifier();
 	}
 
-	public void printItemInfobox(Item Item) {
+	public void printItemInfobox(Item Item, Entity entity) {
 		String displayName = ObjectHelper.getItemName(Item);
 		List<ResourceLocation> tags = getItemTags(Item);
 		ItemStack itemStack = new ItemStack(Item);
@@ -94,8 +96,8 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		write("|ammunition=");
 		write("|drawspeed=");
 		write("|firerate=");
-		write("|hunger=" + getHunger(itemStack));
-		write("|saturation=" + getSaturation(itemStack));
+		write("|hunger=" + getHunger(itemStack, entity));
+		write("|saturation=" + getSaturation(itemStack, entity));
 		write("|efficiency=");
 		write("|harvestlevel=");
 		write("|radius=");
