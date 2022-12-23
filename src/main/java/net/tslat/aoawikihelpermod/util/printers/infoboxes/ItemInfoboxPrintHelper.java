@@ -55,6 +55,20 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		}
 	}
 
+	private static String getHunger(ItemStack itemStack) {
+		if(itemStack.getFoodProperties(null) == null) {
+			return "" + itemStack.getFoodProperties(null).getNutrition();
+		}
+		return "";
+	}
+
+	private static String getSaturation(ItemStack itemStack) {
+		if(itemStack.getFoodProperties(null) == null) {
+			return "" + itemStack.getFoodProperties(null).getSaturationModifier();
+		}
+		return "";
+	}
+
 	public void printItemInfobox(Item Item) {
 		String displayName = ObjectHelper.getItemName(Item);
 		List<ResourceLocation> tags = getItemTags(Item);
@@ -69,19 +83,19 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		write("|itemimage=");
 		write("|armorimage=");
 		write("|armorimageold=");
-		write("|damage=");
+		write("|damage=" + itemStack.getDamageValue());
 		write("|specialdamage=");
 		write("|attackspeed=");
 		write("|knockback=");
 		write("|armor=");
 		write("|armortoughness=");
-		write("|durability=");
+		write("|durability=" + itemStack.getMaxDamage());
 		write("|ammo=");
 		write("|ammunition=");
 		write("|drawspeed=");
 		write("|firerate=");
-		write("|hunger=");
-		write("|saturation=");
+		write("|hunger=" + getHunger(itemStack));
+		write("|saturation=" + getSaturation(itemStack));
 		write("|efficiency=");
 		write("|harvestlevel=");
 		write("|radius=");
