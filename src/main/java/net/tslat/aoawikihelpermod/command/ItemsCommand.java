@@ -13,12 +13,8 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.item.ItemArgument;
-import net.minecraft.commands.arguments.item.ItemParser;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.dataskimmers.ItemDataSkimmer;
@@ -39,7 +35,7 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 	public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext buildContext) {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("items").executes(CMD);
 
-		builder.then(Commands.argument("item", ItemArgument.item(buildContext))
+		builder.then(Commands.argument("item", net.minecraft.commands.arguments.item.ItemArgument.item(buildContext))
 				.then(LiteralArgumentBuilder.<CommandSourceStack>literal("tags").executes(ItemsCommand::printTags)));
 
 		return builder;
@@ -57,7 +53,7 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printTags(CommandContext<CommandSourceStack> cmd) {
-		Item item = ItemArgument.getItem(cmd, "item").getItem();
+		Item item = net.minecraft.commands.arguments.item.ItemArgument.getItem(cmd, "item").getItem();
 		String itemName = ObjectHelper.getItemName(item);
 		File outputFile;
 		String fileName = "Item Tags - " + itemName;
@@ -101,27 +97,28 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 		}
 	}
 
-	public static class ItemArgument implements ArgumentType<ItemsCommand.ItemInput> {
-		private static final Collection<String> EXAMPLES = Arrays.asList("sword", "minecraft:torch", "aoa3:realmstone");
+	public static class ItemArgument implements ArgumentType<ItemInput> {
+		private static final Collection<String> EXAMPLES = Arrays.asList("minecraft:wooden_sword", "aoa3:limonite_sword");
 
-		public static ItemsCommand.ItemArgument item() {
-			return new ItemsCommand.ItemArgument();
+		public static ItemArgument item() {
+			return new ItemArgument();
 		}
 
-		public static ItemsCommand.ItemArgument item(CommandBuildContext buildContext) {
+		public static ItemArgument item(CommandBuildContext buildContext) {
 			return item();
 		}
 
 		@Override
-		public ItemsCommand.ItemInput parse(StringReader reader) throws CommandSyntaxException {
+		public ItemInput parse(StringReader reader) throws CommandSyntaxException {
 			ResourceLocation id = ResourceLocation.read(reader);
-			Item item = BuiltInRegistries.ITEM.getOptional(id).orElseThrow(() -> ItemParser.ERROR_UNKNOWN_ITEM.createWithContext(reader, id.toString()));
+			Item item = ForgeRegistries.ITEMS.getDelegateOrThrow(id).get();
+			//() -> ItemParser.ERROR_UNKNOWN_ITEM.createWithContext(reader, id.toString()));
 
-			return new ItemsCommand.ItemInput(item);
+			return new ItemInput(item);
 		}
 
-		public static ItemsCommand.ItemInput getItem(CommandContext<?> context, String argumentName) {
-			return context.getArgument(argumentName, ItemsCommand.ItemInput.class);
+		public static ItemInput getItem(CommandContext<?> context, String argumentName) {
+			return context.getArgument(argumentName, ItemInput.class);
 		}
 
 		@Override

@@ -19,6 +19,7 @@ import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.common.registration.AoARegistries;
 import net.tslat.aoawikihelpermod.command.BlocksCommand;
+import net.tslat.aoawikihelpermod.command.ItemsCommand;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.dataskimmers.*;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapters;
@@ -53,10 +54,13 @@ public class AoAWikiHelperMod {
 		MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::loadFinished);
 
-		SingletonArgumentInfo argumentInfo = SingletonArgumentInfo.contextAware(BlocksCommand.BlockArgument::block);
+		SingletonArgumentInfo blockArgumentInfo = SingletonArgumentInfo.contextAware(BlocksCommand.BlockArgument::block);
+		SingletonArgumentInfo itemArgumentInfo = SingletonArgumentInfo.contextAware(ItemsCommand.ItemArgument::item);
 
-		ArgumentTypeInfos.registerByClass(BlocksCommand.BlockArgument.class, argumentInfo);
-		AoARegistries.ARGUMENT_TYPES.register("wikihelper_block", () -> argumentInfo);
+		ArgumentTypeInfos.registerByClass(BlocksCommand.BlockArgument.class, blockArgumentInfo);
+		ArgumentTypeInfos.registerByClass(ItemsCommand.ItemArgument.class, blockArgumentInfo);
+		AoARegistries.ARGUMENT_TYPES.register("wikihelper_block", () -> blockArgumentInfo);
+		AoARegistries.ARGUMENT_TYPES.register("wikihelper_item", () -> itemArgumentInfo);
 	}
 
 	@SubscribeEvent
