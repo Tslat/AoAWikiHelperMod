@@ -58,7 +58,7 @@ public class AoAWikiHelperMod {
 		SingletonArgumentInfo itemArgumentInfo = SingletonArgumentInfo.contextAware(ItemsCommand.ItemArgument::item);
 
 		ArgumentTypeInfos.registerByClass(BlocksCommand.BlockArgument.class, blockArgumentInfo);
-		ArgumentTypeInfos.registerByClass(ItemsCommand.ItemArgument.class, blockArgumentInfo);
+		ArgumentTypeInfos.registerByClass(ItemsCommand.ItemArgument.class, itemArgumentInfo);
 		AoARegistries.ARGUMENT_TYPES.register("wikihelper_block", () -> blockArgumentInfo);
 		AoARegistries.ARGUMENT_TYPES.register("wikihelper_item", () -> itemArgumentInfo);
 	}

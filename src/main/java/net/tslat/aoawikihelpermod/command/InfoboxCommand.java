@@ -22,15 +22,20 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("infobox").executes(CMD);
 
-		// Only supports blocks for now
 		builder.then(
 				Commands.literal("block")
-						.then(Commands.argument("id", BlocksCommand.BlockArgument.block()))
-		).executes(InfoboxCommand::printBlockInfobox);
+						.then(
+								Commands.argument("id", BlocksCommand.BlockArgument.block())
+										.executes(InfoboxCommand::printBlockInfobox)
+						)
+		);
 		builder.then(
 				Commands.literal("item")
-						.then(Commands.argument("id", ItemsCommand.ItemArgument.item()))
-		).executes(InfoboxCommand::printItemInfobox);
+						.then(
+								Commands.argument("id", ItemsCommand.ItemArgument.item())
+										.executes(InfoboxCommand::printItemInfobox)
+						)
+		);
 
 		return builder;
 	}

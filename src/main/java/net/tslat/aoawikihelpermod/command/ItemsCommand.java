@@ -13,6 +13,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -111,10 +112,14 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 		@Override
 		public ItemInput parse(StringReader reader) throws CommandSyntaxException {
 			ResourceLocation id = ResourceLocation.read(reader);
-			Item item = ForgeRegistries.ITEMS.getDelegateOrThrow(id).get();
-			//() -> ItemParser.ERROR_UNKNOWN_ITEM.createWithContext(reader, id.toString()));
+			try {
+				Item item = ForgeRegistries.ITEMS.getDelegateOrThrow(id).get();
+				return new ItemInput(item);
+			} catch (Exception e) {
+				ItemParser.ERROR_UNKNOWN_ITEM.createWithContext(reader, id.toString());
+			}
 
-			return new ItemInput(item);
+			return null;
 		}
 
 		public static ItemInput getItem(CommandContext<?> context, String argumentName) {
