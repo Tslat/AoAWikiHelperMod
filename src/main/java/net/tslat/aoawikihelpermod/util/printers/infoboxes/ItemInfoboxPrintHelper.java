@@ -64,7 +64,7 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		write(HEAD);
 		write("|name=" + displayName);
 		write("|image=" + displayName + ".png");
-		write("|imgsize=" + Item_IMAGE_SIZE);
+		write("|imgsize=" + ITEM_IMAGE_SIZE);
 		write("|imglist=");
 		write("|itemimage=");
 		write("|armorimage=");
@@ -91,7 +91,7 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		write("|tooltip=");
 		write("|stackable=" + (stackSize == 1 ? "No" : "Yes (" + stackSize + ")"));
 		write("|raritycolor=" + convertRarityColor(itemStack.getRarity()));
-		write("|id=" + ForgeRegistries.ItemS.getKey(Item));
+		write("|id=" + ForgeRegistries.ITEMS.getKey(Item));
 		write("|versionadded=");
 		write(END);
 	}

@@ -13,6 +13,7 @@ import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.infoboxes.BlockInfoboxPrintHelper;
+import net.tslat.aoawikihelpermod.util.printers.infoboxes.ItemInfoboxPrintHelper;
 
 import java.io.File;
 
@@ -75,11 +76,19 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 		Item item = ItemsCommand.ItemArgument.getItem(cmd, "id").getItem();
 		CommandSourceStack source = cmd.getSource();
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+		File outputFile;
 
 		WikiHelperCommand.info(cmd.getSource(), "Infobox", "Printing item infobox for '" + ForgeRegistries.ITEMS.getKey(item) + "'...");
 		String fileName = "Item Infobox - " + ObjectHelper.getItemName(item);
 
-		WikiHelperCommand.success(source, "Infobox", "super cool stuff");
+		try (ItemInfoboxPrintHelper printHelper = ItemInfoboxPrintHelper.open(fileName)) {
+			printHelper.withClipboardOutput(clipboardContent);
+			printHelper.printItemInfobox(item);
+
+			outputFile = printHelper.getOutputFile();
+		}
+
+		WikiHelperCommand.success(source, "Infobox", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
 		return 1;
 	}
 }
