@@ -4,9 +4,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
@@ -71,7 +73,24 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		return "" + itemStack.getFoodProperties((LivingEntity) entity).getSaturationModifier();
 	}
 
-	public void printItemInfobox(Item Item, Entity entity) {
+	private static String getRange(ItemStack itemStack, Entity entity) {
+		double range = 0;
+		AABB box = itemStack.getSweepHitBox((Player) entity, entity);
+		if (box.getXsize() > range) range = box.getXsize();
+		if (box.getYsize() > range) range = box.getYsize();
+		if (box.getZsize() > range) range = box.getZsize();
+		if (range == 0) {
+			return "";
+		}
+		return "" + range;
+	}
+
+	private <T extends Number> String noStringIfZero(T input) {
+		if (input.equals(0)) return "";
+		return "" + input;
+	}
+
+	public void printItemInfobox(Item Item, Entity player) {
 		String displayName = ObjectHelper.getItemName(Item);
 		List<ResourceLocation> tags = getItemTags(Item);
 		ItemStack itemStack = new ItemStack(Item);
@@ -85,22 +104,22 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		write("|itemimage=");
 		write("|armorimage=");
 		write("|armorimageold=");
-		write("|damage=" + itemStack.getDamageValue());
+		write("|damage=");//+ noStringIfZero(itemStack.getAttributeModifiers()));
 		write("|specialdamage=");
 		write("|attackspeed=");
 		write("|knockback=");
 		write("|armor=");
 		write("|armortoughness=");
-		write("|durability=" + itemStack.getMaxDamage());
+		write("|durability=" + noStringIfZero(itemStack.getMaxDamage()));
 		write("|ammo=");
 		write("|ammunition=");
 		write("|drawspeed=");
 		write("|firerate=");
-		write("|hunger=" + getHunger(itemStack, entity));
-		write("|saturation=" + getSaturation(itemStack, entity));
+		write("|hunger=" + getHunger(itemStack, player));
+		write("|saturation=" + getSaturation(itemStack, player));
 		write("|efficiency=");
 		write("|harvestlevel=");
-		write("|radius=");
+		write("|radius=" + getRange(itemStack, player));
 		write("|penetration=");
 		write("|effect=");
 		write("|skillreq=");
