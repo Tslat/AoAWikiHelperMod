@@ -1,15 +1,19 @@
 package net.tslat.aoawikihelpermod.util.printers.infoboxes;
 
+import com.google.common.collect.Multimap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.*;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 
@@ -79,10 +83,29 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		if (box.getXsize() > range) range = box.getXsize();
 		if (box.getYsize() > range) range = box.getYsize();
 		if (box.getZsize() > range) range = box.getZsize();
-		if (range == 0) {
-			return "";
-		}
-		return "" + range;
+		if (range > 0)return "" + NumberUtil.roundToNthDecimalPlace(range, 2);
+		return "";
+	}
+
+	private static String getAttackSpeed(ItemStack itemStack){
+		Item item = itemStack.getItem();
+		double attackSpeed = ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_SPEED) + 4;
+		if(attackSpeed > 0)return "" + NumberUtil.roundToNthDecimalPlace(attackSpeed, 2) + "/sec";
+		return "";
+	}
+
+	private static String getAttackDamage(ItemStack itemStack){
+		Item item = itemStack.getItem();
+		float damage = (float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_DAMAGE);
+		if(damage > 0)return "" + NumberUtil.roundToNthDecimalPlace(damage, 2) + "";
+		return "";
+	}
+
+	private static String getAttribute(ItemStack itemStack, Attribute attribute, double offset, String suffix) {
+		Item item = itemStack.getItem();
+		double value = (double)ObjectHelper.getAttributeFromItem(item, attribute) + offset;
+		if(damage > 0)return "" + NumberUtil.roundToNthDecimalPlace(damage, 2) + suffix;
+		return "";
 	}
 
 	private <T extends Number> String noStringIfZero(T input) {
@@ -104,12 +127,12 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		write("|itemimage=");
 		write("|armorimage=");
 		write("|armorimageold=");
-		write("|damage=");//+ noStringIfZero(itemStack.getAttributeModifiers()));
-		write("|specialdamage=");
-		write("|attackspeed=");
-		write("|knockback=");
-		write("|armor=");
-		write("|armortoughness=");
+		write("|damage=" + getAttribute(itemStack, Attributes.ATTACK_DAMAGE, 0, ""));
+		write("|specialdamage="); // manual input
+		write("|attackspeed=" + getAttribute(itemStack, Attributes.ATTACK_SPEED, 4, "/sec"));
+		write("|knockback=" + getAttribute(itemStack, Attributes.ATTACK_KNOCKBACK, 0, ""));
+		write("|armor=" + getAttribute(itemStack, Attributes.ARMOR, 0, ""));
+		write("|armortoughness=" + getAttribute(itemStack, Attributes.ARMOR_TOUGHNESS, 0, ""));
 		write("|durability=" + noStringIfZero(itemStack.getMaxDamage()));
 		write("|ammo=");
 		write("|ammunition=");
