@@ -81,15 +81,6 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		return "" + itemStack.getFoodProperties((LivingEntity) entity).getSaturationModifier();
 	}
 
-	private static String getRadius(ItemStack itemStack, Entity entity) {
-		Item item = itemStack.getItem();
-		if(item instanceof BaseGun) {
-			Player player = (Player) entity;
-			BaseBullet bullet = ((BaseGun)item).createProjectileEntity((LivingEntity)player, itemStack, InteractionHand.MAIN_HAND);
-		}
-		return "";
-	}
-
 	private static String getAttribute(ItemStack itemStack, Attribute attribute, double offset, String suffix) {
 		double value = (double) ObjectHelper.getAttributeFromItem(itemStack.getItem(), attribute) + offset;
 		if (value > 0) return NumberUtil.roundToNthDecimalPlace((float) value, 2) + suffix;
@@ -158,6 +149,11 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		return "" + input;
 	}
 
+	private void writeIfExists(String name, String value) {
+		if (value.length() == 0) return;
+		write(name, value);
+	}
+
 	public void printItemInfobox(Item Item, Entity player) {
 		String displayName = ObjectHelper.getItemName(Item);
 		List<ResourceLocation> tags = getItemTags(Item);
@@ -165,32 +161,32 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		int stackSize = itemStack.getItem().getMaxStackSize();
 
 		write(HEAD);
-		write("|name=" + displayName);
-		write("|image=" + displayName + ".png");
-		write("|imgsize=" + ITEM_IMAGE_SIZE);
+		writeIfExists("|name=", displayName);
+		writeIfExists("|image=", displayName + ".png");
+		//write("|imgsize=" + ITEM_IMAGE_SIZE);
 		write("|imglist=");
 		write("|itemimage=");
 		write("|armorimage=");
 		write("|armorimageold=");
-		write("|damage=" + getAttribute(itemStack, Attributes.ATTACK_DAMAGE, 0, ""));
+		writeIfExists("|damage=", getAttribute(itemStack, Attributes.ATTACK_DAMAGE, 0, ""));
 		write("|specialdamage="); // manual input
-		write("|" +
-				(isGun(itemStack) ? "unholstertime" : "attackspeed") + "=" + getAttribute(itemStack, Attributes.ATTACK_SPEED, 4, "/sec"))
+		writeIfExists("|" +
+				(isGun(itemStack) ? "unholstertime" : "attackspeed") + "=", getAttribute(itemStack, Attributes.ATTACK_SPEED, 4, "/sec"))
 		;
-		write("|knockback=" + getAttribute(itemStack, Attributes.ATTACK_KNOCKBACK, 0, ""));
-		write("|armor=" + getAttribute(itemStack, Attributes.ARMOR, 0, ""));
-		write("|armortoughness=" + getAttribute(itemStack, Attributes.ARMOR_TOUGHNESS, 0, ""));
-		write("|durability=" + noStringIfZero(itemStack.getMaxDamage()));
-		write("|ammo=" + getAmmoType(itemStack));
+		writeIfExists("|knockback=", getAttribute(itemStack, Attributes.ATTACK_KNOCKBACK, 0, ""));
+		writeIfExists("|armor=", getAttribute(itemStack, Attributes.ARMOR, 0, ""));
+		writeIfExists("|armortoughness=", getAttribute(itemStack, Attributes.ARMOR_TOUGHNESS, 0, ""));
+		writeIfExists("|durability=", noStringIfZero(itemStack.getMaxDamage()));
+		writeIfExists("|ammo=", getAmmoType(itemStack));
 		write("|ammunition="); // can be omitted
-		write("|drawspeed=" + getDrawSpeed(itemStack));
-		write("|firerate=" + getFireRate(itemStack));
-		write("|hunger=" + getHunger(itemStack, player));
-		write("|saturation=" + getSaturation(itemStack, player));
-		write("|efficiency=" + getEfficiency(itemStack));
-		write("|harvestlevel=" + getHarvestLevel(itemStack));
-		write("|radius=" + getRadius(itemStack, player));
-		write("|penetration=");
+		writeIfExists("|drawspeed=", getDrawSpeed(itemStack));
+		writeIfExists("|firerate=", getFireRate(itemStack));
+		writeIfExists("|hunger=", getHunger(itemStack, player));
+		writeIfExists("|saturation=", getSaturation(itemStack, player));
+		writeIfExists("|efficiency=", getEfficiency(itemStack));
+		writeIfExists("|harvestlevel=", getHarvestLevel(itemStack));
+		//write("|radius=" );
+		//write("|penetration=");
 		//write("|range=" + getAttribute(itemStack, (Attribute) ForgeMod.ATTACK_RANGE.get(), 0, ""));
 		write("|effect=");
 		write("|skillreq=");
