@@ -2,6 +2,7 @@ package net.tslat.aoawikihelpermod.util.printers.infoboxes;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -11,6 +12,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoa3.content.entity.projectile.gun.BaseBullet;
 import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
 import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
 import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
@@ -79,13 +81,11 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		return "" + itemStack.getFoodProperties((LivingEntity) entity).getSaturationModifier();
 	}
 
-	private static String getRange(ItemStack itemStack, Entity entity) {
-		double range = 0;
-		AABB box = itemStack.getSweepHitBox((Player) entity, entity);
-		if (box.getXsize() > range) range = box.getXsize();
-		if (box.getYsize() > range) range = box.getYsize();
-		if (box.getZsize() > range) range = box.getZsize();
-		if (range > 0) return NumberUtil.roundToNthDecimalPlace((float) range, 2);
+	private static String getRadius(ItemStack itemStack, Entity entity) {
+		Item item = itemStack.getItem();
+		if(item instanceof BaseGun) {
+			BaseBullet bullet = ((BaseGun)item).createProjectileEntity((LivingEntity)player, itemStack, InteractionHand.MAIN_HAND);
+		}
 		return "";
 	}
 
@@ -188,8 +188,9 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		write("|saturation=" + getSaturation(itemStack, player));
 		write("|efficiency=" + getEfficiency(itemStack));
 		write("|harvestlevel=" + getHarvestLevel(itemStack));
-		//write("|radius=" + getAttribute(itemStack, (Attribute) ForgeMod.ATTACK_RANGE.get(), 0, ""));
+		write("|radius=" + getRadius(itemStack, player));
 		write("|penetration=");
+		//write("|range=" + getAttribute(itemStack, (Attribute) ForgeMod.ATTACK_RANGE.get(), 0, ""));
 		write("|effect=");
 		write("|skillreq=");
 		write("|tooltip=");
