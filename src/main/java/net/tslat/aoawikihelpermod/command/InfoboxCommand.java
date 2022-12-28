@@ -1,24 +1,57 @@
 package net.tslat.aoawikihelpermod.command;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
+import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
+import net.tslat.aoa3.content.item.weapon.cannon.BaseCannon;
+import net.tslat.aoa3.content.item.weapon.crossbow.BaseCrossbow;
+import net.tslat.aoa3.content.item.weapon.greatblade.BaseGreatblade;
+import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
+import net.tslat.aoa3.content.item.weapon.maul.BaseMaul;
+import net.tslat.aoa3.content.item.weapon.shotgun.BaseShotgun;
+import net.tslat.aoa3.content.item.weapon.sniper.BaseSniper;
+import net.tslat.aoa3.content.item.weapon.staff.BaseStaff;
+import net.tslat.aoa3.content.item.weapon.sword.BaseSword;
+import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
+import net.tslat.aoa3.content.item.weapon.vulcane.BaseVulcane;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.infoboxes.BlockInfoboxPrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.infoboxes.ItemInfoboxPrintHelper;
+import org.checkerframework.checker.units.qual.C;
 
 import java.io.File;
+import java.util.Map;
 
 public class InfoboxCommand implements Command<CommandSourceStack> {
 	private static final InfoboxCommand CMD = new InfoboxCommand();
+
+	private static final Map<String, Class<? extends Item>> CLASSES = Map.ofEntries(
+			Map.entry("blaster", BaseBlaster.class),
+			Map.entry("bow", BaseBow.class),
+			Map.entry("cannon", BaseCannon.class),
+			Map.entry("crossbow", BaseCrossbow.class),
+			Map.entry("greatblade", BaseGreatblade.class),
+			Map.entry("gun", BaseGun.class),
+			Map.entry("maul", BaseMaul.class),
+			Map.entry("shotgun", BaseShotgun.class),
+			Map.entry("sniper", BaseSniper.class),
+			Map.entry("staff", BaseStaff.class),
+			Map.entry("sword", BaseSword.class),
+			Map.entry("thrown", BaseThrownWeapon.class),
+			Map.entry("vulcane", BaseVulcane.class)
+	);
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("infobox").executes(CMD);
@@ -37,6 +70,15 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 										.executes(InfoboxCommand::printItemInfobox)
 						)
 		);
+		CLASSES.forEach((key, value) -> {
+			builder.then(
+					Commands.literal(key)
+							.then(
+									Commands.argument("id", ItemsCommand.ItemArgumentByType.item(value))
+											.executes(InfoboxCommand::printItemInfobox)
+							)
+			);
+		});
 
 		return builder;
 	}

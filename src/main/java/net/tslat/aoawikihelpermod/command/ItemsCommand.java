@@ -25,6 +25,7 @@ import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.ItemDataPrintHandler;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.concurrent.CompletableFuture;
@@ -133,6 +134,66 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 			reader.setCursor(builder.getStart());
 
 			return SharedSuggestionProvider.suggestResource(ForgeRegistries.ITEMS.getKeys(), builder.createOffset(reader.getCursor()));
+		}
+
+		@Override
+		public Collection<String> getExamples() {
+			return EXAMPLES;
+		}
+	}
+
+	public static class ItemArgumentByType implements ArgumentType<ItemInput> {
+		ItemArgumentByType(Class<? extends Item> type){
+			this.type = type;
+		}
+		private static final Collection<String> EXAMPLES = Arrays.asList("minecraft:wooden_sword", "aoa3:limonite_sword");
+
+		private Class<? extends Item> type;
+		private ArrayList<ResourceLocation> suggestions = new ArrayList<ResourceLocation>();
+		private ArrayList<ResourceLocation> getSuggestions() {
+			if(suggestions.size() == 0) {
+				for (ResourceLocation key : ForgeRegistries.ITEMS.getKeys()){
+					try {
+						Item itemFromId = ForgeRegistries.ITEMS.getDelegateOrThrow(id).get();
+						if(type.isInstance(itemFromId)){
+							this.suggestions.add(key);
+						}
+					} catch (Exception e) {
+						ItemParser.ERROR_UNKNOWN_ITEM.createWithContext(reader, id.toString());
+					}
+				}
+			}
+			return this.suggestions;
+		}
+
+		public static ItemArgumentByType item(Class<? extends Item> type) {
+			return new ItemArgumentByType(type);
+		}
+
+		@Override
+		public ItemInput parse(StringReader reader) throws CommandSyntaxException {
+			ResourceLocation id = ResourceLocation.read(reader);
+			try {
+				Item item = ForgeRegistries.ITEMS.getDelegateOrThrow(id).get();
+				return new ItemInput(item);
+			} catch (Exception e) {
+				ItemParser.ERROR_UNKNOWN_ITEM.createWithContext(reader, id.toString());
+			}
+
+			return null;
+		}
+
+		public static ItemInput getItem(CommandContext<?> context, String argumentName) {
+			return context.getArgument(argumentName, ItemInput.class);
+		}
+
+		@Override
+		public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+			StringReader reader = new StringReader(builder.getInput());
+
+			reader.setCursor(builder.getStart());
+
+			return SharedSuggestionProvider.suggestResource(getSuggestions(), builder.createOffset(reader.getCursor()));
 		}
 
 		@Override
