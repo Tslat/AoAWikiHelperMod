@@ -84,6 +84,7 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 	private static String getRadius(ItemStack itemStack, Entity entity) {
 		Item item = itemStack.getItem();
 		if(item instanceof BaseGun) {
+			Player player = (Player) entity;
 			BaseBullet bullet = ((BaseGun)item).createProjectileEntity((LivingEntity)player, itemStack, InteractionHand.MAIN_HAND);
 		}
 		return "";
