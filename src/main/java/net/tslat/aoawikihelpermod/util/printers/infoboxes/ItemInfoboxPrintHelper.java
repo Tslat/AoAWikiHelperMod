@@ -1,18 +1,20 @@
 package net.tslat.aoawikihelpermod.util.printers.infoboxes;
 
-import com.google.common.collect.Multimap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
+import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
+import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
+import net.tslat.aoa3.content.item.weapon.shotgun.BaseShotgun;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
@@ -83,29 +85,71 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		if (box.getXsize() > range) range = box.getXsize();
 		if (box.getYsize() > range) range = box.getYsize();
 		if (box.getZsize() > range) range = box.getZsize();
-		if (range > 0)return "" + NumberUtil.roundToNthDecimalPlace(range, 2);
-		return "";
-	}
-
-	private static String getAttackSpeed(ItemStack itemStack){
-		Item item = itemStack.getItem();
-		double attackSpeed = ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_SPEED) + 4;
-		if(attackSpeed > 0)return "" + NumberUtil.roundToNthDecimalPlace(attackSpeed, 2) + "/sec";
-		return "";
-	}
-
-	private static String getAttackDamage(ItemStack itemStack){
-		Item item = itemStack.getItem();
-		float damage = (float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_DAMAGE);
-		if(damage > 0)return "" + NumberUtil.roundToNthDecimalPlace(damage, 2) + "";
+		if (range > 0) return NumberUtil.roundToNthDecimalPlace((float) range, 2);
 		return "";
 	}
 
 	private static String getAttribute(ItemStack itemStack, Attribute attribute, double offset, String suffix) {
-		Item item = itemStack.getItem();
-		double value = (double)ObjectHelper.getAttributeFromItem(item, attribute) + offset;
-		if(damage > 0)return "" + NumberUtil.roundToNthDecimalPlace(damage, 2) + suffix;
+		double value = (double) ObjectHelper.getAttributeFromItem(itemStack.getItem(), attribute) + offset;
+		if (value > 0) return NumberUtil.roundToNthDecimalPlace((float) value, 2) + suffix;
 		return "";
+	}
+
+	private static String getHarvestLevel(ItemStack itemStack) {
+		Item item = itemStack.getItem();
+		if (item instanceof TieredItem) {
+			Tier tier = ((TieredItem) item).getTier();
+			int level = tier.getLevel();
+			if (level > 0) return "" + level;
+		}
+		return "";
+	}
+
+	private static String getEfficiency(ItemStack itemStack) {
+		Item item = itemStack.getItem();
+		if (item instanceof TieredItem) {
+			Tier tier = ((TieredItem) item).getTier();
+			float speed = tier.getSpeed();
+			if (speed > 0) return NumberUtil.roundToNthDecimalPlace(speed, 2);
+		}
+		return "";
+	}
+
+	private static String getDrawSpeed(ItemStack itemStack) {
+		Item item = itemStack.getItem();
+		if (item instanceof BaseBow) {
+			BaseBow bow = (BaseBow) itemStack.getItem();
+			double speed = bow.getDrawSpeedMultiplier();
+			if (speed > 0) return NumberUtil.roundToNthDecimalPlace((float) (1 / speed), 2) + "s";
+		}
+		return "";
+	}
+
+	private static String getFireRate(ItemStack itemStack) {
+		Item item = itemStack.getItem();
+		if (item instanceof BaseGun) {
+			BaseGun gun = (BaseGun) itemStack.getItem();
+			double fireRate = gun.getFiringDelay();
+			if (fireRate > 0) return NumberUtil.roundToNthDecimalPlace((float) (20 / fireRate), 2) + "/sec";
+		}
+		return "";
+	}
+
+	private static String getAmmoType(ItemStack itemStack) {
+		Item item = itemStack.getItem();
+		if (item instanceof BaseGun) {
+			BaseGun gun = (BaseGun) itemStack.getItem();
+			Item ammo = gun.getAmmoItem();
+			return ammo.getName(new ItemStack(ammo)).getString();
+		}
+		return "";
+	}
+
+	private boolean isGun(ItemStack itemStack) {
+		if (itemStack.getItem() instanceof BaseGun) {
+			return true;
+		}
+		return false;
 	}
 
 	private <T extends Number> String noStringIfZero(T input) {
@@ -129,20 +173,22 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		write("|armorimageold=");
 		write("|damage=" + getAttribute(itemStack, Attributes.ATTACK_DAMAGE, 0, ""));
 		write("|specialdamage="); // manual input
-		write("|attackspeed=" + getAttribute(itemStack, Attributes.ATTACK_SPEED, 4, "/sec"));
+		write("|" +
+				(isGun(itemStack) ? "unholstertime" : "attackspeed") + "=" + getAttribute(itemStack, Attributes.ATTACK_SPEED, 4, "/sec"))
+		;
 		write("|knockback=" + getAttribute(itemStack, Attributes.ATTACK_KNOCKBACK, 0, ""));
 		write("|armor=" + getAttribute(itemStack, Attributes.ARMOR, 0, ""));
 		write("|armortoughness=" + getAttribute(itemStack, Attributes.ARMOR_TOUGHNESS, 0, ""));
 		write("|durability=" + noStringIfZero(itemStack.getMaxDamage()));
-		write("|ammo=");
-		write("|ammunition=");
-		write("|drawspeed=");
-		write("|firerate=");
+		write("|ammo=" + getAmmoType(itemStack));
+		write("|ammunition="); // can be omitted
+		write("|drawspeed=" + getDrawSpeed(itemStack));
+		write("|firerate=" + getFireRate(itemStack));
 		write("|hunger=" + getHunger(itemStack, player));
 		write("|saturation=" + getSaturation(itemStack, player));
-		write("|efficiency=");
-		write("|harvestlevel=");
-		write("|radius=" + getRange(itemStack, player));
+		write("|efficiency=" + getEfficiency(itemStack));
+		write("|harvestlevel=" + getHarvestLevel(itemStack));
+		//write("|radius=" + getAttribute(itemStack, (Attribute) ForgeMod.ATTACK_RANGE.get(), 0, ""));
 		write("|penetration=");
 		write("|effect=");
 		write("|skillreq=");
