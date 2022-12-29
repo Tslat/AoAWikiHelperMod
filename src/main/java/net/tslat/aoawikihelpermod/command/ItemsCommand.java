@@ -17,6 +17,19 @@ import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
+import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
+import net.tslat.aoa3.content.item.weapon.cannon.BaseCannon;
+import net.tslat.aoa3.content.item.weapon.crossbow.BaseCrossbow;
+import net.tslat.aoa3.content.item.weapon.greatblade.BaseGreatblade;
+import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
+import net.tslat.aoa3.content.item.weapon.maul.BaseMaul;
+import net.tslat.aoa3.content.item.weapon.shotgun.BaseShotgun;
+import net.tslat.aoa3.content.item.weapon.sniper.BaseSniper;
+import net.tslat.aoa3.content.item.weapon.staff.BaseStaff;
+import net.tslat.aoa3.content.item.weapon.sword.BaseSword;
+import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
+import net.tslat.aoa3.content.item.weapon.vulcane.BaseVulcane;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.dataskimmers.ItemDataSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -27,6 +40,7 @@ import net.tslat.aoawikihelpermod.util.printers.handlers.ItemDataPrintHandler;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.concurrent.CompletableFuture;
 import java.util.Collection;
@@ -142,7 +156,23 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 		}
 	}
 
-	public static class ItemArgumentByType<T extends Item> implements ArgumentType<ItemInput> {
+	public static final Map<String, Class<? extends ItemArgumentByType>> ITEM_ARGUMENT_CLASSES = Map.ofEntries(
+			Map.entry("blaster", ItemArgumentTypeBlaster.class),
+			Map.entry("bow", ItemArgumentTypeBow.class),
+			Map.entry("cannon", ItemArgumentTypeCannon.class),
+			Map.entry("crossbow", ItemArgumentTypeCrossbow.class),
+			Map.entry("greatblade", ItemArgumentTypeGreatblade.class),
+			Map.entry("gun", ItemArgumentTypeGun.class),
+			Map.entry("maul", ItemArgumentTypeMaul.class),
+			Map.entry("shotgun", ItemArgumentTypeShotgun.class),
+			Map.entry("sniper", ItemArgumentTypeSniper.class),
+			Map.entry("staff", ItemArgumentTypeStaff.class),
+			Map.entry("sword", ItemArgumentTypeSword.class),
+			Map.entry("thrown", ItemArgumentTypeThrownWeapon.class),
+			Map.entry("vulcane", ItemArgumentTypeVulcane.class)
+	);
+
+	public static class ItemArgumentByType implements ArgumentType<ItemInput> {
 		ItemArgumentByType(Class<? extends Item> type) {
 			this.type = type;
 		}
@@ -206,4 +236,84 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 			return EXAMPLES;
 		}
 	}
+
+	public static class ItemArgumentTypeBlaster extends ItemArgumentByType {
+		public ItemArgumentTypeBlaster() {
+			super(BaseBlaster.class);
+		}
+	}
+
+	public static class ItemArgumentTypeBow extends ItemArgumentByType {
+		public ItemArgumentTypeBow() {
+			super(BaseBow.class);
+		}
+	}
+
+	public static class ItemArgumentTypeCannon extends ItemArgumentByType {
+		public ItemArgumentTypeCannon() {
+			super(BaseCannon.class);
+		}
+	}
+
+	public static class ItemArgumentTypeCrossbow extends ItemArgumentByType {
+		public ItemArgumentTypeCrossbow() {
+			super(BaseCrossbow.class);
+		}
+	}
+
+	public static class ItemArgumentTypeGreatblade extends ItemArgumentByType {
+		public ItemArgumentTypeGreatblade() {
+			super(BaseGreatblade.class);
+		}
+	}
+
+	public static class ItemArgumentTypeGun extends ItemArgumentByType {
+		public ItemArgumentTypeGun() {
+			super(BaseGun.class);
+		}
+	}
+
+	public static class ItemArgumentTypeMaul extends ItemArgumentByType {
+		public ItemArgumentTypeMaul() {
+			super(BaseMaul.class);
+		}
+	}
+
+	public static class ItemArgumentTypeShotgun extends ItemArgumentByType {
+		public ItemArgumentTypeShotgun() {
+			super(BaseShotgun.class);
+		}
+	}
+
+	public static class ItemArgumentTypeSniper extends ItemArgumentByType {
+		public ItemArgumentTypeSniper() {
+			super(BaseSniper.class);
+		}
+	}
+
+	public static class ItemArgumentTypeStaff extends ItemArgumentByType {
+		public ItemArgumentTypeStaff() {
+			super(BaseStaff.class);
+		}
+	}
+
+	public static class ItemArgumentTypeSword extends ItemArgumentByType {
+		public ItemArgumentTypeSword() {
+			super(BaseSword.class);
+		}
+	}
+
+	public static class ItemArgumentTypeThrownWeapon extends ItemArgumentByType {
+		public ItemArgumentTypeThrownWeapon() {
+			super(BaseThrownWeapon.class);
+		}
+	}
+
+	public static class ItemArgumentTypeVulcane extends ItemArgumentByType {
+		public ItemArgumentTypeVulcane() {
+			super(BaseVulcane.class);
+		}
+	}
+
+
 }

@@ -64,9 +64,9 @@ public class AoAWikiHelperMod {
 		ArgumentTypeInfos.registerByClass(ItemsCommand.ItemArgument.class, itemArgumentInfo);
 		AoARegistries.ARGUMENT_TYPES.register("wikihelper_item", () -> itemArgumentInfo);
 
-		ObjectHelper.ITEM_CLASSES.forEach((key, value) -> {
+		ItemsCommand.ITEM_ARGUMENT_CLASSES.forEach((key, value) -> {
 			SingletonArgumentInfo argumentInfo = SingletonArgumentInfo.contextAware((CommandBuildContext buildContext) -> ItemsCommand.ItemArgumentByType.item(buildContext, value));
-			ArgumentTypeInfos.registerByClass(value, argumentInfo);
+			ArgumentTypeInfos.registerByClass(ItemsCommand.ITEM_ARGUMENT_CLASSES.get(key), argumentInfo);
 			AoARegistries.ARGUMENT_TYPES.register("wikihelper_item_" + key, () -> argumentInfo);
 		});
 	}

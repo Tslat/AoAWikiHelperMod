@@ -32,6 +32,7 @@ import net.tslat.aoawikihelpermod.util.printers.infoboxes.ItemInfoboxPrintHelper
 import org.checkerframework.checker.units.qual.C;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 public class InfoboxCommand implements Command<CommandSourceStack> {
@@ -54,14 +55,18 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 										.executes(InfoboxCommand::printItemInfobox)
 						)
 		);
-		ObjectHelper.ITEM_CLASSES.forEach((key, value) -> {
-			builder.then(
-					Commands.literal(key)
-							.then(
-									Commands.argument("id", ItemsCommand.ItemArgumentByType.item(value))
-											.executes(InfoboxCommand::printItemInfobox)
-							)
-			);
+		ItemsCommand.ITEM_ARGUMENT_CLASSES.forEach((key, value) -> {
+			try {
+				builder.then(
+						Commands.literal(key)
+								.then(
+										Commands.argument("id", value.getConstructor().newInstance())
+												.executes(InfoboxCommand::printItemInfobox)
+								)
+				);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		});
 
 		return builder;

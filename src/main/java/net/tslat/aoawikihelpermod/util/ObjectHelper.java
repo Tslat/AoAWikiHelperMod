@@ -442,20 +442,4 @@ public class ObjectHelper {
 
 		return namingFunction;
 	}
-
-	public static final Map<String, Class<? extends Item>> ITEM_CLASSES = Map.ofEntries(
-			Map.entry("blaster", BaseBlaster.class),
-			Map.entry("bow", BaseBow.class),
-			Map.entry("cannon", BaseCannon.class),
-			Map.entry("crossbow", BaseCrossbow.class),
-			Map.entry("greatblade", BaseGreatblade.class),
-			Map.entry("gun", BaseGun.class),
-			Map.entry("maul", BaseMaul.class),
-			Map.entry("shotgun", BaseShotgun.class),
-			Map.entry("sniper", BaseSniper.class),
-			Map.entry("staff", BaseStaff.class),
-			Map.entry("sword", BaseSword.class),
-			Map.entry("thrown", BaseThrownWeapon.class),
-			Map.entry("vulcane", BaseVulcane.class)
-	);
 }
