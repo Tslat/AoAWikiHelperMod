@@ -142,24 +142,25 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 		}
 	}
 
-	public static class ItemArgumentByType implements ArgumentType<ItemInput> {
-		ItemArgumentByType(Class<? extends Item> type){
+	public static class ItemArgumentByType<T extends Item> implements ArgumentType<ItemInput> {
+		ItemArgumentByType(Class<? extends Item> type) {
 			this.type = type;
 		}
+
 		private static final Collection<String> EXAMPLES = Arrays.asList("minecraft:wooden_sword", "aoa3:limonite_sword");
 
 		private Class<? extends Item> type;
 		private ArrayList<ResourceLocation> suggestions = new ArrayList<ResourceLocation>();
+
 		private ArrayList<ResourceLocation> getSuggestions() {
-			if(suggestions.size() == 0) {
-				for (ResourceLocation key : ForgeRegistries.ITEMS.getKeys()){
+			if (suggestions.size() == 0) {
+				for (ResourceLocation key : ForgeRegistries.ITEMS.getKeys()) {
 					try {
-						Item itemFromId = ForgeRegistries.ITEMS.getDelegateOrThrow(id).get();
-						if(type.isInstance(itemFromId)){
+						Item itemFromId = ForgeRegistries.ITEMS.getDelegateOrThrow(key).get();
+						if (type.isInstance(itemFromId)) {
 							this.suggestions.add(key);
 						}
 					} catch (Exception e) {
-						ItemParser.ERROR_UNKNOWN_ITEM.createWithContext(reader, id.toString());
 					}
 				}
 			}
@@ -168,6 +169,10 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 
 		public static ItemArgumentByType item(Class<? extends Item> type) {
 			return new ItemArgumentByType(type);
+		}
+
+		public static ItemArgumentByType item(CommandBuildContext buildContext, Class<? extends Item> type) {
+			return item(type);
 		}
 
 		@Override

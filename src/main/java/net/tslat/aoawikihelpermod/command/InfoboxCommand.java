@@ -37,22 +37,6 @@ import java.util.Map;
 public class InfoboxCommand implements Command<CommandSourceStack> {
 	private static final InfoboxCommand CMD = new InfoboxCommand();
 
-	private static final Map<String, Class<? extends Item>> CLASSES = Map.ofEntries(
-			Map.entry("blaster", BaseBlaster.class),
-			Map.entry("bow", BaseBow.class),
-			Map.entry("cannon", BaseCannon.class),
-			Map.entry("crossbow", BaseCrossbow.class),
-			Map.entry("greatblade", BaseGreatblade.class),
-			Map.entry("gun", BaseGun.class),
-			Map.entry("maul", BaseMaul.class),
-			Map.entry("shotgun", BaseShotgun.class),
-			Map.entry("sniper", BaseSniper.class),
-			Map.entry("staff", BaseStaff.class),
-			Map.entry("sword", BaseSword.class),
-			Map.entry("thrown", BaseThrownWeapon.class),
-			Map.entry("vulcane", BaseVulcane.class)
-	);
-
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("infobox").executes(CMD);
 
@@ -70,7 +54,7 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 										.executes(InfoboxCommand::printItemInfobox)
 						)
 		);
-		CLASSES.forEach((key, value) -> {
+		ObjectHelper.ITEM_CLASSES.forEach((key, value) -> {
 			builder.then(
 					Commands.literal(key)
 							.then(

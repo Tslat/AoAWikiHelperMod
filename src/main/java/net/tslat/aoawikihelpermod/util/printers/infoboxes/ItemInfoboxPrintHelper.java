@@ -144,7 +144,7 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 
 	private void writeIfExists(String name, String value) {
 		if (value.length() == 0) return;
-		write(name, value);
+		write(name + value);
 	}
 
 	public void printItemInfobox(Item Item, Entity player) {
@@ -171,7 +171,7 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		writeIfExists("|armortoughness=", getAttribute(itemStack, Attributes.ARMOR_TOUGHNESS, 0, ""));
 		writeIfExists("|durability=", noStringIfZero(itemStack.getMaxDamage()));
 		writeIfExists("|ammo=", getAmmoType(itemStack));
-		write("|ammunition="); // can be omitted
+		//write("|ammunition="); // can be omitted
 		writeIfExists("|drawspeed=", getDrawSpeed(itemStack));
 		writeIfExists("|firerate=", getFireRate(itemStack));
 		writeIfExists("|hunger=", getHunger(itemStack, player));

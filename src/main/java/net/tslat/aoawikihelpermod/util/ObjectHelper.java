@@ -40,6 +40,19 @@ import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
+import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
+import net.tslat.aoa3.content.item.weapon.cannon.BaseCannon;
+import net.tslat.aoa3.content.item.weapon.crossbow.BaseCrossbow;
+import net.tslat.aoa3.content.item.weapon.greatblade.BaseGreatblade;
+import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
+import net.tslat.aoa3.content.item.weapon.maul.BaseMaul;
+import net.tslat.aoa3.content.item.weapon.shotgun.BaseShotgun;
+import net.tslat.aoa3.content.item.weapon.sniper.BaseSniper;
+import net.tslat.aoa3.content.item.weapon.staff.BaseStaff;
+import net.tslat.aoa3.content.item.weapon.sword.BaseSword;
+import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
+import net.tslat.aoa3.content.item.weapon.vulcane.BaseVulcane;
 import net.tslat.aoa3.util.LocaleUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.dataskimmers.TagDataSkimmer;
@@ -48,10 +61,7 @@ import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 import net.tslat.aoawikihelpermod.util.printers.handlers.TagCategoryPrintHandler;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -432,4 +442,20 @@ public class ObjectHelper {
 
 		return namingFunction;
 	}
+
+	public static final Map<String, Class<? extends Item>> ITEM_CLASSES = Map.ofEntries(
+			Map.entry("blaster", BaseBlaster.class),
+			Map.entry("bow", BaseBow.class),
+			Map.entry("cannon", BaseCannon.class),
+			Map.entry("crossbow", BaseCrossbow.class),
+			Map.entry("greatblade", BaseGreatblade.class),
+			Map.entry("gun", BaseGun.class),
+			Map.entry("maul", BaseMaul.class),
+			Map.entry("shotgun", BaseShotgun.class),
+			Map.entry("sniper", BaseSniper.class),
+			Map.entry("staff", BaseStaff.class),
+			Map.entry("sword", BaseSword.class),
+			Map.entry("thrown", BaseThrownWeapon.class),
+			Map.entry("vulcane", BaseVulcane.class)
+	);
 }

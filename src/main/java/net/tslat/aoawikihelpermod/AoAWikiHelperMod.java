@@ -2,6 +2,7 @@ package net.tslat.aoawikihelpermod;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.network.chat.ClickEvent;
@@ -24,6 +25,7 @@ import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.dataskimmers.*;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapters;
 import net.tslat.aoawikihelpermod.util.LootTableHelper;
+import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 import org.apache.logging.log4j.LogManager;
@@ -55,12 +57,18 @@ public class AoAWikiHelperMod {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::loadFinished);
 
 		SingletonArgumentInfo blockArgumentInfo = SingletonArgumentInfo.contextAware(BlocksCommand.BlockArgument::block);
-		SingletonArgumentInfo itemArgumentInfo = SingletonArgumentInfo.contextAware(ItemsCommand.ItemArgument::item);
-
 		ArgumentTypeInfos.registerByClass(BlocksCommand.BlockArgument.class, blockArgumentInfo);
-		ArgumentTypeInfos.registerByClass(ItemsCommand.ItemArgument.class, itemArgumentInfo);
 		AoARegistries.ARGUMENT_TYPES.register("wikihelper_block", () -> blockArgumentInfo);
+
+		SingletonArgumentInfo itemArgumentInfo = SingletonArgumentInfo.contextAware(ItemsCommand.ItemArgument::item);
+		ArgumentTypeInfos.registerByClass(ItemsCommand.ItemArgument.class, itemArgumentInfo);
 		AoARegistries.ARGUMENT_TYPES.register("wikihelper_item", () -> itemArgumentInfo);
+
+		ObjectHelper.ITEM_CLASSES.forEach((key, value) -> {
+			SingletonArgumentInfo argumentInfo = SingletonArgumentInfo.contextAware((CommandBuildContext buildContext) -> ItemsCommand.ItemArgumentByType.item(buildContext, value));
+			ArgumentTypeInfos.registerByClass(value, argumentInfo);
+			AoARegistries.ARGUMENT_TYPES.register("wikihelper_item_" + key, () -> argumentInfo);
+		});
 	}
 
 	@SubscribeEvent
@@ -95,8 +103,7 @@ public class AoAWikiHelperMod {
 	private void patchClickEvent() {
 		try {
 			ObfuscationReflectionHelper.setPrivateValue(ClickEvent.Action.class, ClickEvent.Action.OPEN_FILE, true, "f_130635_");
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			LOGGER.error("Failed to patch in support for opening files from chat. Skipping", ex);
 		}
 	}
