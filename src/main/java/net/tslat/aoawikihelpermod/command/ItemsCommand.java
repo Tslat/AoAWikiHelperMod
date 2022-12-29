@@ -173,8 +173,12 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 	);
 
 	public static class ItemArgumentByType implements ArgumentType<ItemInput> {
-		ItemArgumentByType(Class<? extends Item> type) {
+		public ItemArgumentByType(Class<? extends Item> type) {
 			this.type = type;
+		}
+
+		public ItemArgumentByType item(CommandBuildContext buildContext) {
+			return this;
 		}
 
 		private static final Collection<String> EXAMPLES = Arrays.asList("minecraft:wooden_sword", "aoa3:limonite_sword");
@@ -195,14 +199,6 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 				}
 			}
 			return this.suggestions;
-		}
-
-		public static ItemArgumentByType item(Class<? extends Item> type) {
-			return new ItemArgumentByType(type);
-		}
-
-		public static ItemArgumentByType item(CommandBuildContext buildContext, Class<? extends Item> type) {
-			return item(type);
 		}
 
 		@Override

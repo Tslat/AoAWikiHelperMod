@@ -32,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 
 import static net.tslat.aoawikihelpermod.AoAWikiHelperMod.MOD_ID;
 
@@ -65,7 +66,14 @@ public class AoAWikiHelperMod {
 		AoARegistries.ARGUMENT_TYPES.register("wikihelper_item", () -> itemArgumentInfo);
 
 		ItemsCommand.ITEM_ARGUMENT_CLASSES.forEach((key, value) -> {
-			SingletonArgumentInfo argumentInfo = SingletonArgumentInfo.contextAware((CommandBuildContext buildContext) -> ItemsCommand.ItemArgumentByType.item(buildContext, value));
+			SingletonArgumentInfo argumentInfo = SingletonArgumentInfo.contextAware((CommandBuildContext buildContext) -> {
+				try {
+					ItemsCommand.ItemArgumentByType argument = value.getConstructor().newInstance();
+					return argument.item(buildContext);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
 			ArgumentTypeInfos.registerByClass(ItemsCommand.ITEM_ARGUMENT_CLASSES.get(key), argumentInfo);
 			AoARegistries.ARGUMENT_TYPES.register("wikihelper_item_" + key, () -> argumentInfo);
 		});
