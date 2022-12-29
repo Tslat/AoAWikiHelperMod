@@ -7,16 +7,23 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.*;
+import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
 import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
+import net.tslat.aoa3.content.item.weapon.crossbow.BaseCrossbow;
 import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
+import net.tslat.aoa3.content.item.weapon.staff.BaseStaff;
+import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 public class ItemInfoboxPrintHelper extends PrintHelper {
 	private static final String HEAD = "{{ItemInfo";
@@ -75,8 +82,8 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 	}
 
 	private static String getAttribute(ItemStack itemStack, Attribute attribute, double offset, String suffix) {
-		double value = (double) ObjectHelper.getAttributeFromItem(itemStack.getItem(), attribute) + offset;
-		if (value > 0) return NumberUtil.roundToNthDecimalPlace((float) value, 2) + suffix;
+		double value = (double) ObjectHelper.getAttributeFromItem(itemStack.getItem(), attribute);
+		if (value > 0) return NumberUtil.roundToNthDecimalPlace((float) (value + offset), 2) + suffix;
 		return "";
 	}
 
@@ -100,6 +107,22 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		return "";
 	}
 
+	private static String getAttackSpeed(ItemStack itemStack) {
+		if (!(itemStack.getItem() instanceof BaseGun)) {
+			return getAttribute(itemStack, Attributes.ATTACK_SPEED, 4, "s");
+		}
+		return "";
+	}
+
+	private static String getUnholsterTime(ItemStack itemStack) {
+		Item item = itemStack.getItem();
+		if (item instanceof BaseGun || item instanceof BaseBlaster) {
+			double speed = ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_SPEED) + 4;
+			return NumberUtil.roundToNthDecimalPlace((float) (1.0 / speed), 2) + "s";
+		}
+		return "";
+	}
+
 	private static String getDrawSpeed(ItemStack itemStack) {
 		Item item = itemStack.getItem();
 		if (item instanceof BaseBow) {
@@ -117,15 +140,54 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 			double fireRate = gun.getFiringDelay();
 			if (fireRate > 0) return NumberUtil.roundToNthDecimalPlace((float) (20 / fireRate), 2) + "/sec";
 		}
+		if (item instanceof BaseBlaster) {
+			BaseBlaster gun = (BaseBlaster) itemStack.getItem();
+			double fireRate = gun.getFiringDelay();
+			if (fireRate > 0) return NumberUtil.roundToNthDecimalPlace((float) (20 / fireRate), 2) + "/sec";
+		}
+		return "";
+	}
+
+	private static String getFireType(ItemStack itemStack) {
+		Item item = itemStack.getItem();
+		if (item instanceof BaseGun) {
+			BaseGun gun = (BaseGun) itemStack.getItem();
+			if (gun.isFullAutomatic()) return "Fully-Automatic";
+			return "Semi-Automatic";
+		}
+		if (item instanceof BaseBlaster) {
+			BaseBlaster gun = (BaseBlaster) itemStack.getItem();
+			return "Fully-Automatic";
+		}
 		return "";
 	}
 
 	private static String getAmmoType(ItemStack itemStack) {
 		Item item = itemStack.getItem();
-		if (item instanceof BaseGun) {
+		if (item instanceof BaseGun && !(item instanceof BaseThrownWeapon)) {
 			BaseGun gun = (BaseGun) itemStack.getItem();
 			Item ammo = gun.getAmmoItem();
 			return ammo.getName(new ItemStack(ammo)).getString();
+		}
+		if (item instanceof ProjectileWeaponItem) {
+			ProjectileWeaponItem bow = (ProjectileWeaponItem) itemStack.getItem();
+			String s = "";
+			for (Item i : ForgeRegistries.ITEMS.getValues()) {
+				ItemStack stack = new ItemStack(i);
+				if (bow.getAllSupportedProjectiles().test(stack)) {
+					s += ObjectHelper.getItemNameFromItem(i);
+				}
+			}
+			return s;
+		}
+		if (item instanceof BaseStaff<?>) {
+			BaseStaff staff = (BaseStaff) itemStack.getItem();
+			String s = "";
+			HashMap<Item, Integer> runes = staff.getRunes();
+			for (Item i : runes.keySet()) {
+				s += runes.get(i) + " " + ObjectHelper.getItemNameFromItem((Item) i) + ",";
+			}
+			return s;
 		}
 		return "";
 	}
@@ -156,33 +218,23 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		write(HEAD);
 		writeIfExists("|name=", displayName);
 		writeIfExists("|image=", displayName + ".png");
-		//write("|imgsize=" + ITEM_IMAGE_SIZE);
-		write("|imglist=");
-		write("|itemimage=");
-		write("|armorimage=");
-		write("|armorimageold=");
 		writeIfExists("|damage=", getAttribute(itemStack, Attributes.ATTACK_DAMAGE, 0, ""));
 		write("|specialdamage="); // manual input
-		writeIfExists("|" +
-				(isGun(itemStack) ? "unholstertime" : "attackspeed") + "=", getAttribute(itemStack, Attributes.ATTACK_SPEED, 4, "/sec"))
-		;
+		writeIfExists("|attackspeed=", getAttackSpeed(itemStack));
+		writeIfExists("|unholstertime=", getUnholsterTime(itemStack));
 		writeIfExists("|knockback=", getAttribute(itemStack, Attributes.ATTACK_KNOCKBACK, 0, ""));
 		writeIfExists("|armor=", getAttribute(itemStack, Attributes.ARMOR, 0, ""));
 		writeIfExists("|armortoughness=", getAttribute(itemStack, Attributes.ARMOR_TOUGHNESS, 0, ""));
 		writeIfExists("|durability=", noStringIfZero(itemStack.getMaxDamage()));
 		writeIfExists("|ammo=", getAmmoType(itemStack));
-		//write("|ammunition="); // can be omitted
 		writeIfExists("|drawspeed=", getDrawSpeed(itemStack));
 		writeIfExists("|firerate=", getFireRate(itemStack));
+		writeIfExists("|firetype=", getFireType(itemStack));
 		writeIfExists("|hunger=", getHunger(itemStack, player));
 		writeIfExists("|saturation=", getSaturation(itemStack, player));
 		writeIfExists("|efficiency=", getEfficiency(itemStack));
 		writeIfExists("|harvestlevel=", getHarvestLevel(itemStack));
-		//write("|radius=" );
-		//write("|penetration=");
-		//write("|range=" + getAttribute(itemStack, (Attribute) ForgeMod.ATTACK_RANGE.get(), 0, ""));
 		write("|effect=");
-		write("|skillreq=");
 		write("|tooltip=");
 		write("|stackable=" + (stackSize == 1 ? "No" : "Yes (" + stackSize + ")"));
 		write("|raritycolor=" + convertRarityColor(itemStack.getRarity()));
