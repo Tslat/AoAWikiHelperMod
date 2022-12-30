@@ -171,7 +171,7 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 			for (Item i : ForgeRegistries.ITEMS.getValues()) {
 				ItemStack stack = new ItemStack(i);
 				if (bow.getAllSupportedProjectiles().test(stack)) {
-					s += ObjectHelper.getItemNameFromItem(i);
+					s += ObjectHelper.getItemName(i);
 				}
 			}
 			return s;
@@ -181,7 +181,7 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 			String s = "";
 			HashMap<Item, Integer> runes = staff.getRunes();
 			for (Item i : runes.keySet()) {
-				s += runes.get(i) + " " + ObjectHelper.getItemNameFromItem((Item) i) + ",";
+				s += runes.get(i) + " " + ObjectHelper.getItemName(i) + ",";
 			}
 			return s;
 		}

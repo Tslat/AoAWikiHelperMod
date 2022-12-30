@@ -226,10 +226,6 @@ public class ObjectHelper {
 		return new ItemStack(item).getHoverName().getString() + suffix;
 	}
 
-	public static String getItemNameFromItem(Item item){
-		return item.getName(new ItemStack(item)).getString();
-	}
-
 	public static String getBlockName(Block block) {
 		if (block.asItem() != Items.AIR)
 			return getItemName(block);
