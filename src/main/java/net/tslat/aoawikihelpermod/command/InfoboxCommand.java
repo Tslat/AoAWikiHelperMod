@@ -7,6 +7,10 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -28,6 +32,7 @@ import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.infoboxes.BlockInfoboxPrintHelper;
+import net.tslat.aoawikihelpermod.util.printers.infoboxes.EntityInfoboxPrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.infoboxes.ItemInfoboxPrintHelper;
 import org.checkerframework.checker.units.qual.C;
 
@@ -53,6 +58,14 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 						.then(
 								Commands.argument("id", ItemsCommand.ItemArgument.item())
 										.executes(InfoboxCommand::printItemInfobox)
+						)
+		);
+		builder.then(
+				Commands.literal("entity")
+						.then(
+								Commands.argument("id", ResourceLocationArgument.id())
+										.suggests(SuggestionProviders.SUMMONABLE_ENTITIES)
+										.executes(InfoboxCommand::printEntityInfobox)
 						)
 		);
 		ItemsCommand.ITEM_ARGUMENT_CLASSES.forEach((key, value) -> {
@@ -115,6 +128,34 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 		try (ItemInfoboxPrintHelper printHelper = ItemInfoboxPrintHelper.open(fileName)) {
 			printHelper.withClipboardOutput(clipboardContent);
 			printHelper.printItemInfobox(item, cmd.getSource().getEntity());
+
+			outputFile = printHelper.getOutputFile();
+		}
+
+		WikiHelperCommand.success(source, "Infobox", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+		return 1;
+	}
+
+	private static int printEntityInfobox(CommandContext<CommandSourceStack> cmd) {
+		ResourceLocation id = ResourceLocationArgument.getId(cmd, "id");
+		EntityType<?> entity = ForgeRegistries.ENTITY_TYPES.getValue(id);
+		CommandSourceStack source = cmd.getSource();
+
+		if (entity == null || (!id.toString().equals("minecraft:pig") && entity == EntityType.PIG)) {
+			WikiHelperCommand.warn(cmd.getSource(), "LootTable", "Invalid entity id '" + id + "'");
+
+			return 1;
+		}
+
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+		File outputFile;
+
+		WikiHelperCommand.info(cmd.getSource(), "Infobox", "Printing entity infobox for '" + ForgeRegistries.ENTITY_TYPES.getKey(entity) + "'...");
+		String fileName = "Entity Infobox - " + ObjectHelper.getEntityName(entity);
+
+		try (EntityInfoboxPrintHelper printHelper = EntityInfoboxPrintHelper.open(fileName)) {
+			printHelper.withClipboardOutput(clipboardContent);
+			printHelper.printEntityInfobox(entity, cmd.getSource().getEntity());
 
 			outputFile = printHelper.getOutputFile();
 		}

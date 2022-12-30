@@ -7,11 +7,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
 import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
-import net.tslat.aoa3.content.item.weapon.crossbow.BaseCrossbow;
 import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
 import net.tslat.aoa3.content.item.weapon.staff.BaseStaff;
 import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
@@ -23,13 +21,11 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 public class ItemInfoboxPrintHelper extends PrintHelper {
 	private static final String HEAD = "{{ItemInfo";
 	private static final String END = "}}";
 
-	private static final String ITEM_IMAGE_SIZE = "150px";
 
 	protected ItemInfoboxPrintHelper(String fileName) throws IOException {
 		super(fileName);
@@ -216,8 +212,8 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		int stackSize = itemStack.getItem().getMaxStackSize();
 
 		write(HEAD);
-		writeIfExists("|name=", displayName);
-		writeIfExists("|image=", displayName + ".png");
+		write("|name=" + displayName);
+		write("|image=" + displayName + ".png");
 		writeIfExists("|damage=", getAttribute(itemStack, Attributes.ATTACK_DAMAGE, 0, ""));
 		write("|specialdamage="); // manual input
 		writeIfExists("|attackspeed=", getAttackSpeed(itemStack));
