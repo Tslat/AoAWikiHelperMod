@@ -116,13 +116,7 @@ public class BlockInfoboxPrintHelper extends PrintHelper {
     }
 
     private static String convertRarityColor(Rarity rarity) {
-        switch (rarity) {
-            case COMMON: return "Common";
-            case UNCOMMON: return "Uncommon";
-            case EPIC: return "Epic";
-            case RARE: return "Rare";
-            default: return "Couldn't get rarity color";
-        }
+        return StringUtil.toTitleCase(rarity.name());
     }
 
     public void printBlockInfobox(Block block) {
