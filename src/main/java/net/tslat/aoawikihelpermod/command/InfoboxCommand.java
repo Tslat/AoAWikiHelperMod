@@ -139,7 +139,7 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 
 		try (EntityInfoboxPrintHelper printHelper = EntityInfoboxPrintHelper.open(fileName)) {
 			printHelper.withClipboardOutput(clipboardContent);
-			printHelper.printEntityInfobox(entity, cmd.getSource().getEntity());
+			printHelper.printEntityInfobox(entity, (LivingEntity) cmd.getSource().getEntity());
 
 			outputFile = printHelper.getOutputFile();
 		}
