@@ -63,23 +63,25 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		}
 	}
 
-	private static String getHunger(ItemStack itemStack, Entity entity) {
-		if (itemStack.getFoodProperties((LivingEntity) entity) == null) {
+	private static String getHunger(ItemStack itemStack, LivingEntity player) {
+		if (itemStack.getFoodProperties( player) == null) {
 			return "";
 		}
-		return "" + itemStack.getFoodProperties((LivingEntity) entity).getNutrition();
+		return "" + itemStack.getFoodProperties( player).getNutrition();
 	}
 
-	private static String getSaturation(ItemStack itemStack, Entity entity) {
-		if (itemStack.getFoodProperties((LivingEntity) entity) == null) {
+	private static String getSaturation(ItemStack itemStack, LivingEntity player) {
+		if (itemStack.getFoodProperties(player) == null) {
 			return "";
 		}
-		return "" + itemStack.getFoodProperties((LivingEntity) entity).getSaturationModifier();
+		return "" + itemStack.getFoodProperties(player).getSaturationModifier();
 	}
 
 	private static String getAttribute(ItemStack itemStack, Attribute attribute, double offset, String suffix) {
 		double value = (double) ObjectHelper.getAttributeFromItem(itemStack.getItem(), attribute);
-		if (value > 0) return NumberUtil.roundToNthDecimalPlace((float) (value + offset), 2) + suffix;
+		if (value > 0) {
+			return NumberUtil.roundToNthDecimalPlace((float) (value + offset), 2) + suffix;
+		}
 		return "";
 	}
 
@@ -205,7 +207,7 @@ public class ItemInfoboxPrintHelper extends PrintHelper {
 		write(name + value);
 	}
 
-	public void printItemInfobox(Item Item, Entity player) {
+	public void printItemInfobox(Item Item, LivingEntity player) {
 		String displayName = ObjectHelper.getItemName(Item);
 		List<ResourceLocation> tags = getItemTags(Item);
 		ItemStack itemStack = new ItemStack(Item);

@@ -10,6 +10,7 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -110,7 +111,7 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 
 		try (ItemInfoboxPrintHelper printHelper = ItemInfoboxPrintHelper.open(fileName)) {
 			printHelper.withClipboardOutput(clipboardContent);
-			printHelper.printItemInfobox(item, cmd.getSource().getEntity());
+			printHelper.printItemInfobox(item, (LivingEntity) cmd.getSource().getEntity());
 
 			outputFile = printHelper.getOutputFile();
 		}
