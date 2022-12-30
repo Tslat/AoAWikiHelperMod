@@ -1,6 +1,5 @@
 package net.tslat.aoawikihelpermod.command;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -11,34 +10,17 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
-import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
-import net.tslat.aoa3.content.item.weapon.cannon.BaseCannon;
-import net.tslat.aoa3.content.item.weapon.crossbow.BaseCrossbow;
-import net.tslat.aoa3.content.item.weapon.greatblade.BaseGreatblade;
-import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
-import net.tslat.aoa3.content.item.weapon.maul.BaseMaul;
-import net.tslat.aoa3.content.item.weapon.shotgun.BaseShotgun;
-import net.tslat.aoa3.content.item.weapon.sniper.BaseSniper;
-import net.tslat.aoa3.content.item.weapon.staff.BaseStaff;
-import net.tslat.aoa3.content.item.weapon.sword.BaseSword;
-import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
-import net.tslat.aoa3.content.item.weapon.vulcane.BaseVulcane;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.infoboxes.BlockInfoboxPrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.infoboxes.EntityInfoboxPrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.infoboxes.ItemInfoboxPrintHelper;
-import org.checkerframework.checker.units.qual.C;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 
 public class InfoboxCommand implements Command<CommandSourceStack> {
 	private static final InfoboxCommand CMD = new InfoboxCommand();
@@ -68,12 +50,13 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 										.executes(InfoboxCommand::printEntityInfobox)
 						)
 		);
-		ItemsCommand.ITEM_ARGUMENT_CLASSES.forEach((key, value) -> {
+		ItemsCommand.ITEM_CATEGORY_PROVIDERS.forEach(provider -> {
 			try {
 				builder.then(
-						Commands.literal(key)
+						Commands.literal(provider.getCategoryName())
 								.then(
-										Commands.argument("id", value.getConstructor().newInstance())
+										Commands.argument("id", ResourceLocationArgument.id())
+												.suggests(provider.getProvider())
 												.executes(InfoboxCommand::printItemInfobox)
 								)
 				);
@@ -117,7 +100,7 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printItemInfobox(CommandContext<CommandSourceStack> cmd) {
-		Item item = ItemsCommand.ItemArgument.getItem(cmd, "id").getItem();
+		Item item = ForgeRegistries.ITEMS.getDelegateOrThrow(cmd.getArgument("id", ResourceLocation.class)).get();
 		CommandSourceStack source = cmd.getSource();
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
