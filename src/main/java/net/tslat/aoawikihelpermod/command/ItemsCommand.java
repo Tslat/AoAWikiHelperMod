@@ -10,6 +10,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import it.unimi.dsi.fastutil.ints.IntIterators;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -54,6 +55,7 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("items").executes(CMD);
 
 		builder.then(Commands.argument("item", net.minecraft.commands.arguments.item.ItemArgument.item(buildContext))
+				.suggests(ITEM_PROVIDER.getProvider())
 				.then(LiteralArgumentBuilder.<CommandSourceStack>literal("tags").executes(ItemsCommand::printTags)));
 
 		return builder;
@@ -71,7 +73,7 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printTags(CommandContext<CommandSourceStack> cmd) {
-		Item item = net.minecraft.commands.arguments.item.ItemArgument.getItem(cmd, "item").getItem();
+		Item item = ForgeRegistries.ITEMS.getDelegateOrThrow(cmd.getArgument("id", ResourceLocation.class)).get();
 		String itemName = ObjectHelper.getItemName(item);
 		File outputFile;
 		String fileName = "Item Tags - " + itemName;
@@ -99,84 +101,26 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 		return 1;
 	}
 
-	public static class ItemInput implements Predicate<Item> {
-		private final Item item;
-
-		public ItemInput(Item item) {
-			this.item = item;
-		}
-
-		public Item getItem() {
-			return this.item;
-		}
-
-		public boolean test(Item item) {
-			return item == this.item;
-		}
-	}
-
-	public static class ItemArgument implements ArgumentType<ItemInput> {
-		private static final Collection<String> EXAMPLES = Arrays.asList("minecraft:wooden_sword", "aoa3:limonite_sword");
-
-		public static ItemArgument item() {
-			return new ItemArgument();
-		}
-
-		public static ItemArgument item(CommandBuildContext buildContext) {
-			return item();
-		}
-
-		@Override
-		public ItemInput parse(StringReader reader) throws CommandSyntaxException {
-			ResourceLocation id = ResourceLocation.read(reader);
-			try {
-				Item item = ForgeRegistries.ITEMS.getDelegateOrThrow(id).get();
-				return new ItemInput(item);
-			} catch (Exception e) {
-				ItemParser.ERROR_UNKNOWN_ITEM.createWithContext(reader, id.toString());
-			}
-
-			return null;
-		}
-
-		public static ItemInput getItem(CommandContext<?> context, String argumentName) {
-			return context.getArgument(argumentName, ItemInput.class);
-		}
-
-		@Override
-		public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-			StringReader reader = new StringReader(builder.getInput());
-
-			reader.setCursor(builder.getStart());
-
-			return SharedSuggestionProvider.suggestResource(ForgeRegistries.ITEMS.getKeys(), builder.createOffset(reader.getCursor()));
-		}
-
-		@Override
-		public Collection<String> getExamples() {
-			return EXAMPLES;
-		}
-	}
-
 	public static final class ItemCategoryProvider {
 		private final String categoryName;
 		private final Class<? extends Item> classType;
 
 		private SuggestionProvider<CommandSourceStack> provider = null;
-		public ItemCategoryProvider(String categoryName, Class<? extends Item> classType){
+
+		public ItemCategoryProvider(String categoryName, Class<? extends Item> classType) {
 			this.classType = classType;
 			this.categoryName = categoryName;
 			this.getProvider();
 		}
 
-		public String getCategoryName(){
+		public String getCategoryName() {
 			return this.categoryName;
 		}
 
-		public Predicate<ResourceLocation> isIdOfType(){
+		public Predicate<ResourceLocation> isIdOfType() {
 			return id -> {
 				Item item = ForgeRegistries.ITEMS.getDelegateOrThrow(id).get();
-				if(this.classType.isInstance(item)){
+				if (this.classType.isInstance(item)) {
 					return true;
 				}
 				return false;
@@ -184,7 +128,7 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 		}
 
 		public SuggestionProvider<CommandSourceStack> getProvider() {
-			if(provider != null)return this.provider;
+			if (provider != null) return this.provider;
 			this.provider = SuggestionProviders.register(
 					new ResourceLocation(AoAWikiHelperMod.MOD_ID, "item_" + categoryName),
 					(context, suggestionBuilder) -> SharedSuggestionProvider.suggestResource(
@@ -198,6 +142,8 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 		}
 	}
 
+	//because we filter ForgeRegistry this will only contain AoA (or other mod) items
+	public static final ItemCategoryProvider ITEM_PROVIDER = new ItemCategoryProvider("item", Item.class);
 	public static final List<ItemCategoryProvider> ITEM_CATEGORY_PROVIDERS = List.of(
 			new ItemCategoryProvider("blaster", BaseBlaster.class),
 			new ItemCategoryProvider("bow", BaseBow.class),

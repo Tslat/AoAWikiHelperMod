@@ -30,21 +30,23 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("infobox").executes(CMD);
 
 		builder.then(Commands.literal("block")
-							.then(Commands.argument("id", BlocksCommand.BlockArgument.block())
-										.executes(InfoboxCommand::printBlockInfobox)));
+				.then(Commands.argument("id", ResourceLocationArgument.id())
+						.suggests(BlocksCommand.BLOCK_PROVIDER.getProvider())
+						.executes(InfoboxCommand::printBlockInfobox)));
 		builder.then(Commands.literal("item")
-							.then(Commands.argument("id", ItemsCommand.ItemArgument.item())
-										.executes(InfoboxCommand::printItemInfobox)));
+				.then(Commands.argument("id", ResourceLocationArgument.id())
+						.suggests(ItemsCommand.ITEM_PROVIDER.getProvider())
+						.executes(InfoboxCommand::printItemInfobox)));
 		builder.then(Commands.literal("entity")
-							.then(Commands.argument("id", ResourceLocationArgument.id())
-									.suggests(SuggestionProviders.SUMMONABLE_ENTITIES)
-									.executes(InfoboxCommand::printEntityInfobox)));
+				.then(Commands.argument("id", ResourceLocationArgument.id())
+						.suggests(SuggestionProviders.SUMMONABLE_ENTITIES)
+						.executes(InfoboxCommand::printEntityInfobox)));
 		ItemsCommand.ITEM_CATEGORY_PROVIDERS.forEach(provider -> {
 			try {
 				builder.then(Commands.literal(provider.getCategoryName())
-									.then(Commands.argument("id", ResourceLocationArgument.id())
-												.suggests(provider.getProvider())
-												.executes(InfoboxCommand::printItemInfobox)));
+						.then(Commands.argument("id", ResourceLocationArgument.id())
+								.suggests(provider.getProvider())
+								.executes(InfoboxCommand::printItemInfobox)));
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -65,7 +67,7 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printBlockInfobox(CommandContext<CommandSourceStack> cmd) {
-		Block block = BlocksCommand.BlockArgument.getBlock(cmd, "id").getBlock();
+		Block block = ForgeRegistries.BLOCKS.getDelegateOrThrow(cmd.getArgument("id", ResourceLocation.class)).get();
 		CommandSourceStack source = cmd.getSource();
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;

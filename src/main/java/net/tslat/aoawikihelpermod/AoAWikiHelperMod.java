@@ -54,14 +54,6 @@ public class AoAWikiHelperMod {
 		MinecraftForge.EVENT_BUS.addListener(this::registerRecipeSkimmer);
 		MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::loadFinished);
-
-		SingletonArgumentInfo blockArgumentInfo = SingletonArgumentInfo.contextAware(BlocksCommand.BlockArgument::block);
-		ArgumentTypeInfos.registerByClass(BlocksCommand.BlockArgument.class, blockArgumentInfo);
-		AoARegistries.ARGUMENT_TYPES.register("wikihelper_block", () -> blockArgumentInfo);
-
-		SingletonArgumentInfo itemArgumentInfo = SingletonArgumentInfo.contextAware(ItemsCommand.ItemArgument::item);
-		ArgumentTypeInfos.registerByClass(ItemsCommand.ItemArgument.class, itemArgumentInfo);
-		AoARegistries.ARGUMENT_TYPES.register("wikihelper_item", () -> itemArgumentInfo);
 	}
 
 	@SubscribeEvent
