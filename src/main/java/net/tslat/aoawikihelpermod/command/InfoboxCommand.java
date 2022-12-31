@@ -29,38 +29,22 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("infobox").executes(CMD);
 
-		builder.then(
-				Commands.literal("block")
-						.then(
-								Commands.argument("id", BlocksCommand.BlockArgument.block())
-										.executes(InfoboxCommand::printBlockInfobox)
-						)
-		);
-		builder.then(
-				Commands.literal("item")
-						.then(
-								Commands.argument("id", ItemsCommand.ItemArgument.item())
-										.executes(InfoboxCommand::printItemInfobox)
-						)
-		);
-		builder.then(
-				Commands.literal("entity")
-						.then(
-								Commands.argument("id", ResourceLocationArgument.id())
-										.suggests(SuggestionProviders.SUMMONABLE_ENTITIES)
-										.executes(InfoboxCommand::printEntityInfobox)
-						)
-		);
+		builder.then(Commands.literal("block")
+							.then(Commands.argument("id", BlocksCommand.BlockArgument.block())
+										.executes(InfoboxCommand::printBlockInfobox)));
+		builder.then(Commands.literal("item")
+							.then(Commands.argument("id", ItemsCommand.ItemArgument.item())
+										.executes(InfoboxCommand::printItemInfobox)));
+		builder.then(Commands.literal("entity")
+							.then(Commands.argument("id", ResourceLocationArgument.id())
+									.suggests(SuggestionProviders.SUMMONABLE_ENTITIES)
+									.executes(InfoboxCommand::printEntityInfobox)));
 		ItemsCommand.ITEM_CATEGORY_PROVIDERS.forEach(provider -> {
 			try {
-				builder.then(
-						Commands.literal(provider.getCategoryName())
-								.then(
-										Commands.argument("id", ResourceLocationArgument.id())
+				builder.then(Commands.literal(provider.getCategoryName())
+									.then(Commands.argument("id", ResourceLocationArgument.id())
 												.suggests(provider.getProvider())
-												.executes(InfoboxCommand::printItemInfobox)
-								)
-				);
+												.executes(InfoboxCommand::printItemInfobox)));
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
