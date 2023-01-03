@@ -1,9 +1,17 @@
 package net.tslat.aoawikihelpermod.util;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.tslat.aoa3.util.RegistryUtil;
+import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.printers.TablePrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import javax.annotation.Nullable;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,5 +136,43 @@ public class WikiTemplateHelper {
 		lines[lines.length - i] = "shapeless=1";
 
 		return makeWikiTemplateObject("Infusion", false, lines);
+	}
+
+	public static String makeBlockInfoboxTemplate(Block block) {
+		List<String> params = new ObjectArrayList<>();
+		Item item = Item.byBlock(block);
+		ItemStack stack = item == Items.AIR ? null : new ItemStack(item);
+
+		params.add("name=" + ObjectHelper.getBlockName(block));
+		params.add("image=" + ObjectHelper.getBlockName(block) + ".png");
+		params.add("id=" + RegistryUtil.getId(block));
+		params.add("hardness=" + block.defaultDestroyTime());
+		params.add("blastresistance=" + block.getExplosionResistance());
+		params.add("transparent=" + ClientHelper.isRenderTransparent(block));
+		params.add("flammable=" + ObjectHelper.getBlockFlammability(block));
+
+		String luminance = ObjectHelper.getBlockLuminosity(block);
+
+		if (luminance != null)
+			params.add("luminance=" + luminance);
+
+		String harvestLevel = ObjectHelper.getBlockHarvestTag(block);
+
+		if (harvestLevel != null)
+			params.add("harvestlevel=" + harvestLevel);
+
+		String toolType = ObjectHelper.getBlockToolTag(block);
+
+		if (toolType != null)
+			params.add("tool=" + toolType);
+
+		if (stack != null) {
+			params.add("stackable=" + (stack.isStackable() ? "Yes (" + stack.getMaxStackSize() + ")" : "No"));
+			params.add("raritycolor=" + StringUtil.toTitleCase(stack.getRarity().toString()));
+		}
+
+		params.add("versionadded=");
+
+		return makeWikiTemplateObject("BlockInfo", false, params.toArray(new String[0]));
 	}
 }

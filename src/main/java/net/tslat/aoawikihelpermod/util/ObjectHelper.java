@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.objects.Object2BooleanAVLTreeMap;
+import net.minecraft.core.BlockSource;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -16,6 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -28,11 +30,14 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -54,7 +59,9 @@ import net.tslat.aoa3.content.item.weapon.sword.BaseSword;
 import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
 import net.tslat.aoa3.content.item.weapon.vulcane.BaseVulcane;
 import net.tslat.aoa3.util.LocaleUtil;
+import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoa3.util.StringUtil;
+import net.tslat.aoa3.util.TagUtil;
 import net.tslat.aoawikihelpermod.dataskimmers.TagDataSkimmer;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
@@ -230,7 +237,7 @@ public class ObjectHelper {
 		if (block.asItem() != Items.AIR)
 			return getItemName(block);
 
-		return StringUtil.toTitleCase(ForgeRegistries.BLOCKS.getKey(block).getPath());
+		return StringUtil.toTitleCase(RegistryUtil.getId(block).getPath());
 	}
 
 	public static String getBiomeName(ResourceKey<Biome> biome) {
@@ -248,7 +255,7 @@ public class ObjectHelper {
 	}
 
 	public static String getEntityName(EntityType<?> entityType) {
-		ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(entityType);
+		ResourceLocation id = RegistryUtil.getId(entityType);
 		String suffix = isItem(id) ? " (entity)" : "";
 
 		return LocaleUtil.getLocaleMessage("entity." + id.getNamespace() + "." + id.getPath()).getString() + suffix;
@@ -307,10 +314,10 @@ public class ObjectHelper {
 		controlItemTooltip.add(dummyComponent);
 		controlItemTooltip.add(dummyComponent);
 
-		ClientHelper.collectTooltipLines(item, itemTooltip, false);
+		collectTooltipLines(item, itemTooltip, false);
 
 		if (controlItem != null)
-			ClientHelper.collectTooltipLines(controlItem, controlItemTooltip, false);
+			collectTooltipLines(controlItem, controlItemTooltip, false);
 
 		tooltipLoop:
 		for (Component text : itemTooltip) {
@@ -338,6 +345,10 @@ public class ObjectHelper {
 		}
 
 		return builder.toString();
+	}
+
+	public static void collectTooltipLines(Item item, List<Component> baseList, boolean advanced) {
+		item.appendHoverText(new ItemStack(item), null, baseList, advanced ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
 	}
 
 	public static boolean areStringsSimilar(String str1, String str2) {
@@ -441,5 +452,101 @@ public class ObjectHelper {
 		}
 
 		return namingFunction;
+	}
+
+	public static String getBlockFlammability(Block block) {
+		VariableResponse flammable = null;
+
+		for (BlockState state : block.getStateDefinition().getPossibleStates()) {
+			flammable = VariableResponse.merge(flammable, ((FireBlock)Blocks.FIRE).getBurnOdds(state) > 0);
+		}
+
+		if (flammable == VariableResponse.NO)
+			flammable = null;
+
+		try {
+			for (BlockState state : block.getStateDefinition().getPossibleStates()) {
+				flammable = VariableResponse.merge(flammable, state.getFlammability(null, null, null) > 0);
+			}
+		}
+		catch (Exception ex) {
+			return VariableResponse.VARIES.toString();
+		}
+
+		return flammable.toString();
+	}
+
+	@Nullable
+	public static String getBlockLuminosity(Block block) {
+		int min = 15;
+		int max = 0;
+
+		for (BlockState state : block.getStateDefinition().getPossibleStates()) {
+			int luminosity = 0;
+
+			try {
+				luminosity = state.getLightEmission(null, null);
+			}
+			catch (Exception ex) {
+				luminosity = state.getLightEmission();
+			}
+
+			min = Math.min(luminosity, min);
+			max = Math.max(luminosity, max);
+		}
+
+		if (max == 0)
+			return null;
+
+		if (min == max)
+			return String.valueOf(min);
+
+		return "Varies (" + min + "-" + max + ")";
+	}
+
+	@Nullable
+	public static String getBlockHarvestTag(Block block) {
+		TagKey<Block> harvestTag = TagUtil.getAllTagsFor(ForgeRegistries.BLOCKS.tags(), block)
+				.filter(tag -> tag.location().getPath().startsWith("needs_") && tag.location().getPath().endsWith("_tool"))
+				.findAny()
+				.orElse(null);
+
+		if (harvestTag == null)
+			return null;
+
+		return harvestTag.location().toString();
+	}
+
+	@Nullable
+	public static String getBlockToolTag(Block block) {
+		TagKey<Block> toolTag = TagUtil.getAllTagsFor(ForgeRegistries.BLOCKS.tags(), block)
+				.filter(tag -> tag.location().getPath().startsWith("mineable/"))
+				.findAny()
+				.orElse(null);
+
+		if (toolTag == null)
+			return null;
+
+		String tagName = toolTag.location().toString();
+
+		return StringUtil.toTitleCase(tagName.substring(9));
+	}
+
+	public enum VariableResponse {
+		YES,
+		NO,
+		VARIES;
+
+		@Override
+		public String toString() {
+			return StringUtil.toTitleCase(super.toString());
+		}
+
+		public static VariableResponse merge(@Nullable VariableResponse existing, boolean newResponse) {
+			if (existing == VARIES || (existing == YES && !newResponse) || (existing == NO && newResponse))
+				return VARIES;
+
+			return newResponse ? YES : NO;
+		}
 	}
 }
