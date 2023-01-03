@@ -7,6 +7,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
 
@@ -115,13 +116,7 @@ public class BlockInfoboxPrintHelper extends PrintHelper {
     }
 
     private static String convertRarityColor(Rarity rarity) {
-        switch (rarity) {
-            case COMMON: return "Common";
-            case UNCOMMON: return "Uncommon";
-            case EPIC: return "Epic";
-            case RARE: return "Rare";
-            default: return "Couldn't get rarity color";
-        }
+        return StringUtil.toTitleCase(rarity.name());
     }
 
     public void printBlockInfobox(Block block) {

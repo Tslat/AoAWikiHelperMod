@@ -2,6 +2,7 @@ package net.tslat.aoawikihelpermod;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.network.chat.ClickEvent;
@@ -19,6 +20,7 @@ import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.common.registration.AoARegistries;
 import net.tslat.aoawikihelpermod.command.BlocksCommand;
+import net.tslat.aoawikihelpermod.command.ItemsCommand;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.dataskimmers.*;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapters;
@@ -34,7 +36,7 @@ import static net.tslat.aoawikihelpermod.AoAWikiHelperMod.MOD_ID;
 
 @Mod(MOD_ID)
 public class AoAWikiHelperMod {
-	public static final String VERSION = "2.9.16";
+	public static final String VERSION = "2.9.17";
 	public static final String MOD_ID = "aoawikihelpermod";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
@@ -52,11 +54,6 @@ public class AoAWikiHelperMod {
 		MinecraftForge.EVENT_BUS.addListener(this::registerRecipeSkimmer);
 		MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::loadFinished);
-
-		SingletonArgumentInfo argumentInfo = SingletonArgumentInfo.contextAware(BlocksCommand.BlockArgument::block);
-
-		ArgumentTypeInfos.registerByClass(BlocksCommand.BlockArgument.class, argumentInfo);
-		AoARegistries.ARGUMENT_TYPES.register("wikihelper_block", () -> argumentInfo);
 	}
 
 	@SubscribeEvent
@@ -91,8 +88,7 @@ public class AoAWikiHelperMod {
 	private void patchClickEvent() {
 		try {
 			ObfuscationReflectionHelper.setPrivateValue(ClickEvent.Action.class, ClickEvent.Action.OPEN_FILE, true, "f_130635_");
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			LOGGER.error("Failed to patch in support for opening files from chat. Skipping", ex);
 		}
 	}

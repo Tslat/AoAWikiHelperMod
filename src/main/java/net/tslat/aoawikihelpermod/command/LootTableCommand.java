@@ -33,7 +33,7 @@ public class LootTableCommand implements Command<CommandSourceStack> {
 
 		builder.then(Commands.literal("table").then(Commands.argument("loot_table", ResourceLocationArgument.id()).suggests(SUGGESTION_PROVIDER).executes(cmd -> printTable(cmd, ResourceLocationArgument.getId(cmd, "loot_table")))));
 		builder.then(Commands.literal("entity").then(Commands.argument("entity", ResourceLocationArgument.id()).suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(LootTableCommand::printEntityTable)));
-		builder.then(Commands.literal("block").then(Commands.argument("block", BlocksCommand.BlockArgument.block()).executes(LootTableCommand::printBlockTable)));
+		builder.then(Commands.literal("block").then(Commands.argument("id", ResourceLocationArgument.id()).suggests(BlocksCommand.BLOCK_PROVIDER.getProvider()).executes(LootTableCommand::printBlockTable)));
 
 		return builder;
 	}
@@ -43,7 +43,7 @@ public class LootTableCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printBlockTable(CommandContext<CommandSourceStack> cmd) {
-		Block block = BlocksCommand.BlockArgument.getBlock(cmd, "block").getBlock();
+		Block block = ForgeRegistries.BLOCKS.getDelegateOrThrow(cmd.getArgument("id", ResourceLocation.class)).get();
 
 		if (block.getLootTable() == null) {
 			WikiHelperCommand.warn(cmd.getSource(), "LootTable", "Block '" + ForgeRegistries.BLOCKS.getKey(block) + "' has no attached loot table");
