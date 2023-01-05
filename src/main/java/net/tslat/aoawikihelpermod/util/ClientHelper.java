@@ -4,17 +4,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.ForgeRenderTypes;
 import net.minecraftforge.client.model.data.ModelData;
-
-import java.util.List;
 
 public final class ClientHelper {
 	public static ObjectHelper.VariableResponse isRenderTransparent(Block block) {

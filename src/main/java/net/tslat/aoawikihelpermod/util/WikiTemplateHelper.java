@@ -1,17 +1,25 @@
 package net.tslat.aoawikihelpermod.util;
 
+import com.google.common.collect.Multimap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
+import net.tslat.aoa3.client.ClientOperations;
+import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
+import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
+import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
+import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
+import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.printers.TablePrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -174,5 +182,82 @@ public class WikiTemplateHelper {
 		params.add("versionadded=");
 
 		return makeWikiTemplateObject("BlockInfo", false, params.toArray(new String[0]));
+	}
+
+	public static String makeItemInfoboxTemplate(Item item) {
+		List<String> params = new ObjectArrayList<>();
+		ItemStack stack = new ItemStack(item);
+
+		params.add("name=" + ObjectHelper.getItemName(item));
+		params.add("image=" + ObjectHelper.getItemName(item) + ".png");
+		params.add("id=" + RegistryUtil.getId(item));
+
+		String ammo = ObjectHelper.getItemAmmoType(item);
+
+		if (ammo != null)
+			params.add("ammo=" + ammo);
+
+		Multimap<Attribute, AttributeModifier> attributes = ObjectHelper.getAttributesForItem(item);
+
+		if (attributes.containsKey(Attributes.ATTACK_DAMAGE))
+			params.add("damage=" + NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_DAMAGE, attributes.values()), 2));
+
+		if (attributes.containsKey(Attributes.ATTACK_SPEED)) {
+			if (attributes.containsKey(Attributes.ATTACK_DAMAGE)) {
+				params.add("attackspeed=" + NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_SPEED, attributes.values()) + 4, 2) + "/sec");
+			}
+			else {
+				params.add("unholstertime=" + NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_SPEED, attributes.values()) + 4), 2) + "s");
+			}
+		}
+
+		if (attributes.containsKey(Attributes.ATTACK_KNOCKBACK))
+			params.add("knockback=" + NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_KNOCKBACK, attributes.values()), 2));
+
+		if (attributes.containsKey(Attributes.ARMOR))
+			params.add("armor=" + NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ARMOR, attributes.values()), 2));
+
+		if (attributes.containsKey(Attributes.ARMOR))
+			params.add("armortoughness=" + NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ARMOR_TOUGHNESS, attributes.values()), 2));
+
+		if (stack.isStackable()) {
+			params.add("stackable=Yes (" + stack.getMaxStackSize() + ")");
+		}
+		else {
+			params.add("durability=" + stack.getMaxDamage());
+			params.add("stackable=No");
+		}
+
+		FoodProperties foodProperties = stack.getFoodProperties(ClientOperations.getPlayer());
+
+		if (foodProperties != null) {
+			params.add("hunger=" + foodProperties.getNutrition());
+			params.add("saturation=Up to " + foodProperties.getSaturationModifier() * foodProperties.getNutrition() + " (" + NumberUtil.roundToNthDecimalPlace(foodProperties.getSaturationModifier(), 2) + ")");
+		}
+
+		if (item instanceof TieredItem tieredItem) {
+			Tier tier = tieredItem.getTier();
+
+			params.add("efficiency=" + NumberUtil.roundToNthDecimalPlace(tier.getSpeed(), 2));
+
+			if (tier.getTag() != null)
+				params.add("harvestlevel=" + tier.getTag().location().toString());
+		}
+
+		if (item instanceof BaseGun gun && !(gun instanceof BaseThrownWeapon)) {
+			params.add("firerate=" + NumberUtil.roundToNthDecimalPlace(20f / gun.getFiringDelay(), 2) + "/sec");
+			params.add("firetype=" + (gun.isFullAutomatic() ? "Fully-Automatic" : "Semi-Automatic"));
+		}
+		else if (item instanceof BaseBlaster blaster) {
+			params.add("firerate=" + NumberUtil.roundToNthDecimalPlace(20f / blaster.getFiringDelay(), 2) + "/sec");
+			params.add("firetype=Fully-Automatic");
+		}
+		else if (item instanceof BaseBow bow) {
+			params.add("drawspeed=" + NumberUtil.roundToNthDecimalPlace(1f / bow.getDrawSpeedMultiplier(), 2) + "/s");
+		}
+
+		params.add("raritycolor=" + StringUtil.toTitleCase(stack.getRarity().toString()));
+
+		return makeWikiTemplateObject("ItemInfo", false, params.toArray(new String[0]));
 	}
 }

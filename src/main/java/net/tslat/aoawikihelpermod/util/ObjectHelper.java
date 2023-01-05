@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.objects.Object2BooleanAVLTreeMap;
-import net.minecraft.core.BlockSource;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -27,10 +26,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.biome.Biome;
@@ -45,19 +41,11 @@ import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
 import net.minecraftforge.server.ServerLifecycleHooks;
-import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
-import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
-import net.tslat.aoa3.content.item.weapon.cannon.BaseCannon;
-import net.tslat.aoa3.content.item.weapon.crossbow.BaseCrossbow;
-import net.tslat.aoa3.content.item.weapon.greatblade.BaseGreatblade;
+import net.tslat.aoa3.common.registration.AoARegistries;
+import net.tslat.aoa3.content.item.weapon.bow.Slingshot;
 import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
-import net.tslat.aoa3.content.item.weapon.maul.BaseMaul;
-import net.tslat.aoa3.content.item.weapon.shotgun.BaseShotgun;
-import net.tslat.aoa3.content.item.weapon.sniper.BaseSniper;
 import net.tslat.aoa3.content.item.weapon.staff.BaseStaff;
-import net.tslat.aoa3.content.item.weapon.sword.BaseSword;
 import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
-import net.tslat.aoa3.content.item.weapon.vulcane.BaseVulcane;
 import net.tslat.aoa3.util.LocaleUtil;
 import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoa3.util.StringUtil;
@@ -530,6 +518,49 @@ public class ObjectHelper {
 		String tagName = toolTag.location().toString();
 
 		return StringUtil.toTitleCase(tagName.substring(9));
+	}
+
+	@Nullable
+	public static String getItemAmmoType(Item item) {
+		ItemStack stack = new ItemStack(item);
+		StringBuilder builder = new StringBuilder();
+
+		if (item instanceof BaseStaff<?> staff) {
+			for (Map.Entry<Item, Integer> rune : staff.getRunes().entrySet()) {
+				if (!builder.isEmpty())
+					builder.append(System.lineSeparator());
+
+				builder.append(rune.getValue()).append(" ").append(ObjectHelper.getItemName(rune.getKey()));
+			}
+		}
+		else if (item instanceof BaseGun gun && !(gun instanceof BaseThrownWeapon)) {
+			builder.append(ObjectHelper.getItemName(gun.getAmmoItem()));
+		}
+		else if (item instanceof ProjectileWeaponItem weapon) {
+			Predicate<ItemStack> ammoPredicate = weapon.getAllSupportedProjectiles();
+
+			if (ammoPredicate == ProjectileWeaponItem.ARROW_ONLY) {
+				builder.append("Arrows");
+			}
+			else if (ammoPredicate == ProjectileWeaponItem.ARROW_OR_FIREWORK) {
+				builder.append("Arrows or Fireworks");
+			}
+			else if (ammoPredicate == Slingshot.AMMO_PREDICATE) {
+				builder.append("Pop Shots or Flint");
+			}
+			else {
+				for (Item registryItem : AoARegistries.ITEMS.getAllRegisteredObjects()) {
+					if (ammoPredicate.test(new ItemStack(registryItem))) {
+						if (!builder.isEmpty())
+							builder.append(System.lineSeparator());
+
+						builder.append(ObjectHelper.getItemName(registryItem)).append(", ");
+					}
+				}
+			}
+		}
+
+		return builder.isEmpty() ? null : builder.toString();
 	}
 
 	public enum VariableResponse {
