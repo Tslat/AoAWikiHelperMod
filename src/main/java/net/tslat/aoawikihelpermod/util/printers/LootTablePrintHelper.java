@@ -11,6 +11,7 @@ public class LootTablePrintHelper extends PrintHelper {
 	private static final String END = "}}";
 
 	private int tableCount = 0;
+	private boolean mentionWorldTable = false;
 	private final boolean singleTable;
 
 	protected LootTablePrintHelper(String fileName, boolean singleTable) throws IOException {
@@ -29,6 +30,10 @@ public class LootTablePrintHelper extends PrintHelper {
 		}
 	}
 
+	public void mentionWorldTable() {
+		this.mentionWorldTable = true;
+	}
+
 	public void printTable(ResourceLocation id, LootTablePrintHandler printHandler) {
 		if (tableCount > 0)
 			write("");
@@ -38,6 +43,9 @@ public class LootTablePrintHelper extends PrintHelper {
 
 		write(HEAD);
 		write("|type=" + printHandler.getType());
+
+		if (mentionWorldTable)
+			write("|worldtable=1");
 
 		for (LootTablePrintHandler.PoolPrintData poolData : printHandler.getPools()) {
 			int index = poolData.getPoolIndex();
