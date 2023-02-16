@@ -11,7 +11,9 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
@@ -19,10 +21,12 @@ import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.dataskimmers.LootTablesSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
+import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
 import net.tslat.aoawikihelpermod.util.printers.LootTablePrintHelper;
 import net.tslat.aoawikihelpermod.util.printers.handlers.LootTablePrintHandler;
 
 import java.io.File;
+import java.util.Arrays;
 
 public class LootTableCommand implements Command<CommandSourceStack> {
 	private static final LootTableCommand CMD = new LootTableCommand();
@@ -64,10 +68,19 @@ public class LootTableCommand implements Command<CommandSourceStack> {
 			return 1;
 		}
 
-		return printTable(cmd, entity.getDefaultLootTable());
+		return printTable(cmd, entity.getDefaultLootTable(), dropsFromWorldTable(entity));
+	}
+
+	private static boolean dropsFromWorldTable(EntityType entityType) {
+		Entity entity = entityType.create(FakeWorld.INSTANCE.get());
+		return entity instanceof Enemy;
 	}
 
 	private static int printTable(CommandContext<CommandSourceStack> cmd, ResourceLocation tableId) {
+		return printTable(cmd, tableId, false);
+	}
+
+	private static int printTable(CommandContext<CommandSourceStack> cmd, ResourceLocation tableId, boolean mentionWorldTable) {
 		try {
 			LootTablePrintHandler printHandler = LootTablesSkimmer.TABLE_PRINTERS.get(tableId);
 
@@ -92,6 +105,9 @@ public class LootTableCommand implements Command<CommandSourceStack> {
 			fileName = fileName + pathName;
 
 			try (LootTablePrintHelper printHelper = LootTablePrintHelper.open(fileName, true)) {
+				if (mentionWorldTable)
+					printHelper.mentionWorldTable();
+
 				printHelper.withClipboardOutput(clipboardContent);
 				printHelper.printTable(tableId, printHandler);
 
