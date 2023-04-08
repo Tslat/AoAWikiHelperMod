@@ -29,6 +29,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -52,8 +53,8 @@ import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoa3.util.TagUtil;
 import net.tslat.aoawikihelpermod.dataskimmers.TagDataSkimmer;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
-import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
-import net.tslat.aoawikihelpermod.util.printers.handlers.TagCategoryPrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.handler.RecipePrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.handler.TagCategoryPrintHandler;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -99,6 +100,12 @@ public class ObjectHelper {
 			return 0d;
 
 		return getAttributeValue(attribute, attributes.get(attribute));
+	}
+
+	public static double getAttributeFromEntity(LivingEntity entity, Attribute attribute) {
+		AttributeInstance instance = entity.getAttribute(attribute);
+
+		return instance == null ? 0d : instance.getValue();
 	}
 
 	public static double getAttributeValue(Attribute attribute, Collection<AttributeModifier> modifiers) {
@@ -493,8 +500,8 @@ public class ObjectHelper {
 	}
 
 	@Nullable
-	public static String getBlockHarvestTag(Block block) {
-		TagKey<Block> harvestTag = TagUtil.getAllTagsFor(ForgeRegistries.BLOCKS.tags(), block)
+	public static String getBlockHarvestTag(Block block, Level level) {
+		TagKey<Block> harvestTag = TagUtil.getAllTagsFor(Registries.BLOCK, block, level)
 				.filter(tag -> tag.location().getPath().startsWith("needs_") && tag.location().getPath().endsWith("_tool"))
 				.findAny()
 				.orElse(null);
@@ -502,12 +509,14 @@ public class ObjectHelper {
 		if (harvestTag == null)
 			return null;
 
-		return harvestTag.location().toString();
+		String tagName = harvestTag.location().toString();
+
+		return StringUtil.toTitleCase(tagName.substring(6, tagName.indexOf("_tool")));
 	}
 
 	@Nullable
-	public static String getBlockToolTag(Block block) {
-		TagKey<Block> toolTag = TagUtil.getAllTagsFor(ForgeRegistries.BLOCKS.tags(), block)
+	public static String getBlockToolTag(Block block, Level level) {
+		TagKey<Block> toolTag = TagUtil.getAllTagsFor(Registries.BLOCK, block, level)
 				.filter(tag -> tag.location().getPath().startsWith("mineable/"))
 				.findAny()
 				.orElse(null);
@@ -515,9 +524,7 @@ public class ObjectHelper {
 		if (toolTag == null)
 			return null;
 
-		String tagName = toolTag.location().toString();
-
-		return StringUtil.toTitleCase(tagName.substring(9));
+		return StringUtil.toTitleCase(toolTag.location().toString().substring(9));
 	}
 
 	@Nullable

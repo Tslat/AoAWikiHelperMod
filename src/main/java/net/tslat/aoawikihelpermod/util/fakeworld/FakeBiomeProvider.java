@@ -6,14 +6,14 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 public class FakeBiomeProvider extends BiomeSource {
 	public static final Codec<FakeBiomeProvider> CODEC = Biome.CODEC.fieldOf("biome").xmap(FakeBiomeProvider::new, provider -> provider.biome).stable().codec();
 	private final Holder<Biome> biome;
 
 	public FakeBiomeProvider(Holder<Biome> biome) {
-		super(List.of(FakeWorld.PLAINS_BIOME.get()));
+		super();
 
 		this.biome = biome;
 	}
@@ -21,6 +21,11 @@ public class FakeBiomeProvider extends BiomeSource {
 	@Override
 	protected Codec<? extends BiomeSource> codec() {
 		return CODEC;
+	}
+
+	@Override
+	protected Stream<Holder<Biome>> collectPossibleBiomes() {
+		return Stream.empty();
 	}
 
 	@Override

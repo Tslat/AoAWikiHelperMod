@@ -12,7 +12,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.storage.loot.Deserializers;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.HaulingTablePrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.handler.HaulingTablePrintHandler;
 
 import java.util.HashMap;
 import java.util.Map;

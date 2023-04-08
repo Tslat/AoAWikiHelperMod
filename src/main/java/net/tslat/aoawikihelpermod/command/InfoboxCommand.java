@@ -10,18 +10,17 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
-import net.tslat.aoawikihelpermod.util.printers.infoboxes.BlockInfoboxPrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.infoboxes.EntityInfoboxPrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.infoboxes.ItemInfoboxPrintHelper;
+import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
+import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
 
 import java.io.File;
+import java.io.IOException;
 
 public class InfoboxCommand implements Command<CommandSourceStack> {
 	private static final InfoboxCommand CMD = new InfoboxCommand();
@@ -41,16 +40,12 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 				.then(Commands.argument("id", ResourceLocationArgument.id())
 						.suggests(SuggestionProviders.SUMMONABLE_ENTITIES)
 						.executes(InfoboxCommand::printEntityInfobox)));
-		ItemsCommand.ITEM_CATEGORY_PROVIDERS.forEach(provider -> {
-			try {
+
+		ItemsCommand.ITEM_CATEGORY_PROVIDERS.forEach(provider ->
 				builder.then(Commands.literal(provider.getCategoryName())
 						.then(Commands.argument("id", ResourceLocationArgument.id())
 								.suggests(provider.getProvider())
-								.executes(InfoboxCommand::printItemInfobox)));
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		});
+								.executes(InfoboxCommand::printItemInfobox))));
 
 		return builder;
 	}
@@ -61,48 +56,70 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 
 	@Override
 	public int run(CommandContext<CommandSourceStack> context) {
-		WikiHelperCommand.info(context.getSource(), commandName(), "Prints wiki infoboxes. Currently only supports blocks.");
+		WikiHelperCommand.info(context.getSource(), commandName(), "Prints wiki-template infoboxes for objects");
 
 		return 1;
 	}
 
 	private static int printBlockInfobox(CommandContext<CommandSourceStack> cmd) {
-		Block block = ForgeRegistries.BLOCKS.getDelegateOrThrow(cmd.getArgument("id", ResourceLocation.class)).get();
+		ResourceLocation id = ResourceLocationArgument.getId(cmd, "id");
+		Block block = ForgeRegistries.BLOCKS.getValue(id);
 		CommandSourceStack source = cmd.getSource();
-		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+		MutableSupplier<String> clipboardContent = new MutableSupplier<>(null);
 		File outputFile;
-
-		WikiHelperCommand.info(cmd.getSource(), "Infobox", "Printing block infobox for '" + ForgeRegistries.BLOCKS.getKey(block) + "'...");
 		String fileName = "Block Infobox - " + ObjectHelper.getBlockName(block);
 
-		try (BlockInfoboxPrintHelper printHelper = BlockInfoboxPrintHelper.open(fileName)) {
+		WikiHelperCommand.info(cmd.getSource(), "Infobox", "Printing block infobox for '" + id + "'...");
+
+		try (PrintHelper printHelper = PrintHelper.open(fileName)) {
 			printHelper.withClipboardOutput(clipboardContent);
-			printHelper.printBlockInfobox(block);
+
+			for (String line : WikiTemplateHelper.makeBlockInfoboxTemplate(block, source.getLevel()).getLines()) {
+				printHelper.write(line);
+			}
 
 			outputFile = printHelper.getOutputFile();
 		}
+		catch (IOException ex) {
+			WikiHelperCommand.error(source, "Infobox", "Error generating print helper for block. Check log for more info");
+			ex.printStackTrace();
+
+			return 0;
+		}
 
 		WikiHelperCommand.success(source, "Infobox", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+
 		return 1;
 	}
 
 	private static int printItemInfobox(CommandContext<CommandSourceStack> cmd) {
-		Item item = ForgeRegistries.ITEMS.getDelegateOrThrow(cmd.getArgument("id", ResourceLocation.class)).get();
+		ResourceLocation id = ResourceLocationArgument.getId(cmd, "id");
+		Item item = ForgeRegistries.ITEMS.getValue(id);
 		CommandSourceStack source = cmd.getSource();
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-
-		WikiHelperCommand.info(cmd.getSource(), "Infobox", "Printing item infobox for '" + ForgeRegistries.ITEMS.getKey(item) + "'...");
 		String fileName = "Item Infobox - " + ObjectHelper.getItemName(item);
 
-		try (ItemInfoboxPrintHelper printHelper = ItemInfoboxPrintHelper.open(fileName)) {
+		WikiHelperCommand.info(cmd.getSource(), "Infobox", "Printing item infobox for '" + id + "'...");
+
+		try (PrintHelper printHelper = PrintHelper.open(fileName)) {
 			printHelper.withClipboardOutput(clipboardContent);
-			printHelper.printItemInfobox(item, (LivingEntity) cmd.getSource().getEntity());
+
+			for (String line : WikiTemplateHelper.makeItemInfoboxTemplate(item).getLines()) {
+				printHelper.write(line);
+			}
 
 			outputFile = printHelper.getOutputFile();
 		}
+		catch (IOException ex) {
+			WikiHelperCommand.error(source, "Infobox", "Error generating print helper for item. Check log for more info");
+			ex.printStackTrace();
+
+			return 0;
+		}
 
 		WikiHelperCommand.success(source, "Infobox", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+
 		return 1;
 	}
 
@@ -110,6 +127,9 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 		ResourceLocation id = ResourceLocationArgument.getId(cmd, "id");
 		EntityType<?> entity = ForgeRegistries.ENTITY_TYPES.getValue(id);
 		CommandSourceStack source = cmd.getSource();
+		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
+		File outputFile;
+		String fileName = "Entity Infobox - " + ObjectHelper.getEntityName(entity);
 
 		if (entity == null || (!id.toString().equals("minecraft:pig") && entity == EntityType.PIG)) {
 			WikiHelperCommand.warn(cmd.getSource(), "LootTable", "Invalid entity id '" + id + "'");
@@ -117,20 +137,26 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 			return 1;
 		}
 
-		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
-		File outputFile;
+		WikiHelperCommand.info(cmd.getSource(), "Infobox", "Printing entity infobox for '" + id + "'...");
 
-		WikiHelperCommand.info(cmd.getSource(), "Infobox", "Printing entity infobox for '" + ForgeRegistries.ENTITY_TYPES.getKey(entity) + "'...");
-		String fileName = "Entity Infobox - " + ObjectHelper.getEntityName(entity);
-
-		try (EntityInfoboxPrintHelper printHelper = EntityInfoboxPrintHelper.open(fileName)) {
+		try (PrintHelper printHelper = PrintHelper.open(fileName)) {
 			printHelper.withClipboardOutput(clipboardContent);
-			printHelper.printEntityInfobox(entity, (LivingEntity) cmd.getSource().getEntity());
+
+			for (String line : WikiTemplateHelper.makeEntityInfoboxTemplate(entity, source.getLevel()).getLines()) {
+				printHelper.write(line);
+			}
 
 			outputFile = printHelper.getOutputFile();
 		}
+		catch (IOException ex) {
+			WikiHelperCommand.error(source, "Infobox", "Error generating print helper for entity. Check log for more info");
+			ex.printStackTrace();
+
+			return 0;
+		}
 
 		WikiHelperCommand.success(source, "Infobox", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
+
 		return 1;
 	}
 }

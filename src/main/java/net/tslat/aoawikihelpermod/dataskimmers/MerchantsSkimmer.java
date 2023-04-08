@@ -25,7 +25,7 @@ import net.tslat.aoa3.content.entity.base.AoATrader;
 import net.tslat.aoa3.content.entity.npc.trader.UndeadHeraldEntity;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.MerchantTradePrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.handler.MerchantTradePrintHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;

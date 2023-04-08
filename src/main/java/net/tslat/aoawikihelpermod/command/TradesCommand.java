@@ -19,8 +19,8 @@ import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.dataskimmers.MerchantsSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
-import net.tslat.aoawikihelpermod.util.printers.TradesPrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.MerchantTradePrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.TradesPrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.handler.MerchantTradePrintHandler;
 
 import java.io.File;
 import java.util.ArrayList;

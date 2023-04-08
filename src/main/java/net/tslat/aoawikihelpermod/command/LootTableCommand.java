@@ -22,11 +22,10 @@ import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.dataskimmers.LootTablesSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
-import net.tslat.aoawikihelpermod.util.printers.LootTablePrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.LootTablePrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.LootTablePrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.handler.LootTablePrintHandler;
 
 import java.io.File;
-import java.util.Arrays;
 
 public class LootTableCommand implements Command<CommandSourceStack> {
 	private static final LootTableCommand CMD = new LootTableCommand();

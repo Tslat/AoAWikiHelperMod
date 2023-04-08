@@ -25,7 +25,7 @@ import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.dataskimmers.StructureTemplateSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
-import net.tslat.aoawikihelpermod.util.printers.TablePrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.TablePrintHelper;
 
 import java.io.File;
 import java.util.*;

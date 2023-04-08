@@ -9,7 +9,6 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.SpriteContents;
@@ -19,12 +18,13 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapter;
-import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
 import org.joml.Vector4f;
 
 import java.io.File;
@@ -94,7 +94,7 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 			matrix.scale(this.scale, this.scale, 1);
 			matrix.translate(this.minecraft.getWindow().getGuiScaledWidth() / 2f / this.scale, this.mc.getWindow().getGuiScaledHeight() / 2f / this.scale, 1050);
 			matrix.scale(1, -1, 1);
-			matrix.translate(0, 0, -(100 + itemRenderer.blitOffset));
+			matrix.translate(0, 0, -(100 + ItemRenderer.ITEM_COUNT_BLIT_OFFSET));
 			makePreRenderAdjustments(matrix);
 			matrix.translate(this.xAdjust, this.yAdjust, 0);
 
@@ -123,7 +123,7 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 					modelViewPoseStack.scale(relativeScale, relativeScale, relativeScale);
 				}
 
-				itemRenderer.renderAndDecorateItem(this.mc.player, this.stack, 0, 0, 100);
+				itemRenderer.renderAndDecorateItem(matrix, this.stack, 0, 0, 100);
 				modelViewPoseStack.popPose();
 			}
 			else if (!customRenderStack(itemRenderer, matrix, renderBuffer)) {
@@ -195,7 +195,7 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 
 		PoseStack modelViewPose = RenderSystem.getModelViewStack();
 		modelViewPose.pushPose();
-		modelViewPose.translate(0, 0, (100f + itemRenderer.blitOffset));
+		modelViewPose.translate(0, 0, (100f + ItemRenderer.ITEM_COUNT_BLIT_OFFSET));
 		modelViewPose.translate(8, 8, 0);
 		modelViewPose.scale(1, -1, 1);
 		modelViewPose.scale(16, 16, 16);
@@ -209,7 +209,7 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 		if (changeLighting)
 			Lighting.setupForFlatItems();
 
-		itemRenderer.render(stack, ItemTransforms.TransformType.GUI, false, matrix, renderBuffer, 15728880, OverlayTexture.NO_OVERLAY, model);
+		itemRenderer.render(stack, ItemDisplayContext.GUI, false, matrix, renderBuffer, 15728880, OverlayTexture.NO_OVERLAY, model);
 		RenderSystem.enableDepthTest();
 
 		if (changeLighting)

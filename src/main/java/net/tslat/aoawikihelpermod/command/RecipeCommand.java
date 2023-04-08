@@ -16,8 +16,8 @@ import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.dataskimmers.RecipesSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
-import net.tslat.aoawikihelpermod.util.printers.RecipePrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.RecipePrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.handler.RecipePrintHandler;
 
 import java.io.File;
 

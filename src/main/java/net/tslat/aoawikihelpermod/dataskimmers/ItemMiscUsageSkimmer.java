@@ -18,14 +18,14 @@ public class ItemMiscUsageSkimmer {
 	}
 
 	private static void prepRepairableItems() {
-		ItemDataSkimmer.get(AoAWeapons.SHYREGEM_BOW.get()).addRepairableItems(AoAItems.SHYRESTONE_INGOT.get(), AoAItems.SHYREGEM.get());
-		ItemDataSkimmer.get(AoAWeapons.CRYSTAL_CARVER.get()).addRepairableItems(Arrays.stream(Ingredient.of(Tags.Items.GEMS).getItems()).map(ItemStack::getItem).toArray(Item[]::new));
+		ItemDataSkimmer.get(AoAWeapons.SHYREGEM_BOW.get(), null).addRepairableItems(AoAItems.SHYRESTONE_INGOT.get(), AoAItems.SHYREGEM.get());
+		ItemDataSkimmer.get(AoAWeapons.CRYSTAL_CARVER.get(), null).addRepairableItems(Arrays.stream(Ingredient.of(Tags.Items.GEMS).getItems()).map(ItemStack::getItem).toArray(Item[]::new));
 
 		for (Item item : ObjectHelper.scrapeRegistryForItems(item -> item instanceof TieredItem)) {
 			Tier tier = ((TieredItem)item).getTier();
 
 			for (ItemStack stack : tier.getRepairIngredient().getItems()) {
-				ItemDataSkimmer.get(stack.getItem()).addRepairableItems(item);
+				ItemDataSkimmer.get(stack.getItem(), null).addRepairableItems(item);
 			}
 		}
 	}

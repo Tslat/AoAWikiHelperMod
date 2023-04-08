@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.TagKey;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.TagCategoryPrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.handler.TagCategoryPrintHandler;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

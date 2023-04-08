@@ -1,10 +1,11 @@
 package net.tslat.aoawikihelpermod.dataskimmers;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.BlockDataPrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.handler.BlockDataPrintHandler;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -19,7 +20,9 @@ public class BlockDataSkimmer {
 	}
 
 	@Nullable
-	public static BlockDataPrintHandler get(Block block) {
-		return DATA_BY_BLOCK.get(ForgeRegistries.BLOCKS.getKey(block));
+	public static BlockDataPrintHandler get(Block block, ServerLevel level) {
+		BlockDataPrintHandler handler = DATA_BY_BLOCK.getOrDefault(ForgeRegistries.BLOCKS.getKey(block), null);
+
+		return handler == null ? null : handler.withLevel(level);
 	}
 }

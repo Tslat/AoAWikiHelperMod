@@ -1,14 +1,8 @@
 plugins {
     id 'net.minecraftforge.gradle' version '5.1.+'
-    id 'com.github.johnrengelman.shadow' version '7.1.0' // Shadowing
-    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT' // Mixins
+    id 'org.spongepowered.mixin' version '0.+' // Mixins
     id 'org.parchmentmc.librarian.forgegradle' version '1.+' // Parchment
 }
-
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.parchmentmc.librarian.forgegradle' // Parchment
-apply plugin: 'eclipse'
-apply plugin: 'org.spongepowered.mixin'
 
 version = mod_version
 group = 'net.tslat.aoawikihelpermod'
@@ -16,10 +10,8 @@ archivesBaseName = 'aoawikihelpermod'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
-
 minecraft {
-    mappings channel: mappings_channel, version: mappings_version
+    mappings channel: mappings_channel, version: "${mappings_version}-${minecraft_version}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
@@ -89,11 +81,11 @@ dependencies {
     minecraft "net.minecraftforge:forge:$project.minecraft_version-$project.forge_version"
 
     implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version")
-    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.19.3:$project.geckolib_version")
+    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${project.minecraft_version}:$project.geckolib_version")
 
     // Mixin annotation processor, just in case we need it
     if (System.getProperty("idea.sync.active") != "true") {
-        annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
+        annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     }
 }
 
@@ -102,7 +94,7 @@ jar {
         attributes([
             "Specification-Title": "aoawikihelpermod",
             "Specification-Vendor": "Tslat",
-            "Specification-Version": "1.19.2",
+            "Specification-Version": "1.19.4",
             "Implementation-Title": project.name,
             "Implementation-Version": "${mod_version}",
             "Implementation-Vendor" :"Tslat",

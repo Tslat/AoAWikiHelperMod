@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
-import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
 import org.joml.Vector4f;
 
 import java.io.File;

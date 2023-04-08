@@ -16,8 +16,8 @@ import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.dataskimmers.HaulingFishTableSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
-import net.tslat.aoawikihelpermod.util.printers.HaulingTablePrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.HaulingTablePrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.HaulingTablePrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.handler.HaulingTablePrintHandler;
 
 import java.io.File;
 

@@ -20,13 +20,14 @@ import net.tslat.aoawikihelpermod.dataskimmers.MerchantsSkimmer;
 import net.tslat.aoawikihelpermod.dataskimmers.RecipesSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
-import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.RecipePrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.TradesPrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.MerchantTradePrintHandler;
-import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.RecipePrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.TradesPrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.handler.MerchantTradePrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.handler.RecipePrintHandler;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -59,7 +60,7 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		String baseFileName = "Usages - " + itemName;
-		Collection<ResourceLocation> containingRecipes = RecipesSkimmer.RECIPES_BY_INGREDIENT.get(ForgeRegistries.ITEMS.getKey(item));
+		Collection<ResourceLocation> containingRecipes = RecipesSkimmer.getRecipesByIngredient(ForgeRegistries.ITEMS.getKey(item));
 
 		try {
 			if (!containingRecipes.isEmpty()) {
@@ -109,7 +110,7 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		String repairInfo = ItemDataSkimmer.get(item).getRepairIngredientPrintout();
+		String repairInfo = ItemDataSkimmer.get(item, commandSource.getLevel()).getRepairIngredientPrintout();
 
 		if (repairInfo != null) {
 			String fileName = "Usages - " + itemName + " - Repairing";
@@ -118,6 +119,12 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 				printHelper.withClipboardOutput(clipboardContent);
 				printHelper.write(repairInfo);
 				outputFile = printHelper.getOutputFile();
+			}
+			catch (IOException ex) {
+				WikiHelperCommand.error(commandSource, "Blocks", "Error generating print helper for item. Check log for more info");
+				ex.printStackTrace();
+
+				return false;
 			}
 
 			WikiHelperCommand.success(commandSource, "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
@@ -132,7 +139,7 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		String fuelInfo = ItemDataSkimmer.get(item).getFuelPrintout();
+		String fuelInfo = ItemDataSkimmer.get(item, commandSource.getLevel()).getFuelPrintout();
 
 		if (fuelInfo != null) {
 			String fileName = "Usages - " + itemName + " - Fuels";
@@ -141,6 +148,12 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 				printHelper.withClipboardOutput(clipboardContent);
 				printHelper.write(fuelInfo);
 				outputFile = printHelper.getOutputFile();
+			}
+			catch (IOException ex) {
+				WikiHelperCommand.error(commandSource, "Blocks", "Error generating print helper for item. Check log for more info");
+				ex.printStackTrace();
+
+				return false;
 			}
 
 			WikiHelperCommand.success(commandSource, "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
@@ -155,7 +168,7 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		String strippingInfo = item instanceof BlockItem ? BlockDataSkimmer.get(((BlockItem)item).getBlock()).getStrippedBlockDescription() : null;
+		String strippingInfo = item instanceof BlockItem blockItem ? BlockDataSkimmer.get(blockItem.getBlock(), commandSource.getLevel()).getStrippedBlockDescription() : null;
 
 		if (strippingInfo != null) {
 			String fileName = "Usages - " + itemName + " - Log Stripping";
@@ -165,6 +178,12 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 				printHelper.write(strippingInfo);
 
 				outputFile = printHelper.getOutputFile();
+			}
+			catch (IOException ex) {
+				WikiHelperCommand.error(commandSource, "Blocks", "Error generating print helper for item. Check log for more info");
+				ex.printStackTrace();
+
+				return false;
 			}
 
 			WikiHelperCommand.success(commandSource, "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
@@ -179,7 +198,7 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		String composterInfo = ItemDataSkimmer.get(item).getComposterPrintout();
+		String composterInfo = ItemDataSkimmer.get(item, commandSource.getLevel()).getComposterPrintout();
 
 		if (composterInfo != null) {
 			String fileName = "Usages - " + itemName + " - Composter";
@@ -188,6 +207,12 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 				printHelper.withClipboardOutput(clipboardContent);
 				printHelper.write(composterInfo);
 				outputFile = printHelper.getOutputFile();
+			}
+			catch (IOException ex) {
+				WikiHelperCommand.error(commandSource, "Blocks", "Error generating print helper for item. Check log for more info");
+				ex.printStackTrace();
+
+				return false;
 			}
 
 			WikiHelperCommand.success(commandSource, "Usages", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));

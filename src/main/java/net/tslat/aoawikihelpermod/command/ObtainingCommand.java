@@ -17,12 +17,13 @@ import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.dataskimmers.*;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
-import net.tslat.aoawikihelpermod.util.printers.*;
-import net.tslat.aoawikihelpermod.util.printers.handlers.HaulingTablePrintHandler;
-import net.tslat.aoawikihelpermod.util.printers.handlers.MerchantTradePrintHandler;
-import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.*;
+import net.tslat.aoawikihelpermod.util.printer.handler.HaulingTablePrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.handler.MerchantTradePrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.handler.RecipePrintHandler;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -55,7 +56,7 @@ public class ObtainingCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		String baseFileName = "Obtaining - " + itemName;
-		Collection<ResourceLocation> resultingRecipes = RecipesSkimmer.RECIPES_BY_OUTPUT.get(ForgeRegistries.ITEMS.getKey(item));
+		Collection<ResourceLocation> resultingRecipes = RecipesSkimmer.getRecipesByOutput(ForgeRegistries.ITEMS.getKey(item));
 
 		try {
 			if (!resultingRecipes.isEmpty()) {
@@ -129,7 +130,7 @@ public class ObtainingCommand implements Command<CommandSourceStack> {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		String stripInfo = item instanceof BlockItem ? BlockDataSkimmer.get(((BlockItem)item).getBlock()).getStrippableBlockDescription() : null;
+		String stripInfo = item instanceof BlockItem blockItem ? BlockDataSkimmer.get(blockItem.getBlock(), commandSource.getLevel()).getStrippableBlockDescription() : null;
 
 		if (stripInfo != null) {
 			String fileName = "Obtaining - " + itemName + " - Log Stripping";
@@ -139,6 +140,12 @@ public class ObtainingCommand implements Command<CommandSourceStack> {
 				printHelper.write(stripInfo);
 
 				outputFile = printHelper.getOutputFile();
+			}
+			catch (IOException ex) {
+				WikiHelperCommand.error(commandSource, "Obtaining", "Error generating print helper for item. Check log for more info");
+				ex.printStackTrace();
+
+				return false;
 			}
 
 			WikiHelperCommand.success(commandSource, "Obtaining", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));

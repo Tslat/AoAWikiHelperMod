@@ -6,7 +6,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
-import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
 import org.joml.Vector4f;
 
 import javax.annotation.Nullable;

@@ -2,9 +2,6 @@ package net.tslat.aoawikihelpermod;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.synchronization.ArgumentTypeInfos;
-import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -18,15 +15,12 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.FileUtils;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.tslat.aoa3.advent.AdventOfAscension;
-import net.tslat.aoa3.common.registration.AoARegistries;
-import net.tslat.aoawikihelpermod.command.BlocksCommand;
-import net.tslat.aoawikihelpermod.command.ItemsCommand;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.dataskimmers.*;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapters;
 import net.tslat.aoawikihelpermod.util.LootTableHelper;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
-import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,7 +30,7 @@ import static net.tslat.aoawikihelpermod.AoAWikiHelperMod.MOD_ID;
 
 @Mod(MOD_ID)
 public class AoAWikiHelperMod {
-	public static final String VERSION = "2.9.17";
+	public static final String VERSION = "2.10";
 	public static final String MOD_ID = "aoawikihelpermod";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 

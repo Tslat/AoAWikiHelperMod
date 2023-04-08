@@ -64,7 +64,7 @@ public class FakeWorld extends Level implements WorldGenLevel {
 	public static void init() {}
 
 	protected FakeWorld() {
-		super(new FakeSpawnInfo(), Level.OVERWORLD, AoADimensions.OVERWORLD.getWorld().dimensionTypeRegistration(), () -> InactiveProfiler.INSTANCE, true, false, 0, 0);
+		super(new FakeSpawnInfo(), Level.OVERWORLD, AoADimensions.OVERWORLD.getWorld().registryAccess(), AoADimensions.OVERWORLD.getWorld().dimensionTypeRegistration(), () -> InactiveProfiler.INSTANCE, true, false, 0, 0);
 	}
 
 	@Override

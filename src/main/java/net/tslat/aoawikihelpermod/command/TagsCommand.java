@@ -15,8 +15,8 @@ import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.dataskimmers.TagDataSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
-import net.tslat.aoawikihelpermod.util.printers.TablePrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.TagCategoryPrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.TablePrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.handler.TagCategoryPrintHandler;
 
 import java.io.File;
 import java.util.Arrays;

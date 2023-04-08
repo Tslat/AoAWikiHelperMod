@@ -1,14 +1,26 @@
 package net.tslat.aoawikihelpermod.util;
 
 import com.google.common.collect.Multimap;
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.TieredItem;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.tslat.aoa3.client.ClientOperations;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoa3.common.registration.AoAAttributes;
 import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
 import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
 import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
@@ -16,248 +28,224 @@ import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoa3.util.StringUtil;
-import net.tslat.aoawikihelpermod.util.printers.TablePrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.RecipePrintHandler;
+import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
+import net.tslat.aoawikihelpermod.util.printer.TablePrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.handler.RecipePrintHandler;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 
 public class WikiTemplateHelper {
+	public static class Template {
+		private final String name;
+		private List<Pair<String, String>> entries = new ObjectArrayList<>();
+
+		public Template(String name) {
+			this.name = name;
+		}
+
+		public Template entry(String key, String value) {
+			this.entries.add(Pair.of(key, value));
+
+			return this;
+		}
+
+		public Template optionalEntry(String key, @Nullable String value) {
+			if (value == null || value.isEmpty())
+				return this;
+
+			return entry(key, value);
+		}
+
+		public String[] getLines() {
+			String[] lines = new String[this.entries.size() + 2];
+
+			lines[0] = "{{" + this.name;
+
+			for (int i = 0; i < this.entries.size(); i++) {
+				Pair<String, String> entry = this.entries.get(i);
+
+				lines[i + 1] = "|" + entry.getFirst() + "=" + entry.getSecond();
+			}
+
+			lines[lines.length - 1] = "}}";
+
+			return lines;
+		}
+
+		public String getPrintout() {
+			return TablePrintHelper.combineLines(getLines());
+		}
+	}
+
 	public static String tooltip(String text, String tooltip) {
-		return makeWikiTemplateObject("tooltip", true, text, tooltip);
+		return makeInlineTemplate("tooltip", true, text, tooltip);
 	}
 
-	public static String makeWikiTemplateObject(String type, boolean singleLine, String... entries) {
-		if (singleLine) {
-			StringBuilder builder = new StringBuilder("{{");
+	public static String makeInlineTemplate(String type, boolean singleLine, String... entries) {
+		StringBuilder builder = new StringBuilder("{{");
 
-			builder.append(type);
+		builder.append(type);
 
-			for (String str : entries) {
-				builder.append("|");
-				builder.append(str);
-			}
-
-			builder.append("}}");
-
-			return builder.toString();
-		}
-		else {
-			ArrayList<String> lines = new ArrayList<String>();
-
-			lines.add("{{" + type);
-
-
-			for (String str : entries) {
-				lines.add("|" + str);
-			}
-
-			lines.add("}}");
-
-			return TablePrintHelper.combineLines(lines);
-		}
-	}
-
-	public static String makeCraftingTemplate(ArrayList<String> ingredients, RecipePrintHandler.PrintableIngredient output, boolean shapeless) {
-		int extraLines = 1;
-
-		if (shapeless)
-			extraLines++;
-
-		if (output.count > 1)
-			extraLines++;
-
-		String[] lines = new String[ingredients.size() + extraLines];
-		int i = 0;
-
-		while (i < ingredients.size()) {
-			lines[i] = ingredients.get(i);
-			i++;
+		for (String str : entries) {
+			builder.append("|");
+			builder.append(str);
 		}
 
-		lines[i] = "output=" + output.formattedName;
+		builder.append("}}");
 
-		if (output.count > 1)
-			lines[++i] = "amount=" + output.count;
-
-		if (shapeless)
-			lines[++i] = "shapeless=1";
-
-		return makeWikiTemplateObject("Crafting", false, lines);
+		return builder.toString();
 	}
 
-	public static String makeSmeltingTemplate(String input, String output) {
-		return makeSmeltingTemplate(input, null, output, null);
+	public static String makeCraftingTemplate(RecipePrintHandler.RecipeIngredientsHandler ingredientsHandler, boolean shapeless) {
+		Template template = new Template("Crafting");
+		RecipePrintHandler.PrintableIngredient output = ingredientsHandler.getOutput();
+
+		ingredientsHandler.addIngredientsToWikiTemplate(template);
+		template.entry("output", output.formattedName)
+				.optionalEntry("amount", output.count <= 1 ? null : String.valueOf(output.count))
+				.optionalEntry("shapeless", shapeless ? null : "1");
+
+		return template.getPrintout();
 	}
 
-	public static String makeSmeltingTemplate(String input, @Nullable String inputImage, String output, @Nullable String outputImage) {
-		List<String> lines = new ArrayList<>();
+	public static String makeSmeltingTemplate(RecipePrintHandler.PrintableIngredient input, RecipePrintHandler.PrintableIngredient output) {
+		Template template = new Template("Smelting");
 
-		lines.add("input=" + input);
+		template.entry("input", input.formattedName)
+				.optionalEntry("inputimage", input.imageName)
+				.entry("output", output.formattedName)
+				.optionalEntry("outputimage", output.imageName);
 
-		if (inputImage != null)
-			lines.add("inputimage=" + inputImage);
-
-		lines.add("output=" + output);
-
-		if (outputImage != null)
-			lines.add("outputimage=" + outputImage);
-
-		return makeWikiTemplateObject("Smelting", false, lines.toArray(new String[0]));
+		return template.getPrintout();
 	}
 
-	public static String makeInfusionTemplate(ArrayList<String> ingredients, RecipePrintHandler.PrintableIngredient input, RecipePrintHandler.PrintableIngredient output) {
-		int lineCountMod = input.count == 0 ? 2 : 3;
-
-		if (output.count > 1)
-			lineCountMod++;
-
-		if (input.imageName != null)
-			lineCountMod++;
-
-		String[] lines = new String[ingredients.size() + lineCountMod];
-		int i = 0;
+	public static String makeInfusionTemplate(RecipePrintHandler.RecipeIngredientsHandler ingredientsHandler, RecipePrintHandler.PrintableIngredient input) {
+		Template template = new Template("Infusion");
+		RecipePrintHandler.PrintableIngredient output = ingredientsHandler.getOutput();
 
 		if (input != RecipePrintHandler.PrintableIngredient.EMPTY) {
 			if (input.imageName != null) {
-				lines[i++] = "inputimage=" + input.imageName;
-				lines[i++] = "input=" + input.imageName.substring(0, input.imageName.lastIndexOf("."));
+				template.entry("inputimage", input.imageName)
+						.entry("input", input.imageName.substring(0, input.imageName.lastIndexOf(".")));
 			}
 			else {
-				lines[i++] = "input=" + input.formattedName;
+				template.entry("input", input.formattedName);
 			}
 		}
 
-		for (String ingredient : ingredients) {
-			lines[i] = ingredient;
-			i++;
-		}
+		ingredientsHandler.addIngredientsToWikiTemplate(template);
+		template.entry("output", output == RecipePrintHandler.PrintableIngredient.EMPTY ? "Air" : output.formattedName)
+				.optionalEntry("amount", output.count <= 1 ? null : String.valueOf(output.count))
+				.entry("shapeless", "1");
 
-		i = output.count > 1 ? 3 : 2;
-
-		lines[lines.length - i--] = "output=" + (output.formattedName.isEmpty() ? "Air" : output.formattedName);
-
-		if (output.count > 1)
-			lines[lines.length - i--] = "amount=" + output.count;
-
-		lines[lines.length - i] = "shapeless=1";
-
-		return makeWikiTemplateObject("Infusion", false, lines);
+		return template.getPrintout();
 	}
 
-	public static String makeBlockInfoboxTemplate(Block block) {
-		List<String> params = new ObjectArrayList<>();
-		Item item = Item.byBlock(block);
-		ItemStack stack = item == Items.AIR ? null : new ItemStack(item);
+	public static Template makeBlockInfoboxTemplate(Block block, Level level) {
+		Template template = new Template("BlockInfo");
+		ItemStack stack = block.asItem().getDefaultInstance();
 
-		params.add("name=" + ObjectHelper.getBlockName(block));
-		params.add("image=" + ObjectHelper.getBlockName(block) + ".png");
-		params.add("id=" + RegistryUtil.getId(block));
-		params.add("hardness=" + block.defaultDestroyTime());
-		params.add("blastresistance=" + block.getExplosionResistance());
-		params.add("transparent=" + ClientHelper.isRenderTransparent(block));
-		params.add("flammable=" + ObjectHelper.getBlockFlammability(block));
-
-		String luminance = ObjectHelper.getBlockLuminosity(block);
-
-		if (luminance != null)
-			params.add("luminance=" + luminance);
-
-		String harvestLevel = ObjectHelper.getBlockHarvestTag(block);
-
-		if (harvestLevel != null)
-			params.add("harvestlevel=" + harvestLevel);
-
-		String toolType = ObjectHelper.getBlockToolTag(block);
-
-		if (toolType != null)
-			params.add("tool=" + toolType);
-
-		if (stack != null) {
-			params.add("stackable=" + (stack.isStackable() ? "Yes (" + stack.getMaxStackSize() + ")" : "No"));
-			params.add("raritycolor=" + StringUtil.toTitleCase(stack.getRarity().toString()));
-		}
-
-		params.add("versionadded=");
-
-		return makeWikiTemplateObject("BlockInfo", false, params.toArray(new String[0]));
+		return template.entry("name", ObjectHelper.getBlockName(block))
+				.entry("image", ObjectHelper.getBlockName(block) + ".png")
+				.entry("imgsize", "150px")
+				.entry("id", RegistryUtil.getId(block).toString())
+				.entry("hardness", NumberUtil.roundToNthDecimalPlace(block.defaultDestroyTime(), 1))
+				.entry("blastresistance", NumberUtil.roundToNthDecimalPlace(block.getExplosionResistance(), 1))
+				.entry("transparent", ClientHelper.isRenderTransparent(block).toString())
+				.entry("flammable", ObjectHelper.getBlockFlammability(block))
+				.optionalEntry("luminance", ObjectHelper.getBlockLuminosity(block))
+				.optionalEntry("harvestlevel", ObjectHelper.getBlockHarvestTag(block, level))
+				.optionalEntry("tool", ObjectHelper.getBlockToolTag(block, level))
+				.optionalEntry("stackable", stack.isEmpty() ? null : (stack.isStackable() ? "Yes (" + stack.getMaxStackSize() + ")" : "No"))
+				.optionalEntry("raritycolor", stack.isEmpty() ? null : StringUtil.toTitleCase(stack.getRarity().name()))
+				.entry("versionadded", "");
 	}
 
-	public static String makeItemInfoboxTemplate(Item item) {
-		List<String> params = new ObjectArrayList<>();
-		ItemStack stack = new ItemStack(item);
-
-		params.add("name=" + ObjectHelper.getItemName(item));
-		params.add("image=" + ObjectHelper.getItemName(item) + ".png");
-		params.add("id=" + RegistryUtil.getId(item));
-
-		String ammo = ObjectHelper.getItemAmmoType(item);
-
-		if (ammo != null)
-			params.add("ammo=" + ammo);
-
+	public static Template makeItemInfoboxTemplate(Item item) {
+		Template template = new Template("ItemInfo");
 		Multimap<Attribute, AttributeModifier> attributes = ObjectHelper.getAttributesForItem(item);
+		ItemStack stack = item.getDefaultInstance();
+		FoodProperties foodProperties = stack.getFoodProperties(null);
 
-		if (attributes.containsKey(Attributes.ATTACK_DAMAGE))
-			params.add("damage=" + NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_DAMAGE, attributes.values()), 2));
-
-		if (attributes.containsKey(Attributes.ATTACK_SPEED)) {
-			if (attributes.containsKey(Attributes.ATTACK_DAMAGE)) {
-				params.add("attackspeed=" + NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_SPEED, attributes.values()) + 4, 2) + "/sec");
-			}
-			else {
-				params.add("unholstertime=" + NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_SPEED, attributes.values()) + 4), 2) + "s");
-			}
-		}
-
-		if (attributes.containsKey(Attributes.ATTACK_KNOCKBACK))
-			params.add("knockback=" + NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_KNOCKBACK, attributes.values()), 2));
-
-		if (attributes.containsKey(Attributes.ARMOR))
-			params.add("armor=" + NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ARMOR, attributes.values()), 2));
-
-		if (attributes.containsKey(Attributes.ARMOR))
-			params.add("armortoughness=" + NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ARMOR_TOUGHNESS, attributes.values()), 2));
-
-		if (stack.isStackable()) {
-			params.add("stackable=Yes (" + stack.getMaxStackSize() + ")");
-		}
-		else {
-			params.add("durability=" + stack.getMaxDamage());
-			params.add("stackable=No");
-		}
-
-		FoodProperties foodProperties = stack.getFoodProperties(ClientOperations.getPlayer());
-
-		if (foodProperties != null) {
-			params.add("hunger=" + foodProperties.getNutrition());
-			params.add("saturation=Up to " + foodProperties.getSaturationModifier() * foodProperties.getNutrition() + " (" + NumberUtil.roundToNthDecimalPlace(foodProperties.getSaturationModifier(), 2) + ")");
-		}
+		template.entry("name", ObjectHelper.getItemName(item))
+				.entry("image", ObjectHelper.getItemName(item) + ".png")
+				.entry("id", RegistryUtil.getId(item).toString())
+				.optionalEntry("ammo", ObjectHelper.getItemAmmoType(item))
+				.optionalEntry("damage", !attributes.containsKey(Attributes.ATTACK_DAMAGE) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_DAMAGE, attributes.values()), 2))
+				.optionalEntry("attackspeed", !attributes.containsKey(Attributes.ATTACK_SPEED) || !attributes.containsKey(Attributes.ATTACK_DAMAGE) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_SPEED, attributes.values()) + 4, 2) + "/sec")
+				.optionalEntry("unholstertime", !attributes.containsKey(Attributes.ATTACK_SPEED) || attributes.containsKey(Attributes.ATTACK_DAMAGE) ? null : NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_SPEED, attributes.values()) + 4), 2) + "s")
+				.optionalEntry("knockback", !attributes.containsKey(Attributes.ATTACK_KNOCKBACK) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_KNOCKBACK, attributes.values()), 2))
+				.optionalEntry("armor", !attributes.containsKey(Attributes.ARMOR) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ARMOR, attributes.values()), 2))
+				.optionalEntry("armortoughness", !attributes.containsKey(Attributes.ARMOR_TOUGHNESS) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ARMOR_TOUGHNESS, attributes.values()), 2))
+				.entry("stackable", stack.isStackable() ? "Yes (" + stack.getMaxStackSize() + ")" : "No")
+				.optionalEntry("durability", stack.isStackable() ? null : String.valueOf(stack.getMaxDamage()))
+				.optionalEntry("hunger", foodProperties == null ? null : NumberUtil.roundToNthDecimalPlace(foodProperties.getNutrition(), 1))
+				.optionalEntry("saturation", foodProperties == null ? null : "Up to " + foodProperties.getSaturationModifier() * foodProperties.getNutrition() + " (" + NumberUtil.roundToNthDecimalPlace(foodProperties.getSaturationModifier(), 2) + ")");
 
 		if (item instanceof TieredItem tieredItem) {
 			Tier tier = tieredItem.getTier();
 
-			params.add("efficiency=" + NumberUtil.roundToNthDecimalPlace(tier.getSpeed(), 2));
-
-			if (tier.getTag() != null)
-				params.add("harvestlevel=" + tier.getTag().location().toString());
+			template.entry("efficiency", NumberUtil.roundToNthDecimalPlace(tier.getSpeed(), 2))
+					.optionalEntry("harvestlevel", tier.getTag() == null ? null : tier.getTag().location().toString());
 		}
 
 		if (item instanceof BaseGun gun && !(gun instanceof BaseThrownWeapon)) {
-			params.add("firerate=" + NumberUtil.roundToNthDecimalPlace(20f / gun.getFiringDelay(), 2) + "/sec");
-			params.add("firetype=" + (gun.isFullAutomatic() ? "Fully-Automatic" : "Semi-Automatic"));
+			template.entry("firerate", NumberUtil.roundToNthDecimalPlace(20f / gun.getFiringDelay(), 2) + "/sec")
+					.entry("firetype", gun.isFullAutomatic() ? "Fully-Automatic" : "Semi-Automatic");
 		}
 		else if (item instanceof BaseBlaster blaster) {
-			params.add("firerate=" + NumberUtil.roundToNthDecimalPlace(20f / blaster.getFiringDelay(), 2) + "/sec");
-			params.add("firetype=Fully-Automatic");
+			template.entry("firerate", NumberUtil.roundToNthDecimalPlace(20f / blaster.getFiringDelay(), 2) + "/sec")
+					.entry("firetype", "Fully-Automatic");
 		}
 		else if (item instanceof BaseBow bow) {
-			params.add("drawspeed=" + NumberUtil.roundToNthDecimalPlace(1f / bow.getDrawSpeedMultiplier(), 2) + "/s");
+			template.entry("drawspeed", NumberUtil.roundToNthDecimalPlace(1f / bow.getDrawSpeedMultiplier(), 2) + "/s");
 		}
 
-		params.add("raritycolor=" + StringUtil.toTitleCase(stack.getRarity().toString()));
+		template.entry("raritycolor", StringUtil.toTitleCase(stack.getRarity().name()));
 
-		return makeWikiTemplateObject("ItemInfo", false, params.toArray(new String[0]));
+		return template;
+	}
+
+	public static Template makeEntityInfoboxTemplate(EntityType<?> entity, ServerLevel level) {
+		Template template = new Template("EntityInfo");
+		Entity instance = entity.create(FakeWorld.INSTANCE.get());
+		LivingEntity livingInstance = instance instanceof LivingEntity livingEntity ? livingEntity : null;
+
+		if (instance instanceof Mob mob)
+			ForgeEventFactory.onFinalizeSpawn(mob, level, new DifficultyInstance(Difficulty.HARD, 0, 0, 0), MobSpawnType.NATURAL, null, null);
+
+		String meleeStrength = getRoundedAttributeValue(livingInstance, Attributes.ATTACK_DAMAGE);
+
+		template.entry("name", ObjectHelper.getEntityName(entity))
+				.entry("image", ObjectHelper.getEntityName(entity) + ".png")
+				.entry("noimage", "")
+				.entry("image2", "")
+				.optionalEntry("health", getRoundedAttributeValue(livingInstance, Attributes.MAX_HEALTH))
+				.entry("specialhealth", "")
+				.entry("size", "'''Width''': " + entity.getWidth() + " blocks <br> '''Height''': " + entity.getHeight() + " blocks")
+				.optionalEntry("damage", meleeStrength != null ? meleeStrength : getRoundedAttributeValue(livingInstance, AoAAttributes.RANGED_ATTACK_DAMAGE.get()))
+				.optionalEntry("specialdamage", meleeStrength != null ? getRoundedAttributeValue(livingInstance, AoAAttributes.RANGED_ATTACK_DAMAGE.get()) : null)
+				.optionalEntry("armor", getRoundedAttributeValue(livingInstance, Attributes.ARMOR))
+				.optionalEntry("armortoughness", getRoundedAttributeValue(livingInstance, Attributes.ARMOR_TOUGHNESS))
+				.entry("environment", "")
+				.optionalEntry("hostility", instance instanceof Enemy ? "Hostile" : instance instanceof NeutralMob ? "Neutral" : "Passive")
+				.optionalEntry("classification", StringUtil.toTitleCase(entity.getCategory().getName()))
+				.optionalEntry("xp", livingInstance == null ? null : String.valueOf(livingInstance.getExperienceReward()))
+				.optionalEntry("knockbackresist", getRoundedAttributeValue(livingInstance, Attributes.KNOCKBACK_RESISTANCE))
+				.entry("id", ForgeRegistries.ENTITY_TYPES.getKey(entity).toString())
+				.entry("versionadded", "");
+
+		return template;
+	}
+
+	@Nullable
+	private static String getRoundedAttributeValue(@Nullable LivingEntity entity, Attribute attribute) {
+		if (entity == null)
+			return null;
+
+		double value = ObjectHelper.getAttributeFromEntity(entity, attribute);
+
+		return value == 0 ? null : NumberUtil.roundToNthDecimalPlace((float)value, 2);
 	}
 }

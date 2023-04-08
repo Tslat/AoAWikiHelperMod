@@ -17,7 +17,7 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.LootTableHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.LootTablePrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.handler.LootTablePrintHandler;
 import org.apache.logging.log4j.Level;
 
 import java.util.HashMap;

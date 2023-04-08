@@ -1,22 +1,16 @@
 package net.tslat.aoawikihelpermod.command;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import it.unimi.dsi.fastutil.ints.IntIterators;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.item.ItemParser;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -40,12 +34,12 @@ import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.dataskimmers.ItemDataSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
-import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
-import net.tslat.aoawikihelpermod.util.printers.handlers.ItemDataPrintHandler;
+import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.handler.ItemDataPrintHandler;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 public class ItemsCommand implements Command<CommandSourceStack> {
@@ -73,12 +67,13 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printTags(CommandContext<CommandSourceStack> cmd) {
-		Item item = ForgeRegistries.ITEMS.getDelegateOrThrow(cmd.getArgument("id", ResourceLocation.class)).get();
+		ResourceLocation id = ResourceLocationArgument.getId(cmd, "id");
+		Item item = ForgeRegistries.ITEMS.getValue(id);
 		String itemName = ObjectHelper.getItemName(item);
 		File outputFile;
 		String fileName = "Item Tags - " + itemName;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
-		ItemDataPrintHandler printHandler = ItemDataSkimmer.get(item);
+		ItemDataPrintHandler printHandler = ItemDataSkimmer.get(item, cmd.getSource().getLevel());
 
 		if (printHandler == null) {
 			WikiHelperCommand.error(cmd.getSource(), "Items", "Unable to find compiled item data for item: " + itemName);
@@ -94,6 +89,12 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 			}
 
 			outputFile = printHelper.getOutputFile();
+		}
+		catch (IOException ex) {
+			WikiHelperCommand.error(cmd.getSource(), "Items", "Error generating print helper for item. Check log for more info");
+			ex.printStackTrace();
+
+			return 0;
 		}
 
 		WikiHelperCommand.success(cmd.getSource(), "Items", FormattingHelper.generateResultMessage(outputFile, fileName, clipboardContent.get()));
@@ -142,7 +143,7 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 		}
 	}
 
-	//because we filter ForgeRegistry this will only contain AoA (or other mod) items
+	// Because we filter ForgeRegistry this will only contain AoA (or other mod) items
 	public static final ItemCategoryProvider ITEM_PROVIDER = new ItemCategoryProvider("item", Item.class);
 	public static final List<ItemCategoryProvider> ITEM_CATEGORY_PROVIDERS = List.of(
 			new ItemCategoryProvider("blaster", BaseBlaster.class),

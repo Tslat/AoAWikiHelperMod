@@ -11,7 +11,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapter;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
-import net.tslat.aoawikihelpermod.util.printers.PrintHelper;
+import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
 
 import java.io.File;
 import java.util.ArrayList;

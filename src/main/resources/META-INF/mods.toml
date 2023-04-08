@@ -1,10 +1,10 @@
 modLoader="javafml"
-loaderVersion="[43,)"
+loaderVersion="[45,)"
 license="MIT"
 
 [[mods]]
 modId="aoawikihelpermod"
-version="2.9.17"
+version="2.10"
 displayName="AoA WikiHelper Mod"
 credits="Silencer, for the everlasting wiki support for AoA. Fujino and Sonicwave for contributions to this mod and its continuation."
 authors="Tslat"
@@ -14,13 +14,13 @@ https://adventofascension.gamepedia.com'''
 [[dependencies.aoawikihelpermod]]
     modId="forge"
     mandatory=true
-    versionRange="[43.1.0,)"
+    versionRange="[45.0,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.aoawikihelpermod]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19.2,)"
+    versionRange="[1.19.4,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.aoawikihelpermod]]

@@ -1,6 +1,7 @@
 package net.tslat.aoawikihelpermod.render;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.util.FastColor;
 
 import javax.imageio.*;
 import javax.imageio.metadata.IIOInvalidTreeException;
@@ -48,10 +49,10 @@ public class NativeImageGifWriter {
 		for (int x = 0; x < frame.getWidth(); x++) {
 			for (int y = 0; y < frame.getHeight(); y++) {
 				int rgba = frame.getPixelRGBA(x, y);
-				int alpha = NativeImage.getA(rgba);
-				int red = NativeImage.getR(rgba);
-				int green = NativeImage.getG(rgba);
-				int blue = NativeImage.getB(rgba);
+				int alpha = FastColor.ABGR32.alpha(rgba);
+				int red = FastColor.ABGR32.red(rgba);
+				int green = FastColor.ABGR32.green(rgba);
+				int blue = FastColor.ABGR32.blue(rgba);
 
 				bufferedFrame.setRGB(x, y, ((alpha & 255) << 24 | (red & 255) << 16 | (green & 255) << 8) | (blue & 255) << 0);
 			}
