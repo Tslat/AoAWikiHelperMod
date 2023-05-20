@@ -41,7 +41,6 @@ import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.BlackholeTickAccess;
 import net.minecraft.world.ticks.LevelTickAccess;
 import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import net.tslat.aoa3.common.registration.worldgen.AoADimensions;
 
@@ -59,7 +58,7 @@ public class FakeWorld extends Level implements WorldGenLevel {
 	private static final FakeChunkProvider chunkProvider = new FakeChunkProvider();
 	private static final FakeStructureManager structureManager = new FakeStructureManager();
 
-	public static final Lazy<Holder<Biome>> PLAINS_BIOME = Lazy.of(() -> new Holder.Direct<>(ForgeRegistries.BIOMES.getValue(Biomes.PLAINS.location())));
+	public static final Lazy<Holder<Biome>> PLAINS_BIOME = Lazy.of(() -> new Holder.Direct<>(AoADimensions.OVERWORLD.getWorld().registryAccess().registry(Registries.BIOME).get().get(Biomes.PLAINS.location())));
 
 	public static void init() {}
 

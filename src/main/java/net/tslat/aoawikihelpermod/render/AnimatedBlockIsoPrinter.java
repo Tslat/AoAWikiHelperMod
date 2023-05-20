@@ -9,12 +9,15 @@ import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
+import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
 import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
 import org.joml.Vector4f;
 
@@ -58,7 +61,7 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 	}
 
 	@Override
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
 		if (gifWriter == null)
 			return;
 
@@ -127,7 +130,7 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 			}
 		}
 
-		drawCurrentStatus(matrixStack);
+		drawCurrentStatus(poseStack);
 
 		if (this.currentFrame >= this.renderTicks) {
 			if (!definedSize) {
@@ -156,6 +159,21 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 		RandomSource rand = RandomSource.create();
 		int highestFrameTime = 0;
 		BakedModel model = blockRenderer.getBlockModel(this.block);
+		TextureAtlasSprite[] fluidSprites = !block.getFluidState().isEmpty() ? ForgeHooksClient.getFluidSprites(FakeWorld.INSTANCE.get(), BlockPos.ZERO, block.getFluidState()) : null;
+
+		if (fluidSprites != null) {
+			TextureAtlasSprite sprite = fluidSprites[1];
+
+			if (sprite.contents().animatedTexture == null)
+				return true;
+
+			SpriteContents.Ticker ticker = RenderUtil.getTickerForTexture(sprite.contents().animatedTexture);
+
+			if (ticker == null)
+				return true;
+
+			return ticker.frame == 0 && ticker.subFrame == 0;
+		}
 
 		for (Direction face : Direction.values()) {
 			rand.setSeed(42L);
@@ -201,6 +219,20 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 		RandomSource rand = RandomSource.create();
 		int highestFrameTime = 1;
 		BakedModel model = blockRenderer.getBlockModel(this.block);
+		TextureAtlasSprite[] fluidSprites = !block.getFluidState().isEmpty() ? ForgeHooksClient.getFluidSprites(FakeWorld.INSTANCE.get(), BlockPos.ZERO, block.getFluidState()) : null;
+
+		if (fluidSprites != null) {
+			TextureAtlasSprite sprite = fluidSprites[1];
+			SpriteContents.AnimatedTexture animatedTexture = sprite.contents().animatedTexture;
+
+			if (animatedTexture != null && animatedTexture.frames != null) {
+				for (SpriteContents.FrameInfo frameInfo : animatedTexture.frames) {
+					highestFrameTime += frameInfo.time;
+				}
+			}
+
+			return highestFrameTime;
+		}
 
 		for (Direction face : Direction.values()) {
 			rand.setSeed(42L);

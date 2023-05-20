@@ -62,7 +62,7 @@ public final class AnimatedEntityIsoPrinter extends EntityIsoPrinter {
 	}
 
 	@Override
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
 		if (gifWriter == null)
 			return;
 
@@ -115,7 +115,7 @@ public final class AnimatedEntityIsoPrinter extends EntityIsoPrinter {
 			}
 		}
 
-		drawCurrentStatus(matrixStack);
+		drawCurrentStatus(poseStack);
 
 		if (this.currentFrame >= this.renderTicks) {
 			if (!definedSize) {

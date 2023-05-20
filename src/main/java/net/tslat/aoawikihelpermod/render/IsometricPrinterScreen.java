@@ -88,7 +88,7 @@ public abstract class IsometricPrinterScreen extends Screen {
 	protected abstract File getOutputFile();
 
 	@Override
-	public void render(PoseStack matrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
+	public void render(PoseStack poseStack, int pMouseX, int pMouseY, float pPartialTicks) {
 		if (determineScaleAndPosition()) {
 			RenderUtil.clearRenderBuffer();
 			renderObject();

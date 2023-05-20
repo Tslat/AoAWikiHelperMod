@@ -67,7 +67,7 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 	}
 
 	@Override
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
 		if (isOnFirstFrame()) {
 			if (!this.renderIngameModel || determineScaleAndPosition()) {
 				RenderUtil.clearRenderBuffer();

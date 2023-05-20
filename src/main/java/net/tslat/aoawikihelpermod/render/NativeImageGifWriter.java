@@ -140,8 +140,9 @@ public class NativeImageGifWriter {
 			for (BufferedImage frame : this.frames) {
 				IIOMetadata frameMeta = this.meta;
 
-				if (areFramesEqual(lastFrame, frame)) {
+				if (areFramesEqual(lastFrame, frame) && !firstFrame) {
 					nextFrameTime += this.defaultFrameTime;
+
 					continue;
 				}
 				else if (nextFrameTime > this.defaultFrameTime) {
@@ -149,6 +150,7 @@ public class NativeImageGifWriter {
 
 					setupDefaultMetadata(frameMeta, nextFrameTime);
 					nextFrameTime = this.defaultFrameTime;
+					firstFrame = false;
 				}
 
 				this.writer.writeToSequence(new IIOImage(lastFrame, null, frameMeta), this.params);

@@ -1,7 +1,9 @@
 package net.tslat.aoawikihelpermod.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Axis;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
@@ -17,8 +19,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.LiquidBlock;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.client.model.data.ModelData;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
@@ -57,39 +59,63 @@ public final class RenderUtil {
 	public static void renderStandardisedBlock(BlockRenderDispatcher blockRenderer, PoseStack matrix, MultiBufferSource renderBuffer, BlockState block, @Nullable BlockPos pos) {
 		setupFakeGuiLighting();
 
-		RenderShape blockRenderType = block.getRenderShape();
-
-		if (blockRenderType == RenderShape.INVISIBLE) {
-			if (block.getBlock() instanceof LiquidBlock)
-				//StaticFluidRenderer.renderFluid(matrix.last(), pos, FakeWorld.INSTANCE.get(), renderBuffer.getBuffer(RenderType.translucent()), block);
-
-			return;
-		}
-
 		if (pos == null)
-			pos = new BlockPos(0, 0, 0);
+			pos = BlockPos.ZERO;
 
-		switch (blockRenderType) {
+		switch (block.getRenderShape()) {
 			case MODEL -> {
 				int tint = Minecraft.getInstance().getBlockColors().getColor(block, FakeWorld.INSTANCE.get(), pos, 0);
 				float red = (float)(tint >> 16 & 255) / 255f;
 				float green = (float)(tint >> 8 & 255) / 255f;
 				float blue = (float)(tint & 255) / 255f;
 				BakedModel blockModel = blockRenderer.getBlockModel(block);
-				RenderType renderType = ItemBlockRenderTypes.getRenderType(block, true);
 				/*boolean changeLighting = !blockModel.usesBlockLight();
 
 				if (changeLighting)
 					Lighting.setupForFlatItems();*/
 
-				blockRenderer.getModelRenderer().renderModel(matrix.last(), renderBuffer.getBuffer(renderType), block, blockModel, red, green, blue, 15728880, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, renderType);
 
+				for (RenderType renderType : blockModel.getRenderTypes(block, FakeWorld.INSTANCE.get().getRandom(), ModelData.EMPTY)) {
+					blockRenderer.getModelRenderer().renderModel(matrix.last(), renderBuffer.getBuffer(renderType), block, blockModel, red, green, blue, 15728880, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, renderType);
+				}
 				/*if (changeLighting)
 					Lighting.setupFor3DItems();*/
 			}
 			case ENTITYBLOCK_ANIMATED -> {
 				ItemStack stack = new ItemStack(block.getBlock());
 				IClientItemExtensions.of(stack).getCustomRenderer().renderByItem(stack, ItemDisplayContext.NONE, matrix, renderBuffer, 15728880, OverlayTexture.NO_OVERLAY);
+			}
+			case INVISIBLE -> {
+				if (block.getBlock() instanceof LiquidBlock liquidBlock) {
+					Tesselator tesselator = Tesselator.getInstance();
+					BufferBuilder builder = tesselator.getBuilder();
+					try {
+						FluidState fluidState = block.getFluidState();
+						RenderType renderType = ItemBlockRenderTypes.getRenderLayer(fluidState);
+						PoseStack worldStack = RenderSystem.getModelViewStack();
+
+						renderType.setupRenderState();
+						worldStack.pushPose();
+						worldStack.mulPoseMatrix(matrix.last().pose());
+						RenderSystem.applyModelViewMatrix();
+
+						builder.begin(renderType.mode(), renderType.format());
+						blockRenderer.renderLiquid(pos, FakeWorld.INSTANCE.get(), builder, fluidState.createLegacyBlock(), fluidState);
+
+						if (builder.building())
+							tesselator.end();
+
+						renderType.clearRenderState();
+						worldStack.popPose();
+						RenderSystem.applyModelViewMatrix();
+					}
+					catch (Exception ex) {
+						ex.printStackTrace();
+
+						if (builder.building())
+							tesselator.end();
+					}
+				}
 			}
 		}
 	}

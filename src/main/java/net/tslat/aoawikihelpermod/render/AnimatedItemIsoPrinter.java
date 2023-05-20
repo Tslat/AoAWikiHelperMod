@@ -58,7 +58,7 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 	}
 
 	@Override
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
 		if (gifWriter == null)
 			return;
 
@@ -127,7 +127,7 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 			}
 		}
 
-		drawCurrentStatus(matrixStack);
+		drawCurrentStatus(poseStack);
 
 		if (this.currentFrame >= this.renderTicks) {
 			if (!definedSize) {
