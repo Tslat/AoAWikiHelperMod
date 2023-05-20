@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.SpriteContents;
@@ -69,15 +70,20 @@ public final class RenderUtil {
 				float green = (float)(tint >> 8 & 255) / 255f;
 				float blue = (float)(tint & 255) / 255f;
 				BakedModel blockModel = blockRenderer.getBlockModel(block);
+				RenderSystem.enableDepthTest();
+				RenderSystem.enableBlend();
 				/*boolean changeLighting = !blockModel.usesBlockLight();
 
 				if (changeLighting)
 					Lighting.setupForFlatItems();*/
 
-
 				for (RenderType renderType : blockModel.getRenderTypes(block, FakeWorld.INSTANCE.get().getRandom(), ModelData.EMPTY)) {
+					if (renderType == RenderType.translucent())
+						renderType = Sheets.translucentCullBlockSheet();
+
 					blockRenderer.getModelRenderer().renderModel(matrix.last(), renderBuffer.getBuffer(renderType), block, blockModel, red, green, blue, 15728880, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, renderType);
 				}
+
 				/*if (changeLighting)
 					Lighting.setupFor3DItems();*/
 			}
@@ -89,10 +95,14 @@ public final class RenderUtil {
 				if (block.getBlock() instanceof LiquidBlock liquidBlock) {
 					Tesselator tesselator = Tesselator.getInstance();
 					BufferBuilder builder = tesselator.getBuilder();
+
 					try {
 						FluidState fluidState = block.getFluidState();
 						RenderType renderType = ItemBlockRenderTypes.getRenderLayer(fluidState);
 						PoseStack worldStack = RenderSystem.getModelViewStack();
+
+						if (renderType == RenderType.translucent())
+							renderType = RenderType.solid(); // TODO figure out why tf translucent isn't working
 
 						renderType.setupRenderState();
 						worldStack.pushPose();
@@ -100,7 +110,7 @@ public final class RenderUtil {
 						RenderSystem.applyModelViewMatrix();
 
 						builder.begin(renderType.mode(), renderType.format());
-						blockRenderer.renderLiquid(pos, FakeWorld.INSTANCE.get(), builder, fluidState.createLegacyBlock(), fluidState);
+						blockRenderer.renderLiquid(pos, FakeWorld.INSTANCE.get(), builder, block, fluidState);
 
 						if (builder.building())
 							tesselator.end();

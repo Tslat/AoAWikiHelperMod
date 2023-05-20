@@ -30,7 +30,7 @@ import static net.tslat.aoawikihelpermod.AoAWikiHelperMod.MOD_ID;
 
 @Mod(MOD_ID)
 public class AoAWikiHelperMod {
-	public static final String VERSION = "2.10";
+	public static final String VERSION = "2.12";
 	public static final String MOD_ID = "aoawikihelpermod";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 

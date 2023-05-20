@@ -50,6 +50,7 @@ public class BlockIsoPrinter extends IsometricPrinterScreen {
 		PoseStack matrix = new PoseStack();
 
 		withAlignedIsometricProjection(matrix, () -> {
+			matrix.scale(5, 5, 5);
 			BlockRenderDispatcher blockRenderer = this.minecraft.getBlockRenderer();
 			EntityRenderDispatcher renderManager = this.minecraft.getEntityRenderDispatcher();
 			MultiBufferSource.BufferSource renderBuffer = mc.renderBuffers().bufferSource();

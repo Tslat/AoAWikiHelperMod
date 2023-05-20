@@ -211,6 +211,12 @@ public abstract class IsometricPrinterScreen extends Screen {
 				bounds = getBoundsForRenderedImage(capture);
 
 				if (bounds == null) {
+					if (refScale == this.defaultRefScale) {
+						refScale = 50;
+
+						continue;
+					}
+
 					WikiHelperCommand.error(this.commandSource, this.commandName, "Unable to detect rendered object after attempting to scale up. Report this as a bug.");
 					capture.close();
 
@@ -277,6 +283,7 @@ public abstract class IsometricPrinterScreen extends Screen {
 
 		return true;
 	}
+
 	@Nullable
 	protected final Vector4f getBoundsForRenderedImage(NativeImage image) {
 		int minX = this.windowWidth;
