@@ -1,7 +1,7 @@
 package net.tslat.aoawikihelpermod.render;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -62,7 +62,7 @@ public final class AnimatedEntityIsoPrinter extends EntityIsoPrinter {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		if (gifWriter == null)
 			return;
 
@@ -115,7 +115,7 @@ public final class AnimatedEntityIsoPrinter extends EntityIsoPrinter {
 			}
 		}
 
-		drawCurrentStatus(poseStack);
+		drawCurrentStatus(guiGraphics);
 
 		if (this.currentFrame >= this.renderTicks) {
 			if (!definedSize) {

@@ -1,5 +1,5 @@
 plugins {
-    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2]'
     id 'org.spongepowered.mixin' version '0.7.+' // Mixins
     id 'org.parchmentmc.librarian.forgegradle' version '1.+' // Parchment
 }
@@ -81,7 +81,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:$project.minecraft_version-$project.forge_version"
 
     implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version")
-    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${project.minecraft_version}:$project.geckolib_version")
+    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20:$project.geckolib_version")
 
     // Mixin annotation processor, just in case we need it
     if (System.getProperty("idea.sync.active") != "true") {
@@ -94,7 +94,7 @@ jar {
         attributes([
             "Specification-Title": "aoawikihelpermod",
             "Specification-Vendor": "Tslat",
-            "Specification-Version": "1.19.4",
+            "Specification-Version": "1.20.1",
             "Implementation-Title": project.name,
             "Implementation-Version": "${mod_version}",
             "Implementation-Vendor" :"Tslat",

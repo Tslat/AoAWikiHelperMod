@@ -28,8 +28,6 @@ import net.minecraft.world.ticks.TickContainerAccess;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class FakeChunk extends ChunkAccess {
 	private final Level level;
@@ -288,8 +286,8 @@ public class FakeChunk extends ChunkAccess {
 	}
 
 	@Override
-	public Stream<BlockPos> getLights() {
-		return StreamSupport.stream(BlockPos.betweenClosed(this.chunkPos.getMinBlockX(), 0, this.chunkPos.getMinBlockZ(), this.chunkPos.getMaxBlockX(), 255, this.chunkPos.getMaxBlockZ()).spliterator(), false).filter(pos -> this.getBlockState(pos).getLightEmission(this.level, pos) != 0);
+	public void initializeLightSources() {
+		super.initializeLightSources();
 	}
 
 	@Override

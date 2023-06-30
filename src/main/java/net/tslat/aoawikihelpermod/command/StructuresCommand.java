@@ -87,7 +87,7 @@ public class StructuresCommand implements Command<CommandSourceStack> {
 
 			for (StructureTemplate.Palette palette : template.palettes) {
 				for (StructureTemplate.StructureBlockInfo blockInfo : palette.blocks()) {
-					Block block = blockInfo.state.getBlock();
+					Block block = blockInfo.state().getBlock();
 
 					if (block == Blocks.AIR || block == Blocks.JIGSAW || block == Blocks.STRUCTURE_BLOCK)
 						continue;

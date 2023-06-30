@@ -25,21 +25,7 @@ public class FakeLightManager extends LevelLightEngine {
 	}
 
 	@Override
-	public int runUpdates(int updateCount, boolean updateSkylight, boolean updateBlockLight) {
-		return 0;
-	}
-
-	@Override
-	public void onBlockEmissionIncrease(BlockPos pos, int difference) {}
-
-	@Override
 	public void updateSectionStatus(SectionPos pos, boolean isEmpty) {}
-
-	@Override
-	public void enableLightSources(ChunkPos chunkPos, boolean enableSkyLight) {}
-
-	@Override
-	public void queueSectionData(LightLayer type, SectionPos pos, @Nullable DataLayer array, boolean skipUntrusted) {}
 
 	@Override
 	public LayerLightEventListener getLayerListener(LightLayer type) {
@@ -61,11 +47,26 @@ public class FakeLightManager extends LevelLightEngine {
 				return false;
 			}
 
+			@Override
+			public int runLightUpdates() {
+				return 0;
+			}
+
 			public int runUpdates(int toUpdate, boolean skyLight, boolean blockLight) {
 				return toUpdate;
 			}
 
 			public void updateSectionStatus(SectionPos pos, boolean pIsEmpty) {}
+
+			@Override
+			public void setLightEnabled(ChunkPos pChunkPos, boolean pLightEnabled) {
+
+			}
+
+			@Override
+			public void propagateLightSources(ChunkPos pChunkPos) {
+
+			}
 
 			public void enableLightSources(ChunkPos pos, boolean doSkyLight) {}
 		};

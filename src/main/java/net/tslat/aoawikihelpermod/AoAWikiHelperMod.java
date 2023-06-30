@@ -12,9 +12,10 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.loading.FileUtils;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.tslat.aoa3.advent.AdventOfAscension;
+import net.tslat.aoa3.advent.Logging;
+import net.tslat.aoa3.util.ObjectUtil;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.dataskimmers.*;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapters;
@@ -25,12 +26,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 
 import static net.tslat.aoawikihelpermod.AoAWikiHelperMod.MOD_ID;
 
 @Mod(MOD_ID)
 public class AoAWikiHelperMod {
-	public static final String VERSION = "2.12";
+	public static final String VERSION = "2.13";
 	public static final String MOD_ID = "aoawikihelpermod";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
@@ -41,7 +43,13 @@ public class AoAWikiHelperMod {
 	public AoAWikiHelperMod() {
 		File outputDir = FMLPaths.CONFIGDIR.get().resolve(MOD_ID).toFile();
 
-		FileUtils.getOrCreateDirectory(outputDir.toPath(), MOD_ID);
+		try {
+			ObjectUtil.getOrCreateDirectory(outputDir.toPath(), MOD_ID);
+		}
+		catch (IOException ex) {
+			Logging.error("Failed to create output directory.. this is not good", ex);
+		}
+
 		PrintHelper.init(outputDir);
 		patchClickEvent();
 		MinecraftForge.EVENT_BUS.addListener(this::registerCommands);

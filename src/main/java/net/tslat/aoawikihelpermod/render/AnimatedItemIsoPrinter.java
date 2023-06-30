@@ -1,8 +1,8 @@
 package net.tslat.aoawikihelpermod.render;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.SpriteContents;
@@ -58,7 +58,7 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		if (gifWriter == null)
 			return;
 
@@ -127,7 +127,7 @@ public final class AnimatedItemIsoPrinter extends ItemIsoPrinter {
 			}
 		}
 
-		drawCurrentStatus(poseStack);
+		drawCurrentStatus(guiGraphics);
 
 		if (this.currentFrame >= this.renderTicks) {
 			if (!definedSize) {

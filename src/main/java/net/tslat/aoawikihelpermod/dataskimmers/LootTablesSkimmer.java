@@ -48,7 +48,7 @@ public class LootTablesSkimmer extends SimpleJsonResourceReloadListener {
 				LootTable table = null;
 
 				if (resourceManager.getResource(getPreparedPath(id)).isPresent()) {
-					table = ForgeHooks.loadLootTable(GSON, id, json, true, null);
+					table = ForgeHooks.loadLootTable(GSON, id, json, true);
 				}
 				else {
 					AoAWikiHelperMod.LOGGER.log(Level.ERROR, "Invalid loot table json found, skipping");

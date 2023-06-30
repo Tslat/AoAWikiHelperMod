@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -67,7 +68,7 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		if (isOnFirstFrame()) {
 			if (!this.renderIngameModel || determineScaleAndPosition()) {
 				RenderUtil.clearRenderBuffer();
@@ -86,7 +87,8 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 
 	@Override
 	protected void renderObject() {
-		PoseStack matrix = new PoseStack();
+		GuiGraphics guiGraphics = new GuiGraphics(this.mc, this.mc.renderBuffers().bufferSource());
+		PoseStack matrix = guiGraphics.pose();
 
 		matrix.pushPose();
 
@@ -123,7 +125,9 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 					modelViewPoseStack.scale(relativeScale, relativeScale, relativeScale);
 				}
 
-				itemRenderer.renderAndDecorateItem(matrix, this.stack, 0, 0, 100);
+				guiGraphics.renderItem(this.stack, 0, 0);
+				guiGraphics.renderItemDecorations(this.mc.font, this.stack, 0, 0);
+
 				modelViewPoseStack.popPose();
 			}
 			else if (!customRenderStack(itemRenderer, matrix, renderBuffer)) {

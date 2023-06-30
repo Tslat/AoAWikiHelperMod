@@ -90,10 +90,10 @@ public class FakeChunkProvider extends ChunkSource {
 			}
 		}
 
-		blocks.sort(Comparator.<StructureTemplate.StructureBlockInfo>comparingInt(info -> info.pos.getY()).thenComparingInt(info -> info.pos.getZ()).thenComparingInt(info -> info.pos.getX()));
+		blocks.sort(Comparator.<StructureTemplate.StructureBlockInfo>comparingInt(info -> info.pos().getY()).thenComparingInt(info -> info.pos().getZ()).thenComparingInt(info -> info.pos().getX()));
 
-		BlockPos minPos = blocks.get(0).pos;
-		BlockPos maxPos = blocks.get(blocks.size() - 1).pos;
+		BlockPos minPos = blocks.get(0).pos();
+		BlockPos maxPos = blocks.get(blocks.size() - 1).pos();
 		Vec3i totalSize = new Vec3i(Math.abs(maxX - minX) + 1, Math.abs(maxY - minY) + 1, Math.abs(maxZ - minZ) + 1);
 
 		return Pair.of(totalSize, blocks);

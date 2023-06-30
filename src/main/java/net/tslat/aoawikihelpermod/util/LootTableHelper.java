@@ -18,6 +18,7 @@ import net.tslat.aoa3.common.registration.block.AoABlocks;
 import net.tslat.aoa3.content.loottable.condition.HoldingItem;
 import net.tslat.aoa3.content.loottable.condition.PlayerHasLevel;
 import net.tslat.aoa3.content.loottable.condition.PlayerHasResource;
+import net.tslat.aoa3.content.loottable.entrytype.CollectionLootEntry;
 import net.tslat.aoa3.content.loottable.function.EnchantSpecific;
 import net.tslat.aoa3.content.loottable.function.GrantSkillXp;
 import net.tslat.aoa3.util.StringUtil;
@@ -47,7 +48,7 @@ public class LootTableHelper {
 	}
 
 	public static void init() {
-		CONDITION_DESCRIPTORS.put(AlternativeLootItemCondition.class, new AlternativeConditionHelper());
+		CONDITION_DESCRIPTORS.put(AnyOfCondition.class, new AnyOfConditionHelper());
 		CONDITION_DESCRIPTORS.put(LootItemBlockStatePropertyCondition.class, new BlockStatePropertyConditionHelper());
 		CONDITION_DESCRIPTORS.put(DamageSourceCondition.class, new DamageSourcePropertiesConditionHelper());
 		CONDITION_DESCRIPTORS.put(LootItemEntityPropertyCondition.class, new EntityHasPropertyConditionHelper());
@@ -193,19 +194,30 @@ public class LootTableHelper {
 	}
 
 	public static String getLootEntryLine(int poolIndex, LootPoolEntryContainer entry, List<LootItemCondition> conditions) {
-		if (entry instanceof EmptyLootItem)
-			return getEmptyLootEntryLine(poolIndex, (EmptyLootItem)entry, conditions, Arrays.asList(((EmptyLootItem)entry).functions));
+		if (entry instanceof EmptyLootItem emptyLoot)
+			return getEmptyLootEntryLine(poolIndex, emptyLoot, conditions, Arrays.asList(emptyLoot.functions));
 
-		if (entry instanceof LootItem)
-			return getItemLootEntryLine(poolIndex, (LootItem)entry, conditions, Arrays.asList(((LootItem)entry).functions));
+		if (entry instanceof LootItem itemLoot)
+			return getItemLootEntryLine(poolIndex, itemLoot, conditions, Arrays.asList(itemLoot.functions));
 
-		if (entry instanceof TagEntry)
-			return getTagLootEntryLine(poolIndex, (TagEntry)entry, conditions, Arrays.asList(((TagEntry)entry).functions));
+		if (entry instanceof TagEntry tagLoot)
+			return getTagLootEntryLine(poolIndex, tagLoot, conditions, Arrays.asList(tagLoot.functions));
 
-		if (entry instanceof LootTableReference)
-			return getTableLootEntryLine(poolIndex, (LootTableReference)entry, conditions, Arrays.asList(((LootTableReference)entry).functions));
+		if (entry instanceof LootTableReference tableLoot)
+			return getTableLootEntryLine(poolIndex, tableLoot, conditions, Arrays.asList(tableLoot.functions));
 
-		return "";
+		if (entry instanceof CollectionLootEntry collectionLoot)
+			return getCollectionLootEntryLine(poolIndex, collectionLoot, conditions, Arrays.asList(collectionLoot.functions));
+
+		return "UNKNOWN LOOT ENTRY TYPE: " + entry.getClass();
+	}
+
+	private static String getCollectionLootEntryLine(int poolIndex, CollectionLootEntry entry, List<LootItemCondition> conditions, List<LootItemFunction> functions) {
+		StringBuilder entryBuilder = new StringBuilder("group:" + poolIndex + "; item:");
+
+		entryBuilder.append("A bunch of stuff - do this manually until you figure out what format you want this in; image:none;");
+
+		return entryBuilder.toString();
 	}
 
 	private static String getEmptyLootEntryLine(int poolIndex, EmptyLootItem entry, List<LootItemCondition> conditions, List<LootItemFunction> functions) {

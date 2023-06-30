@@ -53,7 +53,7 @@ public class StructureIsoPrinter extends IsometricPrinterScreen {
 
 		if (!expandJigsaw) {
 			for (StructureTemplate.StructureBlockInfo block : template.palettes.get(0).blocks()) {
-				world.setBlock(block.pos, block.state, 0);
+				world.setBlock(block.pos(), block.state(), 0);
 			}
 		}
 		else {
@@ -86,8 +86,8 @@ public class StructureIsoPrinter extends IsometricPrinterScreen {
 
 				for (StructureTemplate.StructureBlockInfo block : this.blocks) {
 					matrix.pushPose();
-					matrix.translate(block.pos.getX() - this.renderSize.getX() / 2f, block.pos.getY() - this.renderSize.getY() / 2f, block.pos.getZ() - this.renderSize.getZ() / 2f);
-					RenderUtil.renderStandardisedBlock(blockRenderer, matrix, renderBuffer, block.state, block.pos);
+					matrix.translate(block.pos().getX() - this.renderSize.getX() / 2f, block.pos().getY() - this.renderSize.getY() / 2f, block.pos().getZ() - this.renderSize.getZ() / 2f);
+					RenderUtil.renderStandardisedBlock(blockRenderer, matrix, renderBuffer, block.state(), block.pos());
 					matrix.popPose();
 				}
 			}

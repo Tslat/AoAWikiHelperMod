@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -88,7 +89,7 @@ public abstract class IsometricPrinterScreen extends Screen {
 	protected abstract File getOutputFile();
 
 	@Override
-	public void render(PoseStack poseStack, int pMouseX, int pMouseY, float pPartialTicks) {
+	public void render(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTicks) {
 		if (determineScaleAndPosition()) {
 			RenderUtil.clearRenderBuffer();
 			renderObject();
@@ -103,13 +104,13 @@ public abstract class IsometricPrinterScreen extends Screen {
 		this.mc.setScreen(null);
 	}
 
-	protected void drawCurrentStatus(PoseStack matrix) {
+	protected void drawCurrentStatus(GuiGraphics guiGraphics) {
 		int stringWidth = this.mc.font.width(this.currentStatus);
 
-		matrix.pushPose();
-		matrix.translate(0, 0, 100);
-		this.mc.font.draw(matrix, this.currentStatus, (mc.getWindow().getGuiScaledWidth() - stringWidth) / 2f, 10, ColourUtil.WHITE);
-		matrix.popPose();
+		guiGraphics.pose().pushPose();
+		guiGraphics.pose().translate(0, 0, 100);
+		guiGraphics.drawString(this.mc.font, this.currentStatus, (mc.getWindow().getGuiScaledWidth() - stringWidth) / 2f, 10, ColourUtil.WHITE, false);
+		guiGraphics.pose().popPose();
 	}
 
 	protected NativeImage captureImage() {

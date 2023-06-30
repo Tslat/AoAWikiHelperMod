@@ -65,7 +65,7 @@ public class WikiHelperCommand {
 	}
 
 	public static void info(CommandSourceStack source, String subcommand, MutableComponent message) {
-		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(ChatFormatting.GRAY)), true);
+		source.sendSuccess(() -> getCmdPrefix(subcommand).append(message.withStyle(ChatFormatting.GRAY)), true);
 	}
 
 	public static void success(CommandSourceStack source, String subcommand, String message) {
@@ -73,7 +73,7 @@ public class WikiHelperCommand {
 	}
 
 	public static void success(CommandSourceStack source, String subcommand, MutableComponent message) {
-		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(ChatFormatting.GREEN)), true);
+		source.sendSuccess(() -> getCmdPrefix(subcommand).append(message.withStyle(ChatFormatting.GREEN)), true);
 	}
 
 	public static void warn(CommandSourceStack source, String subcommand, String message) {
@@ -81,6 +81,6 @@ public class WikiHelperCommand {
 	}
 
 	public static void warn(CommandSourceStack source, String subcommand, MutableComponent message) {
-		source.sendSuccess(getCmdPrefix(subcommand).append(message.withStyle(ChatFormatting.RED)), true);
+		source.sendSuccess(() -> getCmdPrefix(subcommand).append(message.withStyle(ChatFormatting.RED)), true);
 	}
 }
