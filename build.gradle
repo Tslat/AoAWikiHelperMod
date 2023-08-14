@@ -1,5 +1,5 @@
 plugins {
-    id 'net.minecraftforge.gradle' version '[6.0,6.2]'
+    id 'net.neoforged.gradle' version '[6.0,6.2]'
     id 'org.spongepowered.mixin' version '0.7.+' // Mixins
     id 'org.parchmentmc.librarian.forgegradle' version '1.+' // Parchment
 }
@@ -78,10 +78,10 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:$project.minecraft_version-$project.forge_version"
+    minecraft "net.neoforged:forge:$project.minecraft_version-$project.forge_version"
 
     implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version")
-    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20:$project.geckolib_version")
+    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:$project.geckolib_version")
 
     // Mixin annotation processor, just in case we need it
     if (System.getProperty("idea.sync.active") != "true") {

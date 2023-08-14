@@ -14,7 +14,7 @@ https://adventofascension.gamepedia.com'''
 [[dependencies.aoawikihelpermod]]
     modId="forge"
     mandatory=true
-    versionRange="[47.0,)"
+    versionRange="[47.1,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.aoawikihelpermod]]
