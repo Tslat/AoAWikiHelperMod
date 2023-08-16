@@ -19,7 +19,9 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -43,37 +45,57 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 		builder.then(Commands.literal("entity")
 				.then(Commands.argument("entity_id", ResourceLocationArgument.id())
 						.suggests(ENTITY_ID_SUGGESTIONS)
-						.executes(context -> printEntityIso(context, null, 300, false, 0))
+						.executes(context -> printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), null, 300, false, 0))
 						.then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
-								.executes(context -> printEntityIso(context, CompoundTagArgument.getCompoundTag(context, "nbt"), 300, false, 0))
+								.executes(context -> printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), CompoundTagArgument.getCompoundTag(context, "nbt"), 300, false, 0))
 								.then(Commands.argument("animated", BoolArgumentType.bool())
 										.then(Commands.argument("record_length", IntegerArgumentType.integer(10, 1200))
-												.executes(context ->  printEntityIso(context, CompoundTagArgument.getCompoundTag(context, "nbt"), 300, BoolArgumentType.getBool(context, "animated"), 0))
+												.executes(context ->  printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), CompoundTagArgument.getCompoundTag(context, "nbt"), 300, BoolArgumentType.getBool(context, "animated"), 0))
 												.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
-														.executes(context -> printEntityIso(context, CompoundTagArgument.getCompoundTag(context, "nbt"), 300, BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))
+														.executes(context -> printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), CompoundTagArgument.getCompoundTag(context, "nbt"), 300, BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))
 								.then(Commands.argument("image_size", IntegerArgumentType.integer(0, 1000))
-										.executes(context -> printEntityIso(context, CompoundTagArgument.getCompoundTag(context, "nbt"), IntegerArgumentType.getInteger(context, "image_size"), false, 0))
+										.executes(context -> printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), CompoundTagArgument.getCompoundTag(context, "nbt"), IntegerArgumentType.getInteger(context, "image_size"), false, 0))
 										.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
-												.executes(context -> printEntityIso(context, CompoundTagArgument.getCompoundTag(context, "nbt"), IntegerArgumentType.getInteger(context, "image_size"), false, FloatArgumentType.getFloat(context, "rotation_adjust"))))
+												.executes(context -> printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), CompoundTagArgument.getCompoundTag(context, "nbt"), IntegerArgumentType.getInteger(context, "image_size"), false, FloatArgumentType.getFloat(context, "rotation_adjust"))))
 										.then(Commands.argument("animated", BoolArgumentType.bool())
 												.then(Commands.argument("record_length", IntegerArgumentType.integer(10, 1200))
-														.executes(context -> printEntityIso(context, CompoundTagArgument.getCompoundTag(context, "nbt"), IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), 0))
+														.executes(context -> printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), CompoundTagArgument.getCompoundTag(context, "nbt"), IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), 0))
 														.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
-																.executes(context -> printEntityIso(context, CompoundTagArgument.getCompoundTag(context, "nbt"), IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))))
+																.executes(context -> printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), CompoundTagArgument.getCompoundTag(context, "nbt"), IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))))
 						.then(Commands.argument("animated", BoolArgumentType.bool())
 								.then(Commands.argument("record_length", IntegerArgumentType.integer(10, 1200))
-										.executes(context ->  printEntityIso(context, null, 300, BoolArgumentType.getBool(context, "animated"), 0))
+										.executes(context ->  printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), null, 300, BoolArgumentType.getBool(context, "animated"), 0))
 										.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
-												.executes(context -> printEntityIso(context, null, 300, BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))
+												.executes(context -> printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), null, 300, BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))
 						.then(Commands.argument("image_size", IntegerArgumentType.integer(0, 1000))
-								.executes(context -> printEntityIso(context, null, IntegerArgumentType.getInteger(context, "image_size"), false, 0))
+								.executes(context -> printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), null, IntegerArgumentType.getInteger(context, "image_size"), false, 0))
 								.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
-										.executes(context -> printEntityIso(context, null, IntegerArgumentType.getInteger(context, "image_size"), false, FloatArgumentType.getFloat(context, "rotation_adjust"))))
+										.executes(context -> printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), null, IntegerArgumentType.getInteger(context, "image_size"), false, FloatArgumentType.getFloat(context, "rotation_adjust"))))
 								.then(Commands.argument("animated", BoolArgumentType.bool())
 										.then(Commands.argument("record_length", IntegerArgumentType.integer(10, 1200))
-												.executes(context -> printEntityIso(context, null, IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), 0))
+												.executes(context -> printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), null, IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), 0))
 												.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
-														.executes(context -> printEntityIso(context, null, IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust")))))))));
+														.executes(context -> printEntityIso(context, ResourceLocationArgument.getId(context, "entity_id"), null, IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust")))))))));
+		builder.then(Commands.literal("armour")
+				.then(Commands.argument("boots", ItemArgument.item(buildContext))
+						.then(Commands.argument("leggings", ItemArgument.item(buildContext))
+								.then(Commands.argument("chestplate", ItemArgument.item(buildContext))
+										.then(Commands.argument("helmet", ItemArgument.item(buildContext))
+												.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), 300, false, 0))
+												.then(Commands.argument("animated", BoolArgumentType.bool())
+														.then(Commands.argument("record_length", IntegerArgumentType.integer(10, 1200))
+																.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), 300, BoolArgumentType.getBool(context, "animated"), 0))
+																.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
+																		.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), 300, BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))
+												.then(Commands.argument("image_size", IntegerArgumentType.integer(0, 1000))
+														.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), false, 0))
+														.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
+																.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), false, FloatArgumentType.getFloat(context, "rotation_adjust"))))
+														.then(Commands.argument("animated", BoolArgumentType.bool())
+																.then(Commands.argument("record_length", IntegerArgumentType.integer(10, 1200))
+																		.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), 0))
+																		.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
+																				.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))))))));
 		builder.then(Commands.literal("block")
 				.then(Commands.argument("block_id", BlockStateArgument.block(buildContext))
 						.executes(context -> printBlockIso(context, 300, false, 0))
@@ -174,13 +196,13 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 		return 1;
 	}
 
-	private static int printEntityIso(CommandContext<CommandSourceStack> context, @Nullable CompoundTag nbt, int imageSize, boolean animated, float rotation) throws CommandSyntaxException {
+	private static int printEntityIso(CommandContext<CommandSourceStack> context, ResourceLocation entityId, @Nullable CompoundTag nbt, int imageSize, boolean animated, float rotation) throws CommandSyntaxException {
 		context.getSource().getPlayerOrException();
 
 		IsometricPrinterScreen.queuePrintTask(() -> {
 			if (animated) {
 				return new AnimatedEntityIsoPrinter(
-						ResourceLocationArgument.getId(context, "entity_id"),
+						entityId,
 						nbt,
 						imageSize,
 						IntegerArgumentType.getInteger(context, "record_length"),
@@ -191,7 +213,7 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 			}
 			else {
 				return new EntityIsoPrinter(
-						ResourceLocationArgument.getId(context, "entity_id"),
+						entityId,
 						nbt,
 						imageSize,
 						rotation,
@@ -256,5 +278,28 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 						file -> WikiHelperCommand.success(context.getSource(), "Iso", FormattingHelper.generateResultMessage(file, file.getName(), null))));
 
 		return 1;
+	}
+
+	private static CompoundTag armourNbtFromArguments(final CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		final CompoundTag armourTag = new CompoundTag();
+		final ListTag armorItems = new ListTag();
+		final ItemStack boots = ItemArgument.getItem(context, "boots").createItemStack(1, false);
+		final ItemStack leggings = ItemArgument.getItem(context, "leggings").createItemStack(1, false);
+		final ItemStack chestplate = ItemArgument.getItem(context, "chestplate").createItemStack(1, false);
+		final ItemStack helmet = ItemArgument.getItem(context, "helmet").createItemStack(1, false);
+
+		for (ItemStack stack : new ItemStack[] {boots, leggings, chestplate, helmet}) {
+			final CompoundTag piece = new CompoundTag();
+
+			piece.putString("id", ForgeRegistries.ITEMS.getKey(stack.getItem()).toString());
+			piece.putInt("Count", 1);
+
+			armorItems.add(piece);
+		}
+
+		armourTag.put("ArmorItems", armorItems);
+		armourTag.put("Invisible", ByteTag.valueOf(true));
+
+		return armourTag;
 	}
 }
