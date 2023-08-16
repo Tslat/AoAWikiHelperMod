@@ -19,13 +19,14 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
 import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.function.Consumer;
 
-public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
+public class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 	private final int renderTicks;
 	private int currentFrame = 0;
 	private long lastTick;
@@ -44,20 +45,22 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 
 		this.renderTicks = calculateRenderTickTime();
 		this.lastTick = Minecraft.getInstance().level.getGameTime();
-		NativeImageGifWriter gifWriter = null;
+		this.gifWriter = makeGifWriter(this.commandSource, this.commandName);
 
+		this.currentStatus = "Determining best scale for render...";
+	}
+
+	@Nullable
+	protected NativeImageGifWriter makeGifWriter(final CommandSourceStack commandSource, final String commandName) {
 		try {
-			gifWriter = new NativeImageGifWriter(getOutputFile());
+			return new NativeImageGifWriter(getOutputFile());
 		}
 		catch (IOException ex) {
 			WikiHelperCommand.error(commandSource, commandName, "Unable to instantiate gif writer for file. Check log for more details");
 			ex.printStackTrace();
 		}
-		finally {
-			this.gifWriter = gifWriter;
-		}
 
-		this.currentStatus = "Determining best scale for render...";
+		return null;
 	}
 
 	@Override
@@ -273,7 +276,8 @@ public final class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 
 	@Override
 	public void onClose() {
-		this.gifWriter.exit();
+		if (this.gifWriter != null)
+			this.gifWriter.exit();
 
 		super.onClose();
 	}
