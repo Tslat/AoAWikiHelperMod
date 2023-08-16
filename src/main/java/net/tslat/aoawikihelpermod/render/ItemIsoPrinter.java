@@ -108,7 +108,7 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 
 		try {
 			if (!this.renderIngameModel) {
-				PoseStack modelViewPoseStack = RenderSystem.getModelViewStack();
+				PoseStack modelViewPoseStack = guiGraphics.pose();
 				int guiScale = mc.options.guiScale().get();
 
 				modelViewPoseStack.pushPose();
