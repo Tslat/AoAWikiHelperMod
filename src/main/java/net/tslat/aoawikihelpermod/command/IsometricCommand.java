@@ -16,6 +16,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
@@ -98,21 +99,37 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 																				.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))))))));
 		builder.then(Commands.literal("block")
 				.then(Commands.argument("block_id", BlockStateArgument.block(buildContext))
-						.executes(context -> printBlockIso(context, 300, false, 0))
-						.then(Commands.argument("animated", BoolArgumentType.bool())
-								.executes(context -> printBlockIso(context, 300, BoolArgumentType.getBool(context, "animated"), 0))
-								.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
-										.executes(context -> printBlockIso(context, 300, BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust")))))
-						.then(Commands.argument("image_size", IntegerArgumentType.integer(0, 1000))
-								.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), false, 0))
-								.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
-										.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), false, FloatArgumentType.getFloat(context, "rotation_adjust"))))
-								.then(Commands.argument("animated", BoolArgumentType.bool())
-										.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), 0))
+						.executes(context -> printBlockIso(context, 300, false, true, 0, 0))
+						.then(Commands.literal("states")
+								.executes(context -> printBlockIso(context, 300, false, true, 0, 20))
+								.then(Commands.argument("frametime", IntegerArgumentType.integer(1, 200))
+										.executes(context -> printBlockIso(context, 300, false, true, 0, IntegerArgumentType.getInteger(context, "frametime")))
+										.then(Commands.argument("image_size", IntegerArgumentType.integer(0, 1000))
+												.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), false, true, 0, IntegerArgumentType.getInteger(context, "frametime")))
+												.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
+														.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), false, true, FloatArgumentType.getFloat(context, "rotation_adjust"), IntegerArgumentType.getInteger(context, "frametime"))))
+												.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
+														.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), false, true, FloatArgumentType.getFloat(context, "rotation_adjust"), IntegerArgumentType.getInteger(context, "frametime")))))
+								.then(Commands.argument("image_size", IntegerArgumentType.integer(0, 1000))
+										.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), false, true, 0, 20))
 										.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
-												.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))
+												.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), false, true, FloatArgumentType.getFloat(context, "rotation_adjust"), 20)))
+										.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
+												.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), false, true, FloatArgumentType.getFloat(context, "rotation_adjust"), 20)))))
+						.then(Commands.argument("animated", BoolArgumentType.bool())
+								.executes(context -> printBlockIso(context, 300, BoolArgumentType.getBool(context, "animated"), false, 0, 0))
+								.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
+										.executes(context -> printBlockIso(context, 300, BoolArgumentType.getBool(context, "animated"), false, FloatArgumentType.getFloat(context, "rotation_adjust"), 0))))
+						.then(Commands.argument("image_size", IntegerArgumentType.integer(0, 1000))
+								.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), false, false, 0, 0))
+								.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
+										.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), false, false, FloatArgumentType.getFloat(context, "rotation_adjust"), 0)))
+								.then(Commands.argument("animated", BoolArgumentType.bool())
+										.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), false, 0, 0))
+										.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
+												.executes(context -> printBlockIso(context, IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), false, FloatArgumentType.getFloat(context, "rotation_adjust"), 0)))))
 						.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
-								.executes(context -> printBlockIso(context, 300, false, FloatArgumentType.getFloat(context, "rotation_adjust"))))));
+								.executes(context -> printBlockIso(context, 300, false, false, FloatArgumentType.getFloat(context, "rotation_adjust"), 0))))));
 
 		builder.then(Commands.literal("structure")
 						.then(Commands.argument("template_id", ResourceLocationArgument.id()).suggests(StructuresCommand.SUGGEST_TEMPLATES)
@@ -226,13 +243,26 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 		return 1;
 	}
 
-	private static int printBlockIso(CommandContext<CommandSourceStack> context, int imageSize, boolean animated, float rotation) throws CommandSyntaxException {
+	private static int printBlockIso(CommandContext<CommandSourceStack> context, int imageSize, boolean animated, boolean stateScroller, float rotation, int frameTime) throws CommandSyntaxException {
 		context.getSource().getPlayerOrException();
 
+		final BlockInput blockInput = BlockStateArgument.getBlock(context, "block_id");
+
 		IsometricPrinterScreen.queuePrintTask(() -> {
-			if (animated) {
+			if (stateScroller) {
+				return new AnimatedStateBasedBlockIsoPrinter(
+						blockInput.getState(),
+						blockInput.getDefinedProperties().stream().findFirst().orElseThrow(),
+						frameTime,
+						imageSize,
+						rotation,
+						context.getSource(),
+						CMD.commandName(),
+						file -> WikiHelperCommand.success(context.getSource(), "Iso", FormattingHelper.generateResultMessage(file, file.getName(), null)));
+			}
+			else if (animated) {
 				return new AnimatedBlockIsoPrinter(
-						BlockStateArgument.getBlock(context, "block_id").getState(),
+						blockInput.getState(),
 						imageSize,
 						rotation,
 						context.getSource(),
@@ -241,7 +271,7 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 			}
 			else {
 				return new BlockIsoPrinter(
-						BlockStateArgument.getBlock(context, "block_id").getState(),
+						blockInput.getState(),
 						imageSize,
 						rotation,
 						context.getSource(),
