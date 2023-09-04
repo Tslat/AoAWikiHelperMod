@@ -29,12 +29,14 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.command.EnumArgument;
 import net.tslat.aoawikihelpermod.render.*;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 public class IsometricCommand implements Command<CommandSourceStack> {
 	private static final IsometricCommand CMD = new IsometricCommand();
@@ -99,7 +101,7 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 																				.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))))))));
 		builder.then(Commands.literal("block")
 				.then(Commands.argument("block_id", BlockStateArgument.block(buildContext))
-						.executes(context -> printBlockIso(context, 300, false, true, 0, 0))
+						.executes(context -> printBlockIso(context, 300, false, false, 0, 0))
 						.then(Commands.literal("states")
 								.executes(context -> printBlockIso(context, 300, false, true, 0, 20))
 								.then(Commands.argument("frametime", IntegerArgumentType.integer(1, 200))
@@ -247,12 +249,25 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 		context.getSource().getPlayerOrException();
 
 		final BlockInput blockInput = BlockStateArgument.getBlock(context, "block_id");
+		Optional<Property<?>> property = null;
+
+		if (stateScroller) {
+			property = blockInput.getDefinedProperties().stream().findFirst();
+
+			if (property.isEmpty()) {
+				WikiHelperCommand.error(context.getSource(), "Iso", "No property defined to display for state scroller!");
+
+				return 0;
+			}
+		}
+
+		final Optional<Property<?>> finalProperty = property;
 
 		IsometricPrinterScreen.queuePrintTask(() -> {
 			if (stateScroller) {
 				return new AnimatedStateBasedBlockIsoPrinter(
 						blockInput.getState(),
-						blockInput.getDefinedProperties().stream().findFirst().orElseThrow(),
+						finalProperty.get(),
 						frameTime,
 						imageSize,
 						rotation,
