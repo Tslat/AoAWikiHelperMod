@@ -1,7 +1,6 @@
 package net.tslat.aoawikihelpermod.dataskimmers;
 
 import com.google.common.collect.HashMultimap;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -9,7 +8,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.level.storage.loot.Deserializers;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printer.handler.HaulingTablePrintHandler;
@@ -18,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HaulingFishTableSkimmer extends SimpleJsonResourceReloadListener {
-	private static final Gson GSON = Deserializers.createLootTableSerializer().create();
 	public static final HashMap<ResourceLocation, HaulingTablePrintHandler> TABLE_PRINTERS = new HashMap<ResourceLocation, HaulingTablePrintHandler>();
 	public static final HashMultimap<ResourceLocation, ResourceLocation> TABLES_BY_LOOT = HashMultimap.create();
 

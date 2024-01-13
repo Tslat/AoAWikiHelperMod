@@ -9,6 +9,6 @@ public class RandomChanceConditionHelper extends LootConditionHelper<LootItemRan
 	@Nonnull
 	@Override
 	public String getDescription(LootItemRandomChanceCondition condition) {
-		return "if a fixed random chance check is passed, with a chance of " + NumberUtil.roundToNthDecimalPlace(condition.probability * 100, 3) + "%";
+		return "if a fixed random chance check is passed, with a chance of " + NumberUtil.roundToNthDecimalPlace(condition.probability() * 100, 3) + "%";
 	}
 }

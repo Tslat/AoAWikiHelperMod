@@ -2,25 +2,34 @@ package net.tslat.aoawikihelpermod.util.loottable.condition;
 
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.Holder;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.storage.loot.predicates.MatchTool;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.tslat.aoa3.content.loottable.condition.WearingOrHoldingItem;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.Optional;
 
-public class MatchToolConditionHelper extends LootConditionHelper<MatchTool> {
+public class WearingOrHoldingItemConditionHelper extends LootConditionHelper<WearingOrHoldingItem> {
 	@Nonnull
 	@Override
-	public String getDescription(MatchTool condition) {
-		Optional<ItemPredicate> optionalPredicate = condition.predicate();
+	public String getDescription(WearingOrHoldingItem condition) {
+		ItemPredicate predicate = condition.predicate();
+		LootContext.EntityTarget entityTarget = condition.target();
+		Optional<EquipmentSlot> slot = condition.slot();
 
-		if (optionalPredicate.isEmpty())
-			return "";
+		String slotParticle = slot.isEmpty() ? "equipment" : switch (slot.get()) {
+            case MAINHAND -> "mainhand item";
+            case OFFHAND -> "offhand item";
+            case FEET -> "boots";
+            case LEGS -> "leggings";
+            case CHEST -> "chestplate";
+            case HEAD -> "helmet";
+        };
 
-		ItemPredicate predicate = optionalPredicate.get();
 		StringBuilder heldItemParticle;
 
 		if (predicate.items().isPresent()) {
@@ -52,6 +61,11 @@ public class MatchToolConditionHelper extends LootConditionHelper<MatchTool> {
 			heldItemParticle = new StringBuilder("meets certain conditions");
 		}
 
-		return "if the tool used " + heldItemParticle;
+		return switch (entityTarget) {
+			case THIS -> "if the target entity's " + slotParticle + " " + heldItemParticle;
+			case KILLER -> "if the attacking entity's " + slotParticle + " " + heldItemParticle;
+			case DIRECT_KILLER -> "if the directly killing entity's " + slotParticle + " " + heldItemParticle;
+			case KILLER_PLAYER -> "if the killer is a player, and if their " + slotParticle + " " + heldItemParticle;
+		};
 	}
 }

@@ -1,22 +1,20 @@
 package net.tslat.aoawikihelpermod.dataskimmers;
 
 import com.google.common.collect.HashMultimap;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.level.storage.loot.Deserializers;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
-import net.tslat.aoawikihelpermod.util.LootTableHelper;
 import net.tslat.aoawikihelpermod.util.printer.handler.LootTablePrintHandler;
 import org.apache.logging.log4j.Level;
 
@@ -24,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LootTablesSkimmer extends SimpleJsonResourceReloadListener {
-	private static final Gson GSON = Deserializers.createLootTableSerializer().create();
 	public static final HashMap<ResourceLocation, LootTablePrintHandler> TABLE_PRINTERS = new HashMap<ResourceLocation, LootTablePrintHandler>();
 	public static final HashMultimap<ResourceLocation, ResourceLocation> TABLES_BY_LOOT = HashMultimap.create();
 
@@ -45,10 +42,13 @@ public class LootTablesSkimmer extends SimpleJsonResourceReloadListener {
 				continue;
 
 			try {
-				LootTable table = null;
+				LootTable table;
 
 				if (resourceManager.getResource(getPreparedPath(id)).isPresent()) {
-					table = ForgeHooks.loadLootTable(GSON, id, json, true);
+					table = LootTable.CODEC.decode(JsonOps.INSTANCE, json)
+							.resultOrPartial(err -> AoAWikiHelperMod.LOGGER.log(Level.ERROR, err))
+							.map(Pair::getFirst)
+							.orElse(null);
 				}
 				else {
 					AoAWikiHelperMod.LOGGER.log(Level.ERROR, "Invalid loot table json found, skipping");
@@ -67,10 +67,10 @@ public class LootTablesSkimmer extends SimpleJsonResourceReloadListener {
 	}
 
 	private void populateLootByTable(ResourceLocation tableId, LootTable table, JsonObject rawTable) {
-		for (LootPool pool : LootTableHelper.getPools(table)) {
-			for (LootPoolEntryContainer entry : LootTableHelper.getLootEntries(pool)) {
+		for (LootPool pool : table.pools) {
+			for (LootPoolEntryContainer entry : pool.entries) {
 				if (entry instanceof LootItem) {
-					TABLES_BY_LOOT.put(ForgeRegistries.ITEMS.getKey(((LootItem)entry).item), tableId);
+					TABLES_BY_LOOT.put(RegistryUtil.getId(((LootItem)entry).item.value()), tableId);
 				}
 			}
 		}

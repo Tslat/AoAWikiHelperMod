@@ -9,8 +9,8 @@ public class RandomChanceWithLootingConditionHelper extends LootConditionHelper<
 	@Nonnull
 	@Override
 	public String getDescription(LootItemRandomChanceWithLootingCondition condition) {
-		float chance = condition.percent;
-		float lootingMod = condition.lootingMultiplier;
+		float chance = condition.percent();
+		float lootingMod = condition.lootingMultiplier();
 
 		return "if a fixed random chance check is passed, with a chance of " + NumberUtil.roundToNthDecimalPlace(chance * 100, 3) + "%, with an extra " + NumberUtil.roundToNthDecimalPlace(lootingMod * 100, 3) + " per looting level";
 	}

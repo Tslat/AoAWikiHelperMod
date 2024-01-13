@@ -1,5 +1,6 @@
 package net.tslat.aoawikihelpermod.util.fakeworld;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -14,6 +15,7 @@ import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.TickRateManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -40,8 +42,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.BlackholeTickAccess;
 import net.minecraft.world.ticks.LevelTickAccess;
-import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.tslat.aoa3.common.registration.worldgen.AoADimensions;
 
 import javax.annotation.Nonnull;
@@ -49,16 +50,17 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class FakeWorld extends Level implements WorldGenLevel {
-	public static final Lazy<FakeWorld> INSTANCE = FakeWorld::new;
+	public static final Supplier<FakeWorld> INSTANCE = Suppliers.memoize(FakeWorld::new);
 
 	private static final Scoreboard scoreboard = new Scoreboard();
 	private static final RecipeManager recipeManager = new RecipeManager();
 	private static final FakeChunkProvider chunkProvider = new FakeChunkProvider();
 	private static final FakeStructureManager structureManager = new FakeStructureManager();
 
-	public static final Lazy<Holder<Biome>> PLAINS_BIOME = Lazy.of(() -> new Holder.Direct<>(AoADimensions.OVERWORLD.getWorld().registryAccess().registry(Registries.BIOME).get().get(Biomes.PLAINS.location())));
+	public static final Supplier<Holder<Biome>> PLAINS_BIOME = Suppliers.memoize(() -> new Holder.Direct<>(AoADimensions.OVERWORLD.getWorld().registryAccess().registry(Registries.BIOME).get().get(Biomes.PLAINS.location())));
 
 	public static void init() {}
 
@@ -228,6 +230,11 @@ public class FakeWorld extends Level implements WorldGenLevel {
 
 	@Override
 	public void blockEntityChanged(BlockPos pos) {}
+
+	@Override
+	public TickRateManager tickRateManager() {
+		return new TickRateManager();
+	}
 
 	@Override
 	public FluidState getFluidState(BlockPos pos) {

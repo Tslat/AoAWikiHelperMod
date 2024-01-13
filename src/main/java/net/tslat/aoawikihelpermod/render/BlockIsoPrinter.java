@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapter;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
@@ -42,7 +42,7 @@ public class BlockIsoPrinter extends IsometricPrinterScreen {
 
 	@Override
 	protected File getOutputFile() {
-		return PrintHelper.configDir.toPath().resolve("Block Renders").resolve(ForgeRegistries.BLOCKS.getKey(block.getBlock()).getNamespace()).resolve(block.getBlock().getName().getString() + " - " + targetSize + "px.png").toFile();
+		return PrintHelper.configDir.toPath().resolve("Block Renders").resolve(RegistryUtil.getId(block.getBlock()).getNamespace()).resolve(block.getBlock().getName().getString() + " - " + targetSize + "px.png").toFile();
 	}
 
 	@Override

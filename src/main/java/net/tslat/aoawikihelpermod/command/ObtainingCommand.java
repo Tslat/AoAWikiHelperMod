@@ -12,8 +12,8 @@ import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
+import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoawikihelpermod.dataskimmers.*;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
@@ -56,7 +56,7 @@ public class ObtainingCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		String baseFileName = "Obtaining - " + itemName;
-		Collection<ResourceLocation> resultingRecipes = RecipesSkimmer.getRecipesByOutput(ForgeRegistries.ITEMS.getKey(item));
+		Collection<ResourceLocation> resultingRecipes = RecipesSkimmer.getRecipesByOutput(RegistryUtil.getId(item));
 
 		try {
 			if (!resultingRecipes.isEmpty()) {
@@ -105,7 +105,7 @@ public class ObtainingCommand implements Command<CommandSourceStack> {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		Set<MerchantTradePrintHandler> trades = MerchantsSkimmer.TRADES_BY_ITEM.get(ForgeRegistries.ITEMS.getKey(item));
+		Set<MerchantTradePrintHandler> trades = MerchantsSkimmer.TRADES_BY_ITEM.get(RegistryUtil.getId(item));
 
 		if (!trades.isEmpty()) {
 			String fileName = "Obtaining - " + itemName + " - Merchants";
@@ -161,7 +161,7 @@ public class ObtainingCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		String fileName = "Obtaining - " + itemName + " - Hauling";
-		Collection<ResourceLocation> haulingTables = HaulingFishTableSkimmer.TABLES_BY_LOOT.get(ForgeRegistries.ITEMS.getKey(item));
+		Collection<ResourceLocation> haulingTables = HaulingFishTableSkimmer.TABLES_BY_LOOT.get(RegistryUtil.getId(item));
 
 		if (!haulingTables.isEmpty()) {
 			ArrayList<HaulingTablePrintHandler> sortedTables = new ArrayList<HaulingTablePrintHandler>();
@@ -197,7 +197,7 @@ public class ObtainingCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		String baseFileName = "Obtaining - " + itemName;
-		Collection<ResourceLocation> resultingLootTables = LootTablesSkimmer.TABLES_BY_LOOT.get(ForgeRegistries.ITEMS.getKey(item));
+		Collection<ResourceLocation> resultingLootTables = LootTablesSkimmer.TABLES_BY_LOOT.get(RegistryUtil.getId(item));
 
 		if (!resultingLootTables.isEmpty()) {
 			String fileName = baseFileName + " - Loot Tables";
@@ -225,7 +225,7 @@ public class ObtainingCommand implements Command<CommandSourceStack> {
 		CommandSourceStack source = cmd.getSource();
 		boolean success;
 
-		WikiHelperCommand.info(cmd.getSource(), "Obtaining", "Searching for sources of '" + ForgeRegistries.ITEMS.getKey(item) + "'...");
+		WikiHelperCommand.info(cmd.getSource(), "Obtaining", "Searching for sources of '" + RegistryUtil.getId(item) + "'...");
 
 		success = checkRecipeSources(item, source);
 		success |= checkLootTableSources(item, source);

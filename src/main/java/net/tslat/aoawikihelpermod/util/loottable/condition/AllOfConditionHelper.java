@@ -9,11 +9,11 @@ public class AllOfConditionHelper extends LootConditionHelper<AnyOfCondition> {
 	@Nonnull
 	@Override
 	public String getDescription(AnyOfCondition condition) {
-		if (condition.terms.length == 0) {
+		if (condition.terms.isEmpty()) {
 			return "";
 		}
-		else if (condition.terms.length == 1) {
-			String description = LootTableHelper.getConditionDescription(condition.terms[0]);
+		else if (condition.terms.size() == 1) {
+			String description = LootTableHelper.getConditionDescription(condition.terms.get(0));
 
 			if (description.isEmpty())
 				return "";
@@ -23,17 +23,17 @@ public class AllOfConditionHelper extends LootConditionHelper<AnyOfCondition> {
 		else {
 			StringBuilder builder = new StringBuilder("if all of the following are true: \n");
 
-			for (int i = 0; i < condition.terms.length; i++) {
+			for (int i = 0; i < condition.terms.size(); i++) {
 				if (i > 0) {
 					builder.append(",");
 
-					if (i == condition.terms.length - 1)
+					if (i == condition.terms.size() - 1)
 						builder.append(" and");
 
 					builder.append("\n");
 				}
 
-				String description = LootTableHelper.getConditionDescription(condition.terms[i]);
+				String description = LootTableHelper.getConditionDescription(condition.terms.get(i));
 
 				if (description.isEmpty())
 					continue;

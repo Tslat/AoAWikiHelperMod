@@ -17,9 +17,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.textures.FluidSpriteCache;
+import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
@@ -210,7 +210,7 @@ public final class AnimatedStateBasedBlockIsoPrinter extends BlockIsoPrinter {
 
 	@Override
 	protected File getOutputFile() {
-		return PrintHelper.configDir.toPath().resolve("Block Renders").resolve(ForgeRegistries.BLOCKS.getKey(block.getBlock()).getNamespace()).resolve(block.getBlock().getName().getString() + " - " + StringUtil.toTitleCase(property.getName()) + " - " + targetSize + "px.gif").toFile();
+		return PrintHelper.configDir.toPath().resolve("Block Renders").resolve(RegistryUtil.getId(block.getBlock()).getNamespace()).resolve(block.getBlock().getName().getString() + " - " + StringUtil.toTitleCase(property.getName()) + " - " + targetSize + "px.gif").toFile();
 	}
 
 	private boolean isOnFirstFrame() {
@@ -220,7 +220,7 @@ public final class AnimatedStateBasedBlockIsoPrinter extends BlockIsoPrinter {
 
 		for (BlockState state : this.states) {
 			BakedModel model = blockRenderer.getBlockModel(state);
-			TextureAtlasSprite[] fluidSprites = !state.getFluidState().isEmpty() ? ForgeHooksClient.getFluidSprites(FakeWorld.INSTANCE.get(), BlockPos.ZERO, state.getFluidState()) : null;
+			TextureAtlasSprite[] fluidSprites = !state.getFluidState().isEmpty() ? FluidSpriteCache.getFluidSprites(FakeWorld.INSTANCE.get(), BlockPos.ZERO, state.getFluidState()) : null;
 
 			if (fluidSprites != null) {
 				TextureAtlasSprite sprite = fluidSprites[1];
@@ -300,7 +300,7 @@ public final class AnimatedStateBasedBlockIsoPrinter extends BlockIsoPrinter {
 
 		for (BlockState state : this.states) {
 			BakedModel model = blockRenderer.getBlockModel(state);
-			TextureAtlasSprite[] fluidSprites = !state.getFluidState().isEmpty() ? ForgeHooksClient.getFluidSprites(FakeWorld.INSTANCE.get(), BlockPos.ZERO, state.getFluidState()) : null;
+			TextureAtlasSprite[] fluidSprites = !state.getFluidState().isEmpty() ? FluidSpriteCache.getFluidSprites(FakeWorld.INSTANCE.get(), BlockPos.ZERO, state.getFluidState()) : null;
 
 			if (fluidSprites != null) {
 				TextureAtlasSprite sprite = fluidSprites[1];

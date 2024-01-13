@@ -6,8 +6,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.Tags;
+import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
@@ -46,14 +46,14 @@ public class ShulkerColourRecipeHandler extends RecipePrintHandler {
 	@Override
 	public List<ResourceLocation> getIngredientsForLookup() {
 		return Arrays.asList(
-				ForgeRegistries.BLOCKS.getKey(Blocks.SHULKER_BOX),
+				RegistryUtil.getId(Blocks.SHULKER_BOX),
 				Tags.Items.DYES.location()
 		);
 	}
 
 	@Override
 	public List<ResourceLocation> getOutputsForLookup() {
-		return Collections.singletonList(ForgeRegistries.BLOCKS.getKey(Blocks.SHULKER_BOX));
+		return Collections.singletonList(RegistryUtil.getId(Blocks.SHULKER_BOX));
 	}
 
 	@Override

@@ -20,6 +20,7 @@ import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -30,8 +31,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.server.command.EnumArgument;
+import net.neoforged.neoforge.server.command.EnumArgument;
+import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoawikihelpermod.render.*;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 
@@ -40,7 +41,7 @@ import java.util.Optional;
 
 public class IsometricCommand implements Command<CommandSourceStack> {
 	private static final IsometricCommand CMD = new IsometricCommand();
-	public static final SuggestionProvider<CommandSourceStack> ENTITY_ID_SUGGESTIONS = SuggestionProviders.register(new ResourceLocation("all_entities"), (context, suggestionBuilder) -> SharedSuggestionProvider.suggestResource(ForgeRegistries.ENTITY_TYPES.getValues().stream(), suggestionBuilder, EntityType::getKey, (entityType) -> Component.translatable(Util.makeDescriptionId("entity", EntityType.getKey(entityType)))));
+	public static final SuggestionProvider<CommandSourceStack> ENTITY_ID_SUGGESTIONS = SuggestionProviders.register(new ResourceLocation("all_entities"), (context, suggestionBuilder) -> SharedSuggestionProvider.suggestResource(BuiltInRegistries.ENTITY_TYPE.stream(), suggestionBuilder, EntityType::getKey, (entityType) -> Component.translatable(Util.makeDescriptionId("entity", EntityType.getKey(entityType)))));
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext buildContext) {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("iso").requires(source -> source.getEntity() instanceof Player).executes(CMD);
@@ -336,7 +337,7 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 		for (ItemStack stack : new ItemStack[] {boots, leggings, chestplate, helmet}) {
 			final CompoundTag piece = new CompoundTag();
 
-			piece.putString("id", ForgeRegistries.ITEMS.getKey(stack.getItem()).toString());
+			piece.putString("id", RegistryUtil.getId(stack.getItem()).toString());
 			piece.putInt("Count", 1);
 
 			armorItems.add(piece);

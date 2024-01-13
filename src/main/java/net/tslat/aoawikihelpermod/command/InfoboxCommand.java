@@ -8,11 +8,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
@@ -63,7 +63,7 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 
 	private static int printBlockInfobox(CommandContext<CommandSourceStack> cmd) {
 		ResourceLocation id = ResourceLocationArgument.getId(cmd, "id");
-		Block block = ForgeRegistries.BLOCKS.getValue(id);
+		Block block = BuiltInRegistries.BLOCK.get(id);
 		CommandSourceStack source = cmd.getSource();
 		MutableSupplier<String> clipboardContent = new MutableSupplier<>(null);
 		File outputFile;
@@ -94,7 +94,7 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 
 	private static int printItemInfobox(CommandContext<CommandSourceStack> cmd) {
 		ResourceLocation id = ResourceLocationArgument.getId(cmd, "id");
-		Item item = ForgeRegistries.ITEMS.getValue(id);
+		Item item = BuiltInRegistries.ITEM.get(id);
 		CommandSourceStack source = cmd.getSource();
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
@@ -125,7 +125,7 @@ public class InfoboxCommand implements Command<CommandSourceStack> {
 
 	private static int printEntityInfobox(CommandContext<CommandSourceStack> cmd) {
 		ResourceLocation id = ResourceLocationArgument.getId(cmd, "id");
-		EntityType<?> entity = ForgeRegistries.ENTITY_TYPES.getValue(id);
+		EntityType<?> entity = BuiltInRegistries.ENTITY_TYPE.get(id);
 		CommandSourceStack source = cmd.getSource();
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;

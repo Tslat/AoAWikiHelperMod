@@ -11,10 +11,10 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.dataskimmers.BlockDataSkimmer;
@@ -53,7 +53,7 @@ public class BlocksCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printStates(CommandContext<CommandSourceStack> cmd) {
-		Block block = ForgeRegistries.BLOCKS.getDelegateOrThrow(cmd.getArgument("id", ResourceLocation.class)).get();
+		Block block = BuiltInRegistries.BLOCK.get(cmd.getArgument("id", ResourceLocation.class));
 		String blockName = ObjectHelper.getBlockName(block);
 		File outputFile;
 		String fileName = "Blockstates - " + blockName;
@@ -84,7 +84,7 @@ public class BlocksCommand implements Command<CommandSourceStack> {
 
 	private static int printTags(CommandContext<CommandSourceStack> cmd) {
 		ResourceLocation id = ResourceLocationArgument.getId(cmd, "id");
-		Block block = ForgeRegistries.BLOCKS.getValue(id);
+		Block block = BuiltInRegistries.BLOCK.get(id);
 		String blockName = ObjectHelper.getBlockName(block);
 		File outputFile;
 		String fileName = "Block Tags - " + blockName;
@@ -130,7 +130,7 @@ public class BlocksCommand implements Command<CommandSourceStack> {
 			this.provider = SuggestionProviders.register(
 					new ResourceLocation(AoAWikiHelperMod.MOD_ID, "blocks"),
 					(context, suggestionBuilder) -> SharedSuggestionProvider.suggestResource(
-							ForgeRegistries.BLOCKS.getKeys().stream(),
+							BuiltInRegistries.BLOCK.keySet(),
 							suggestionBuilder,
 							loc -> loc,
 							(id) -> Component.translatable(Util.makeDescriptionId("block", id))

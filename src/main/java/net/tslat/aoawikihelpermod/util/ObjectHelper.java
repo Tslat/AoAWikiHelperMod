@@ -1,13 +1,9 @@
 package net.tslat.aoawikihelpermod.util;
 
-import com.google.common.collect.BiMap;
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.mojang.datafixers.util.Either;
-import it.unimi.dsi.fastutil.objects.Object2BooleanAVLTreeMap;
-import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -36,12 +32,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryManager;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.tslat.aoa3.common.registration.AoARegistries;
 import net.tslat.aoa3.content.item.weapon.bow.Slingshot;
 import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
@@ -62,9 +53,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ObjectHelper {
-	private static final Object2BooleanAVLTreeMap<ResourceKey<? extends Registry<?>>> REGISTRY_KEYS = new Object2BooleanAVLTreeMap<>();
 	private static final ArrayList<Pattern> TOOLTIP_BLACKLIST = new ArrayList<Pattern>();
 
 	static {
@@ -78,15 +69,15 @@ public class ObjectHelper {
 	}
 
 	public static List<Item> scrapeRegistryForItems(Predicate<Item> filter) {
-		return ObjectHelper.sortCollection(ForgeRegistries.ITEMS.getValues().stream().filter(filter).collect(Collectors.toList()), ObjectHelper::getItemName);
+		return ObjectHelper.sortCollection(BuiltInRegistries.ITEM.stream().filter(filter).collect(Collectors.toList()), ObjectHelper::getItemName);
 	}
 
 	public static List<Block> scrapeRegistryForBlocks(Predicate<Block> filter) {
-		return ObjectHelper.sortCollection(ForgeRegistries.BLOCKS.getValues().stream().filter(filter).collect(Collectors.toList()), ObjectHelper::getItemName);
+		return ObjectHelper.sortCollection(BuiltInRegistries.BLOCK.stream().filter(filter).collect(Collectors.toList()), ObjectHelper::getItemName);
 	}
 
 	public static List<EntityType<?>> scrapeRegistryForEntities(Predicate<EntityType<?>> filter) {
-		return ForgeRegistries.ENTITY_TYPES.getValues().stream().filter(filter).collect(Collectors.toList());
+		return BuiltInRegistries.ENTITY_TYPE.stream().filter(filter).collect(Collectors.toList());
 	}
 
 	public static Multimap<Attribute, AttributeModifier> getAttributesForItem(Item item) {
@@ -195,20 +186,20 @@ public class ObjectHelper {
 	}
 
 	public static boolean isItem(ResourceLocation id) {
-		return ForgeRegistries.ITEMS.getValue(id) != Items.AIR;
+		return BuiltInRegistries.ITEM.get(id) != Items.AIR;
 	}
 
 	public static boolean isBlock(ResourceLocation id) {
-		return ForgeRegistries.BLOCKS.getValue(id) != Blocks.AIR;
+		return BuiltInRegistries.BLOCK.get(id) != Blocks.AIR;
 	}
 
 	public static boolean isEntity(ResourceLocation id) {
-		return ForgeRegistries.ENTITY_TYPES.getValue(id) != EntityType.PIG;
+		return BuiltInRegistries.ENTITY_TYPE.get(id) != EntityType.PIG;
 	}
 
 	public static String getItemName(ItemLike item) {
-		ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item.asItem());
-		EntityType<?> matchingEntity = ForgeRegistries.ENTITY_TYPES.getValue(itemId);
+		ResourceLocation itemId = RegistryUtil.getId(item.asItem());
+		EntityType<?> matchingEntity = BuiltInRegistries.ENTITY_TYPE.get(itemId);
 		String suffix = "";
 
 		if (matchingEntity != EntityType.PIG) {
@@ -257,10 +248,10 @@ public class ObjectHelper {
 	}
 
 	public static String getFluidName(Fluid fluid) {
-		if (isBlock(ForgeRegistries.FLUIDS.getKey(fluid)))
-			return getBlockName(ForgeRegistries.BLOCKS.getValue(ForgeRegistries.FLUIDS.getKey(fluid)));
+		if (isBlock(BuiltInRegistries.FLUID.getKey(fluid)))
+			return getBlockName(BuiltInRegistries.BLOCK.get(BuiltInRegistries.FLUID.getKey(fluid)));
 
-		return StringUtil.toTitleCase(ForgeRegistries.FLUIDS.getKey(fluid).getPath());
+		return StringUtil.toTitleCase(BuiltInRegistries.FLUID.getKey(fluid).getPath());
 	}
 
 	public static String getEnchantmentName(Enchantment enchant, int level) {
@@ -368,44 +359,16 @@ public class ObjectHelper {
 		return matches / (float)str1.length() >= 0.75f;
 	}
 
-	public static Object2BooleanAVLTreeMap<ResourceKey<? extends Registry<?>>> getAllRegistries() {
-		if (!REGISTRY_KEYS.isEmpty())
-			return REGISTRY_KEYS;
-
-		for (ResourceKey<? extends Registry<?>> key : ((BiMap<ResourceLocation, ForgeRegistry<Object>>)ObfuscationReflectionHelper.getPrivateValue(RegistryManager.class, RegistryManager.ACTIVE, "registries")).values().stream().map(ForgeRegistry::getRegistryKey).sorted().toList()) {
-			REGISTRY_KEYS.put(key, false);
-		}
-
-		for (ResourceKey<? extends Registry<?>> key : ServerLifecycleHooks.getCurrentServer().registryAccess().registries().map(RegistryAccess.RegistryEntry::key).sorted().toList()) {
-			REGISTRY_KEYS.put(key, true);
-		}
-
-		return REGISTRY_KEYS;
+	public static Stream<RegistryAccess.RegistryEntry<?>> getAllRegistries() {
+		return ServerLifecycleHooks.getCurrentServer().registryAccess().registries();
 	}
 
-	public static Either<Registry<?>, IForgeRegistry<?>> getRegistry(ResourceKey<? extends Registry<?>> key) {
-		return getAllRegistries().getBoolean(key) ? Either.left(ServerLifecycleHooks.getCurrentServer().registryAccess().registry(key).get()) : Either.right(RegistryManager.ACTIVE.getRegistry(key.location()));
+	public static <T> Registry<T> getRegistry(ResourceKey<? extends Registry<T>> key) {
+		return ServerLifecycleHooks.getCurrentServer().registryAccess().registry(key).get();
 	}
 
-	@Nullable
-	public static Either<Registry<?>, IForgeRegistry<?>> getRegistryForObject(Object object) {
-		for (ResourceKey<? extends Registry<?>> key : getAllRegistries().keySet()) {
-			Either<Registry<? extends Object>, IForgeRegistry<?>> dynamicOrFixedRegistry = getRegistry(key);
-
-			if (dynamicOrFixedRegistry.left().isPresent()) {
-				Registry registry = dynamicOrFixedRegistry.left().get();
-				ResourceLocation id = registry.getKey(object);
-
-				if (id != null && (!(registry instanceof DefaultedRegistry<?> defaultedRegistry) || defaultedRegistry.getDefaultKey() != id))
-					return Either.left(registry);
-			}
-			else if (dynamicOrFixedRegistry.right().isPresent()) {
-				if (((IForgeRegistry)dynamicOrFixedRegistry.right().get()).containsValue(object))
-					return Either.right(dynamicOrFixedRegistry.right().get());
-			}
-		}
-
-		return null;
+	public static <T> Registry<? super T> getRegistryForObject(T object) {
+		return (Registry)ServerLifecycleHooks.getCurrentServer().registryAccess().registries().filter(registryEntry -> ((Registry)registryEntry.value()).containsValue(object)).findFirst().map(RegistryAccess.RegistryEntry::value).orElse(null);
 	}
 
 	public static Function<Object, String> getNameFunctionForUnknownObject(Object entry) {
@@ -431,18 +394,12 @@ public class ObjectHelper {
 		}
 		else {
 			namingFunction = unknownObject -> {
-				Either<Registry<?>, IForgeRegistry<?>> registry = getRegistryForObject(unknownObject);
+				Registry registry = getRegistryForObject(unknownObject);
 
 				if (registry == null)
 					return "???";
 
-				if (registry.left().isPresent())
-					return ((Registry)registry.left().get()).getKey(unknownObject).toString();
-
-				if (registry.right().isPresent())
-					return ((IForgeRegistry)registry.right().get()).getKey(unknownObject).toString();
-
-				return "???";
+				return registry.getKey(unknownObject).toString();
 			};
 		}
 

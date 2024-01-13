@@ -12,10 +12,10 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
 import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
 import net.tslat.aoa3.content.item.weapon.cannon.BaseCannon;
@@ -68,7 +68,7 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 
 	private static int printTags(CommandContext<CommandSourceStack> cmd) {
 		ResourceLocation id = ResourceLocationArgument.getId(cmd, "id");
-		Item item = ForgeRegistries.ITEMS.getValue(id);
+		Item item = BuiltInRegistries.ITEM.get(id);
 		String itemName = ObjectHelper.getItemName(item);
 		File outputFile;
 		String fileName = "Item Tags - " + itemName;
@@ -120,7 +120,7 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 
 		public Predicate<ResourceLocation> isIdOfType() {
 			return id -> {
-				Item item = ForgeRegistries.ITEMS.getDelegateOrThrow(id).get();
+				Item item = BuiltInRegistries.ITEM.get(id);
 				if (this.classType.isInstance(item)) {
 					return true;
 				}
@@ -133,7 +133,7 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 			this.provider = SuggestionProviders.register(
 					new ResourceLocation(AoAWikiHelperMod.MOD_ID, "item_" + categoryName),
 					(context, suggestionBuilder) -> SharedSuggestionProvider.suggestResource(
-							ForgeRegistries.ITEMS.getKeys().stream().filter(this.isIdOfType()),
+							BuiltInRegistries.ITEM.keySet().stream().filter(isIdOfType()),
 							suggestionBuilder,
 							loc -> loc,
 							(id) -> Component.translatable(Util.makeDescriptionId("item", id))

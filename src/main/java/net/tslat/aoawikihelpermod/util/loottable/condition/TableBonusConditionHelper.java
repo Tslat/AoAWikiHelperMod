@@ -10,6 +10,6 @@ public class TableBonusConditionHelper extends LootConditionHelper<BonusLevelTab
 	@Nonnull
 	@Override
 	public String getDescription(BonusLevelTableCondition condition) {
-		return "if a chance check is passed, depending on the level of " + FormattingHelper.createLinkableText(ObjectHelper.getEnchantmentName(condition.enchantment, 0), false, true) + " used";
+		return "if a chance check is passed, depending on the level of " + FormattingHelper.createLinkableText(ObjectHelper.getEnchantmentName(condition.enchantment().value(), 0), false, true) + " used";
 	}
 }

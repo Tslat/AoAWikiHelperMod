@@ -7,6 +7,7 @@ import net.minecraft.world.level.block.*;
 import net.tslat.aoa3.content.entity.base.AbstractLavaFishEntity;
 import net.tslat.aoa3.content.entity.projectile.gun.BaseBullet;
 import net.tslat.aoawikihelpermod.render.IsometricPrinterScreen;
+import net.tslat.aoawikihelpermod.render.typeadapter.block.DoorBlockRenderAdapter;
 import net.tslat.aoawikihelpermod.render.typeadapter.block.DoublePlantBlockRenderAdapter;
 import net.tslat.aoawikihelpermod.render.typeadapter.block.MultiBlockCropRenderAdapter;
 
@@ -27,6 +28,7 @@ public final class IsoRenderAdapters {
 				block.getBlock() instanceof BedBlock,
 				Axis.YP, -180f));
 		IsometricPrinterScreen.registerBlockAdapter(new DoublePlantBlockRenderAdapter());
+		IsometricPrinterScreen.registerBlockAdapter(new DoorBlockRenderAdapter());
 		IsometricPrinterScreen.registerBlockAdapter(new MultiBlockCropRenderAdapter());
 		IsometricPrinterScreen.registerEntityAdapter(new SimpleScaleRenderAdapter<>(entity ->
 				entity instanceof BaseBullet,

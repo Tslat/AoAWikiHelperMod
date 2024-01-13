@@ -2,11 +2,13 @@ package net.tslat.aoawikihelpermod.util.printer.handler.recipe;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 import net.tslat.aoawikihelpermod.util.printer.handler.RecipePrintHandler;
@@ -94,7 +96,7 @@ public class ShapedCraftingRecipeHandler extends RecipePrintHandler {
 			ingredientMap.put(key.getKey(), ObjectHelper.getIngredientName(value));
 		}
 
-		String[] pattern = ShapedRecipe.shrink(ShapedRecipe.patternFromJson(GsonHelper.getAsJsonArray(this.rawRecipe, "pattern")));
+		String[] pattern = ShapedRecipePattern.shrink(ShapedRecipePattern.Data.PATTERN_CODEC.decode(JsonOps.INSTANCE, GsonHelper.getAsJsonArray(this.rawRecipe, "pattern")).result().orElseThrow().getFirst());
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(9);
 
 		for (int x = 0; x < pattern.length; x++) {

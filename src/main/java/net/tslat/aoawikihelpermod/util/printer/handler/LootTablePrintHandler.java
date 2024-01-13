@@ -14,7 +14,6 @@ import net.tslat.aoawikihelpermod.util.LootTableHelper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class LootTablePrintHandler {
@@ -46,12 +45,12 @@ public class LootTablePrintHandler {
 		ArrayList<PoolPrintData> pools = new ArrayList<PoolPrintData>();
 		int index = 1;
 
-		for (LootPool pool : LootTableHelper.getPools(lootTable)) {
+		for (LootPool pool : this.lootTable.pools) {
 			pools.add(new PoolPrintData(pool, index));
 			index++;
 		}
 
-		String notes = LootTableHelper.getFunctionsDescription("table", Arrays.asList(lootTable.functions));
+		String notes = LootTableHelper.getFunctionsDescription("table", lootTable.functions);
 
 		if (notes.length() > 1)
 			this.tableNotes = notes;
@@ -96,26 +95,26 @@ public class LootTablePrintHandler {
 			this.rolls = rolls;
 			this.bonusRolls = bonusRolls;
 
-			List<LootItemCondition> conditions = LootTableHelper.getConditions(pool);
-			List<LootItemFunction> functions = Arrays.asList(pool.functions);
+			List<LootItemCondition> conditions = pool.conditions;
+			List<LootItemFunction> functions = pool.functions;
 			StringBuilder poolNotesBuilder = new StringBuilder();
 
 			if (!conditions.isEmpty())
 				poolNotesBuilder.append(LootTableHelper.getConditionsDescription("pool", conditions));
 
-			if (functions.size() > 0) {
-				if (poolNotesBuilder.length() > 0)
+			if (!functions.isEmpty()) {
+				if (!poolNotesBuilder.isEmpty())
 					poolNotesBuilder.append("<br/>");
 
 				poolNotesBuilder.append(LootTableHelper.getFunctionsDescription("pool",  functions));
 			}
 
-			this.notes = poolNotesBuilder.length() > 0 ? poolNotesBuilder.toString() : null;
+			this.notes = !poolNotesBuilder.isEmpty() ? poolNotesBuilder.toString() : null;
 
-			for (LootPoolEntryContainer entry : LootTableHelper.getLootEntries(pool)) {
-				String entryLine = LootTableHelper.getLootEntryLine(poolIndex, entry, Arrays.asList(entry.conditions));
+			for (LootPoolEntryContainer entry : pool.entries) {
+				String entryLine = LootTableHelper.getLootEntryLine(poolIndex, entry, entry.conditions);
 
-				if (entryLine.length() > 0)
+				if (!entryLine.isEmpty())
 					this.lootEntries.add(entryLine);
 			}
 		}

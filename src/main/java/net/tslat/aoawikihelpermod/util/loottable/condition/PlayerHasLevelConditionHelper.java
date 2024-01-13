@@ -8,6 +8,6 @@ public class PlayerHasLevelConditionHelper extends LootConditionHelper<PlayerHas
 	@Nonnull
 	@Override
 	public String getDescription(PlayerHasLevel condition) {
-		return "if the player has at least level " + condition.getLevel() + " " + condition.getSkill().getName().getString();
+		return "if the player has at least level " + condition.level() + " " + condition.skill().getName().getString();
 	}
 }

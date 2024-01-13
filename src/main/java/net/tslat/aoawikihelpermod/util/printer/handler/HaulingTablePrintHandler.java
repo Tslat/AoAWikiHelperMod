@@ -3,11 +3,11 @@ package net.tslat.aoawikihelpermod.util.printer.handler;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.common.registration.custom.AoASkills;
 import net.tslat.aoa3.content.loottable.condition.PlayerHasLevel;
@@ -45,7 +45,7 @@ public class HaulingTablePrintHandler {
 
 			if (entry.isJsonPrimitive()) {
 				type = "item";
-				name = ObjectHelper.getItemName(ForgeRegistries.ITEMS.getValue(new ResourceLocation(entry.getAsString()))); // TODO remove
+				name = ObjectHelper.getItemName(BuiltInRegistries.ITEM.get(new ResourceLocation(entry.getAsString()))); // TODO remove
 			}
 			else if (entry.isJsonObject()) {
 				JsonObject obj = entry.getAsJsonObject();
@@ -63,10 +63,10 @@ public class HaulingTablePrintHandler {
 					ResourceLocation id = new ResourceLocation(obj.get("item").getAsString());
 
 					type = "item";
-					name = ObjectHelper.getItemName(ForgeRegistries.ITEMS.getValue(id));
+					name = ObjectHelper.getItemName(BuiltInRegistries.ITEM.get(id));
 				}
 				else {
-					name = ObjectHelper.getEntityName(ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(obj.get("entity").getAsString())));
+					name = ObjectHelper.getEntityName(BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(obj.get("entity").getAsString())));
 				}
 			}
 

@@ -12,8 +12,8 @@ import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
+import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoawikihelpermod.dataskimmers.BlockDataSkimmer;
 import net.tslat.aoawikihelpermod.dataskimmers.ItemDataSkimmer;
 import net.tslat.aoawikihelpermod.dataskimmers.MerchantsSkimmer;
@@ -60,7 +60,7 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		String baseFileName = "Usages - " + itemName;
-		Collection<ResourceLocation> containingRecipes = RecipesSkimmer.getRecipesByIngredient(ForgeRegistries.ITEMS.getKey(item));
+		Collection<ResourceLocation> containingRecipes = RecipesSkimmer.getRecipesByIngredient(RegistryUtil.getId(item));
 
 		try {
 			if (!containingRecipes.isEmpty()) {
@@ -227,7 +227,7 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 		String itemName = ObjectHelper.getItemName(item);
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 		File outputFile;
-		Set<MerchantTradePrintHandler> trades = MerchantsSkimmer.TRADES_BY_COST.get(ForgeRegistries.ITEMS.getKey(item));
+		Set<MerchantTradePrintHandler> trades = MerchantsSkimmer.TRADES_BY_COST.get(RegistryUtil.getId(item));
 
 		if (!trades.isEmpty()) {
 			String fileName = "Usages - " + itemName + " - Merchants";
@@ -253,7 +253,7 @@ public class UsagesCommand implements Command<CommandSourceStack> {
 		CommandSourceStack source = cmd.getSource();
 		boolean success;
 
-		WikiHelperCommand.info(cmd.getSource(), "Usages", "Searching for usages of '" + ForgeRegistries.ITEMS.getKey(item) + "'...");
+		WikiHelperCommand.info(cmd.getSource(), "Usages", "Searching for usages of '" + RegistryUtil.getId(item) + "'...");
 
 		success = checkRecipeUsages(item, source);
 		success |= checkRepairUsages(item, source);

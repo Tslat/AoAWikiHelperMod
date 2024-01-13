@@ -10,13 +10,14 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
+import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.dataskimmers.LootTablesSkimmer;
@@ -46,10 +47,10 @@ public class LootTableCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printBlockTable(CommandContext<CommandSourceStack> cmd) {
-		Block block = ForgeRegistries.BLOCKS.getDelegateOrThrow(cmd.getArgument("id", ResourceLocation.class)).get();
+		Block block = BuiltInRegistries.BLOCK.get(cmd.getArgument("id", ResourceLocation.class));
 
 		if (block.getLootTable() == null) {
-			WikiHelperCommand.warn(cmd.getSource(), "LootTable", "Block '" + ForgeRegistries.BLOCKS.getKey(block) + "' has no attached loot table");
+			WikiHelperCommand.warn(cmd.getSource(), "LootTable", "Block '" + RegistryUtil.getId(block) + "' has no attached loot table");
 
 			return 1;
 		}
@@ -59,7 +60,7 @@ public class LootTableCommand implements Command<CommandSourceStack> {
 
 	private static int printEntityTable(CommandContext<CommandSourceStack> cmd) {
 		ResourceLocation id = ResourceLocationArgument.getId(cmd, "entity");
-		EntityType<?> entity = ForgeRegistries.ENTITY_TYPES.getValue(id);
+		EntityType<?> entity = BuiltInRegistries.ENTITY_TYPE.get(id);
 
 		if (entity == null || (!id.toString().equals("minecraft:pig") && entity == EntityType.PIG)) {
 			WikiHelperCommand.warn(cmd.getSource(), "LootTable", "Invalid entity id '" + id + "'");

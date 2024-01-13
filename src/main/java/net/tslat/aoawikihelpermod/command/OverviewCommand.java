@@ -131,7 +131,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String damage = FormattingHelper.healthValue((float)blaster.getDamage());
 				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(blaster, Attributes.ATTACK_SPEED) + 4), 2) + "s";
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)blaster.getFiringDelay(), 2) + "/sec";
-				String energyCost = NumberUtil.roundToNthDecimalPlace(blaster.getEnergyCost(), 2);
+				String energyCost = NumberUtil.roundToNthDecimalPlace(blaster.getBaseEnergyCost(), 2);
 				String durability = String.valueOf(blaster.getMaxDamage(new ItemStack(blaster)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(blaster, AoAWeapons.BONE_BLASTER.get());
 

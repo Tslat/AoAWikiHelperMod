@@ -11,9 +11,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.library.object.MutableSupplier;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 
 public class TradesCommand implements Command<CommandSourceStack> {
 	private static final TradesCommand CMD = new TradesCommand();
-	private static final SuggestionProvider<CommandSourceStack> PROFESSIONS_SUGGESTIONS_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "merchant_trades"), (context, builder) -> SharedSuggestionProvider.suggestResource(MerchantsSkimmer.TRADE_PRINTERS_BY_PROFESSION.keySet().stream().map(ForgeRegistries.VILLAGER_PROFESSIONS::getKey), builder));
+	private static final SuggestionProvider<CommandSourceStack> PROFESSIONS_SUGGESTIONS_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "merchant_trades"), (context, builder) -> SharedSuggestionProvider.suggestResource(MerchantsSkimmer.TRADE_PRINTERS_BY_PROFESSION.keySet().stream().map(BuiltInRegistries.VILLAGER_PROFESSION::getKey), builder));
 	private static final SuggestionProvider<CommandSourceStack> AOA_TRADERS_SUGGESTIONS_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "aoa_traders"), (context, builder) -> SharedSuggestionProvider.suggestResource(MerchantsSkimmer.TRADE_PRINTERS_BY_AOA_TRADER.keySet().stream(), builder));
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
@@ -70,7 +70,7 @@ public class TradesCommand implements Command<CommandSourceStack> {
 	private static int printByProfession(CommandContext<CommandSourceStack> cmd) {
 		try {
 			ResourceLocation id = ResourceLocationArgument.getId(cmd, "profession_id");
-			VillagerProfession profession = ForgeRegistries.VILLAGER_PROFESSIONS.getValue(id);
+			VillagerProfession profession = BuiltInRegistries.VILLAGER_PROFESSION.get(id);
 
 			if (profession == null) {
 				WikiHelperCommand.error(cmd.getSource(), "Trades", "Invalid profession ID: '" + id + "'");
@@ -101,7 +101,7 @@ public class TradesCommand implements Command<CommandSourceStack> {
 		try {
 			ResourceLocation id = ResourceLocationArgument.getId(cmd, "trader_id");
 
-			if (ForgeRegistries.ENTITY_TYPES.getValue(id) == null) {
+			if (BuiltInRegistries.ENTITY_TYPE.get(id) == null) {
 				WikiHelperCommand.error(cmd.getSource(), "Trades", "Invalid trader ID: '" + id + "'");
 
 				return 1;

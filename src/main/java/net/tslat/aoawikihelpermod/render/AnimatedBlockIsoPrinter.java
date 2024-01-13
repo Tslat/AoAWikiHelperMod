@@ -13,9 +13,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.textures.FluidSpriteCache;
+import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
 import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
@@ -154,7 +154,7 @@ public class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 
 	@Override
 	protected File getOutputFile() {
-		return PrintHelper.configDir.toPath().resolve("Block Renders").resolve(ForgeRegistries.BLOCKS.getKey(block.getBlock()).getNamespace()).resolve(block.getBlock().getName().getString() + " - " + targetSize + "px.gif").toFile();
+		return PrintHelper.configDir.toPath().resolve("Block Renders").resolve(RegistryUtil.getId(block.getBlock()).getNamespace()).resolve(block.getBlock().getName().getString() + " - " + targetSize + "px.gif").toFile();
 	}
 
 	private boolean isOnFirstFrame() {
@@ -162,7 +162,7 @@ public class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 		RandomSource rand = RandomSource.create();
 		int highestFrameTime = 0;
 		BakedModel model = blockRenderer.getBlockModel(this.block);
-		TextureAtlasSprite[] fluidSprites = !block.getFluidState().isEmpty() ? ForgeHooksClient.getFluidSprites(FakeWorld.INSTANCE.get(), BlockPos.ZERO, block.getFluidState()) : null;
+		TextureAtlasSprite[] fluidSprites = !block.getFluidState().isEmpty() ? FluidSpriteCache.getFluidSprites(FakeWorld.INSTANCE.get(), BlockPos.ZERO, block.getFluidState()) : null;
 
 		if (fluidSprites != null) {
 			TextureAtlasSprite sprite = fluidSprites[1];
@@ -222,7 +222,7 @@ public class AnimatedBlockIsoPrinter extends BlockIsoPrinter {
 		RandomSource rand = RandomSource.create();
 		int highestFrameTime = 1;
 		BakedModel model = blockRenderer.getBlockModel(this.block);
-		TextureAtlasSprite[] fluidSprites = !block.getFluidState().isEmpty() ? ForgeHooksClient.getFluidSprites(FakeWorld.INSTANCE.get(), BlockPos.ZERO, block.getFluidState()) : null;
+		TextureAtlasSprite[] fluidSprites = !block.getFluidState().isEmpty() ? FluidSpriteCache.getFluidSprites(FakeWorld.INSTANCE.get(), BlockPos.ZERO, block.getFluidState()) : null;
 
 		if (fluidSprites != null) {
 			TextureAtlasSprite sprite = fluidSprites[1];

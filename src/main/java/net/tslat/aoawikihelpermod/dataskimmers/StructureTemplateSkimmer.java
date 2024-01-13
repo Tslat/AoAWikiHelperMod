@@ -1,39 +1,42 @@
 package net.tslat.aoawikihelpermod.dataskimmers;
 
+import com.google.common.base.Suppliers;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.minecraftforge.common.util.Lazy;
 import net.tslat.aoa3.util.WorldUtil;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class StructureTemplateSkimmer extends SimplePreparableReloadListener<HashMap<ResourceLocation, Lazy<StructureTemplate>>> {
-	private static final HashMap<ResourceLocation, Lazy<StructureTemplate>> templates = new HashMap<>();
+public class StructureTemplateSkimmer extends SimplePreparableReloadListener<Map<ResourceLocation, Supplier<StructureTemplate>>> {
+	private static final HashMap<ResourceLocation, Supplier<StructureTemplate>> templates = new HashMap<>();
 
 	@Override
-	protected HashMap<ResourceLocation, Lazy<StructureTemplate>> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-		HashMap<ResourceLocation, Lazy<StructureTemplate>> collection = new HashMap<>();
+	protected Map<ResourceLocation, Supplier<StructureTemplate>> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+		Map<ResourceLocation, Supplier<StructureTemplate>> collection = new Object2ObjectOpenHashMap<>();
 		templates.clear();
 
 		for (ResourceLocation file : resourceManager.listResources("structures", fileName -> fileName.getPath().endsWith(".nbt")).keySet()) {
 			String filePath = file.getPath();
 			ResourceLocation resourcePath = new ResourceLocation(file.getNamespace(), filePath.substring(11, filePath.length() - 4));
 
-			collection.put(resourcePath, () -> WorldUtil.getServer().getStructureManager().get(resourcePath).get());
+			collection.put(resourcePath, Suppliers.memoize(() -> WorldUtil.getServer().getStructureManager().get(resourcePath).get()));
 		}
 
 		return collection;
 	}
 
 	@Override
-	protected void apply(HashMap<ResourceLocation, Lazy<StructureTemplate>> collection, ResourceManager resourceManager, ProfilerFiller profiler) {
+	protected void apply(Map<ResourceLocation, Supplier<StructureTemplate>> collection, ResourceManager resourceManager, ProfilerFiller profiler) {
 		templates.putAll(collection);
 	}
 

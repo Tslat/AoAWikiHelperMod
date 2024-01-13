@@ -1,10 +1,10 @@
 {
   "required": true,
-  "package": "net.tslat.aoawikihelpermod.mixin",
+  "package": "net.tslat.${mod_id}.mixin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "aoawikihelpermod.refmap.json",
   "mixins": [
-    "TextureAtlasSpriteMixin"
+    "TextureAtlasSpriteMixin",
+    "ClickEventActionMixin"
   ],
   "client": [
   ],

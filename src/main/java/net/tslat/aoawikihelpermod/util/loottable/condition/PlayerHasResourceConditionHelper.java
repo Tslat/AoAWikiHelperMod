@@ -10,6 +10,6 @@ public class PlayerHasResourceConditionHelper extends LootConditionHelper<Player
 	@Nonnull
 	@Override
 	public String getDescription(PlayerHasResource condition) {
-		return "if the player has at least " + NumberUtil.roundToNthDecimalPlace(condition.getAmount(), 2) + " " + FormattingHelper.createLinkableText(condition.getResource().getName().getString(), false, true);
+		return "if the player has at least " + NumberUtil.roundToNthDecimalPlace(condition.amount(), 2) + " " + FormattingHelper.createLinkableText(condition.resource().getName().getString(), false, true);
 	}
 }

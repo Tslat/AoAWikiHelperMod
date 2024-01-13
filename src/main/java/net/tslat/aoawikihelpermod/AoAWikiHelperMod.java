@@ -2,17 +2,15 @@ package net.tslat.aoawikihelpermod;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.advent.Logging;
 import net.tslat.aoa3.util.ObjectUtil;
@@ -40,7 +38,7 @@ public class AoAWikiHelperMod {
 
 	public static boolean isOutdatedAoA = false;
 
-	public AoAWikiHelperMod() {
+	public AoAWikiHelperMod(IEventBus modBus) {
 		File outputDir = FMLPaths.CONFIGDIR.get().resolve(MOD_ID).toFile();
 
 		try {
@@ -51,11 +49,10 @@ public class AoAWikiHelperMod {
 		}
 
 		PrintHelper.init(outputDir);
-		patchClickEvent();
-		MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
-		MinecraftForge.EVENT_BUS.addListener(this::registerRecipeSkimmer);
-		MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::loadFinished);
+		NeoForge.EVENT_BUS.addListener(this::registerCommands);
+		NeoForge.EVENT_BUS.addListener(this::registerRecipeSkimmer);
+		NeoForge.EVENT_BUS.addListener(this::serverStarted);
+		modBus.addListener(this::loadFinished);
 	}
 
 	@SubscribeEvent
@@ -85,14 +82,6 @@ public class AoAWikiHelperMod {
 	@SubscribeEvent
 	public void loadFinished(final FMLLoadCompleteEvent ev) {
 		IsoRenderAdapters.init();
-	}
-
-	private void patchClickEvent() {
-		try {
-			ObfuscationReflectionHelper.setPrivateValue(ClickEvent.Action.class, ClickEvent.Action.OPEN_FILE, true, "f_130635_");
-		} catch (Exception ex) {
-			LOGGER.error("Failed to patch in support for opening files from chat. Skipping", ex);
-		}
 	}
 
 	public static String getAoAVersion() {

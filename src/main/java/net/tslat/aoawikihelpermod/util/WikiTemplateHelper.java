@@ -18,8 +18,7 @@ import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.EventHooks;
 import net.tslat.aoa3.common.registration.AoAAttributes;
 import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
 import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
@@ -213,7 +212,7 @@ public class WikiTemplateHelper {
 		LivingEntity livingInstance = instance instanceof LivingEntity livingEntity ? livingEntity : null;
 
 		if (instance instanceof Mob mob)
-			ForgeEventFactory.onFinalizeSpawn(mob, level, new DifficultyInstance(Difficulty.HARD, 0, 0, 0), MobSpawnType.NATURAL, null, null);
+			EventHooks.onFinalizeSpawn(mob, level, new DifficultyInstance(Difficulty.HARD, 0, 0, 0), MobSpawnType.NATURAL, null, null);
 
 		String meleeStrength = getRoundedAttributeValue(livingInstance, Attributes.ATTACK_DAMAGE);
 
@@ -233,7 +232,7 @@ public class WikiTemplateHelper {
 				.optionalEntry("classification", StringUtil.toTitleCase(entity.getCategory().getName()))
 				.optionalEntry("xp", livingInstance == null ? null : String.valueOf(livingInstance.getExperienceReward()))
 				.optionalEntry("knockbackresist", getRoundedAttributeValue(livingInstance, Attributes.KNOCKBACK_RESISTANCE))
-				.entry("id", ForgeRegistries.ENTITY_TYPES.getKey(entity).toString())
+				.entry("id", RegistryUtil.getId(entity).toString())
 				.entry("versionadded", "");
 
 		return template;

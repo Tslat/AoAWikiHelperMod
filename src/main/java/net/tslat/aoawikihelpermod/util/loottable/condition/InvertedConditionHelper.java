@@ -9,7 +9,7 @@ public class InvertedConditionHelper extends LootConditionHelper<InvertedLootIte
 	@Nonnull
 	@Override
 	public String getDescription(InvertedLootItemCondition condition) {
-		String termDescription = LootTableHelper.getConditionDescription(condition.term);
+		String termDescription = LootTableHelper.getConditionDescription(condition.term());
 
 		if (termDescription.length() < 3)
 			return "";

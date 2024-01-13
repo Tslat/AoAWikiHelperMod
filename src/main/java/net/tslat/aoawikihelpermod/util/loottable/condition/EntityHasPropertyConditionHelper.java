@@ -8,7 +8,7 @@ public class EntityHasPropertyConditionHelper extends LootConditionHelper<LootIt
 	@Nonnull
 	@Override
 	public String getDescription(LootItemEntityPropertyCondition condition) {
-		return switch (condition.entityTarget) {
+		return switch (condition.entityTarget()) {
 			case THIS -> "if the target entity meets certain conditions";
 			case KILLER -> "if the attacking entity meets certain conditions";
 			case DIRECT_KILLER -> "if the directly killing entity meets certain conditions";

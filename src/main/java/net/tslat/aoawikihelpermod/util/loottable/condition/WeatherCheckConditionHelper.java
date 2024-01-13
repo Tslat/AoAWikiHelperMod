@@ -3,19 +3,20 @@ package net.tslat.aoawikihelpermod.util.loottable.condition;
 import net.minecraft.world.level.storage.loot.predicates.WeatherCheck;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 public class WeatherCheckConditionHelper extends LootConditionHelper<WeatherCheck> {
 	@Nonnull
 	@Override
 	public String getDescription(WeatherCheck condition) {
-		Boolean isRaining = condition.isRaining;
-		Boolean isThundering = condition.isThundering;
+		Optional<Boolean> isRaining = condition.isRaining();
+		Optional<Boolean> isThundering = condition.isThundering();
 
 
-		if (isRaining != null || isThundering != null) {
+		if (isRaining.isPresent() || isThundering.isPresent()) {
 			StringBuilder stringBuilder = new StringBuilder("if ");
-			if (isRaining != null) {
-				if (isRaining) {
+			if (isRaining.isPresent()) {
+				if (isRaining.get()) {
 					stringBuilder.append("it is raining");
 				}
 				else {
@@ -23,9 +24,9 @@ public class WeatherCheckConditionHelper extends LootConditionHelper<WeatherChec
 				}
 			}
 
-			if (isThundering != null) {
-				if (isThundering) {
-					if (isRaining != null) {
+			if (isThundering.isPresent()) {
+				if (isThundering.get()) {
+					if (isRaining.isPresent()) {
 						stringBuilder.append(", and it is thundering");
 					}
 					else {
@@ -33,7 +34,7 @@ public class WeatherCheckConditionHelper extends LootConditionHelper<WeatherChec
 					}
 				}
 				else {
-					if (isRaining != null) {
+					if (isRaining.isPresent()) {
 						stringBuilder.append(", and it isn't thundering");
 					}
 					else {

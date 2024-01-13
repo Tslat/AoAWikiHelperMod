@@ -1,6 +1,5 @@
 package net.tslat.aoawikihelpermod.util;
 
-import com.mojang.datafixers.util.Either;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.ClickEvent;
@@ -11,7 +10,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.storage.loot.providers.number.*;
-import net.minecraftforge.registries.IForgeRegistry;
 import net.tslat.aoa3.util.NumberUtil;
 
 import javax.annotation.Nullable;
@@ -53,15 +51,15 @@ public class FormattingHelper {
 	}
 
 	public static String createLinkableTag(String tag, Object sampleObjectFromTagTypeRegistry) {
-		Either<Registry<?>, IForgeRegistry<?>> registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
-		ResourceLocation registryId = registryForObject.map(Registry::key, IForgeRegistry::getRegistryKey).location();
+		Registry registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
+		ResourceLocation registryId = registryForObject.getKey(sampleObjectFromTagTypeRegistry);
 
 		return tooltip(tag, "Any " + registryId.getPath().replaceAll("_", "") + " tagged as " + tag) + " ([[Tags#" + registryId + ":" + tag + "|Tag]])";
 	}
 
 	public static String createTagIngredientDescription(String tag, Object sampleObjectFromTagTypeRegistry) {
-		Either<Registry<?>, IForgeRegistry<?>> registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
-		ResourceLocation registryId = registryForObject.map(Registry::key, IForgeRegistry::getRegistryKey).location();
+		Registry registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
+		ResourceLocation registryId = registryForObject.getKey(sampleObjectFromTagTypeRegistry);
 
 		return "Any " + registryId.getPath().replaceAll("_", "") + " tagged as " + "[[Tags#" + registryId + ":" + tag + "|" + tag + "]]";
 	}
@@ -140,16 +138,16 @@ public class FormattingHelper {
 
 	public static String getStringFromRange(NumberProvider range) {
 		if (range instanceof ConstantValue)
-			return NumberUtil.roundToNthDecimalPlace(((ConstantValue)range).value, 2);
+			return NumberUtil.roundToNthDecimalPlace(((ConstantValue)range).value(), 2);
 
 		if (range instanceof BinomialDistributionGenerator)
 			return "0+";
 
 		if (range instanceof UniformGenerator randomRange) {
-			String min = getStringFromRange(randomRange.min);
-			String max = getStringFromRange(randomRange.max);
+			String min = getStringFromRange(randomRange.min());
+			String max = getStringFromRange(randomRange.max());
 
-			if (!randomRange.min.equals(randomRange.max)) {
+			if (!randomRange.min().equals(randomRange.max())) {
 				Optional<Float> minValue = tryParseFloat(min);
 				Optional<Float> maxValue = tryParseFloat(max);
 
@@ -166,10 +164,10 @@ public class FormattingHelper {
 		}
 
 		if (range instanceof ScoreboardValue scoreboardValue) {
-			String val = "Scoreboard value of '" + scoreboardValue.score + "'";
+			String val = "Scoreboard value of '" + scoreboardValue.score() + "'";
 
-			if (scoreboardValue.scale != 0)
-				val += " * " + NumberUtil.roundToNthDecimalPlace(scoreboardValue.scale, 3);
+			if (scoreboardValue.scale() != 0)
+				val += " * " + NumberUtil.roundToNthDecimalPlace(scoreboardValue.scale(), 3);
 
 			return val;
 		}

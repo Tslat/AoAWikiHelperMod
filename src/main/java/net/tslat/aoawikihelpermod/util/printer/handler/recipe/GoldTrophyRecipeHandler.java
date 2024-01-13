@@ -7,7 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.common.registration.block.AoABlocks;
-import net.tslat.aoa3.content.recipe.TrophyRecipe;
+import net.tslat.aoa3.content.recipe.GoldTrophyRecipe;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 import net.tslat.aoawikihelpermod.util.printer.handler.RecipePrintHandler;
@@ -17,18 +17,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class TrophyRecipeHandler extends RecipePrintHandler {
+public class GoldTrophyRecipeHandler extends RecipePrintHandler {
 	private final ResourceLocation recipeId;
 	private final JsonObject rawRecipe;
 	@Nullable
-	private final TrophyRecipe recipe;
+	private final GoldTrophyRecipe recipe;
 
 	private final HashMap<Item, String[]> printoutData = new HashMap<Item, String[]>();
 
-	public TrophyRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
+	public GoldTrophyRecipeHandler(ResourceLocation recipeId, JsonObject rawRecipe, @Nullable Recipe<?> recipe) {
 		this.recipeId = recipeId;
 		this.rawRecipe = rawRecipe;
-		this.recipe = (TrophyRecipe)recipe;
+		this.recipe = (GoldTrophyRecipe) recipe;
 	}
 
 	@Override

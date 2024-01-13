@@ -1,60 +1,30 @@
 plugins {
-    id 'net.neoforged.gradle' version '[6.0,6.2]'
-    id 'org.spongepowered.mixin' version '0.7.+' // Mixins
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+' // Parchment
+    id 'net.neoforged.gradle.userdev' version '7.0.77+'
 }
 
-version = mod_version
+version = "${wikihelper_version}"
 group = 'net.tslat.aoawikihelpermod'
-archivesBaseName = 'aoawikihelpermod'
+archivesBaseName = "${mod_name}-${minecraft_version}"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-minecraft {
-    mappings channel: mappings_channel, version: "${mappings_version}-${minecraft_version}"
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+minecraft.accessTransformers.file file('src/main/resources/META-INF/accesstransformer.cfg')
 
-    runs {
-        client {
-            workingDirectory project.file('run')
-
-            taskName 'Client'
-            property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
-            args "-mixin.config="+modid+".mixins.json", '-Dgeckolib.disable_examples=true'
-
-            mods {
-                aoawikihelpermod {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-
-            taskName 'Server'
-            property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
-            args "-mixin.config="+modid+".mixins.json", '-Dgeckolib.disable_examples=true'
-
-            mods {
-                aoawikihelpermod {
-                    source sourceSets.main
-                }
-            }
-        }
+runs {
+    configureEach {
+        systemProperty 'forge.logging.console.level', 'debug'
+        modSource project.sourceSets.main
+        workingDirectory project.file('run')
+        programArgument '-Dgeckolib.disable_examples=true'
     }
-}
 
-sourceSets {
-    main.resources.srcDir 'src/generated/resources'
-}
+    client {
 
-mixin { // Add mixins refmap
-    add sourceSets.main, "${modid}.refmap.json"
+    }
+
+    server {
+        programArgument '--nogui'
+    }
 }
 
 repositories {
@@ -71,40 +41,33 @@ repositories {
         name = "Geckolib" // Geckolib
         url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/"
     }
-
-    flatDir {
-        dirs 'libs'
-    }
 }
 
 dependencies {
-    minecraft "net.neoforged:forge:$project.minecraft_version-$project.forge_version"
+    implementation "net.neoforged:neoforge:$project.neoforge_version"
 
-    implementation fg.deobf("curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version")
-    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:$project.geckolib_version")
-
-    // Mixin annotation processor, just in case we need it
-    if (System.getProperty("idea.sync.active") != "true") {
-        annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    }
+    implementation "curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version"
+    compileOnly "software.bernie.geckolib:geckolib-neoforge-${project.minecraft_version}:${project.geckolib_version}"
 }
 
-jar {
-    manifest {
-        attributes([
-            "Specification-Title": "aoawikihelpermod",
-            "Specification-Vendor": "Tslat",
-            "Specification-Version": "1.20.1",
-            "Implementation-Title": project.name,
-            "Implementation-Version": "${mod_version}",
-            "Implementation-Vendor" :"Tslat",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-            "MixinConfigs": "${modid}.mixins.json"
-        ])
+processResources {
+    var replaceProperties = [
+            mod_id: mod_id,
+            wikihelper_version: wikihelper_version,
+            mc_version: minecraft_version,
+            mc_version_range: mc_version_range,
+            neoforge_version: neoforge_version,
+            neoforge_version_range: neoforge_version_range,
+            aoa_version_range: aoa_version_range,
+            loader_version_range: neoforge_loader_version_range
+    ]
+
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', '*.mixins.json']) {
+        expand replaceProperties + [project: project]
     }
 }
-
-jar.finalizedBy('reobfJar')
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'

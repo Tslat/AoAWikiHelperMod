@@ -1,13 +1,15 @@
 package net.tslat.aoawikihelpermod.util.printer.handler;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.content.entity.base.AoATrader;
 import net.tslat.aoa3.util.NumberUtil;
+import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -44,9 +46,9 @@ public class MerchantTradePrintHandler {
 
 	private final HashMap<Item, String[]> printoutData = new HashMap<>();
 
-	public MerchantTradePrintHandler(AoATrader trader, int professionLevel, MerchantOffer trade) {
+	public MerchantTradePrintHandler(Entity trader, int professionLevel, MerchantOffer trade) {
 		this.trade = trade;
-		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(ForgeRegistries.ENTITY_TYPES.getKey(trader.getType()).getPath()), false, true), professionLevel);
+		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(RegistryUtil.getId(trader).getPath()), false, true), professionLevel);
 		int tradesToUnlock;
 
 		try {
@@ -63,7 +65,7 @@ public class MerchantTradePrintHandler {
 
 	public MerchantTradePrintHandler(VillagerProfession profession, int professionLevel, MerchantOffer trade) {
 		this.trade = trade;
-		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(ForgeRegistries.VILLAGER_PROFESSIONS.getKey(profession).getPath()), true, true), professionLevel);
+		this.tradeDetails = Pair.of(FormattingHelper.createLinkableText(StringUtil.toTitleCase(BuiltInRegistries.VILLAGER_PROFESSION.getKey(profession).getPath()), true, true), professionLevel);
 		this.tradesToUnlockAtLevel = 2;
 	}
 

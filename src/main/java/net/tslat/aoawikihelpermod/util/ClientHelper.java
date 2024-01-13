@@ -7,7 +7,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelData;
 
 public final class ClientHelper {
 	public static ObjectHelper.VariableResponse isRenderTransparent(Block block) {
@@ -20,7 +20,7 @@ public final class ClientHelper {
 
 			for (RenderType renderType : model.getRenderTypes(state, rand, ModelData.EMPTY)) {
 				transparent = ObjectHelper.VariableResponse.merge(transparent,
-						renderType == RenderType.translucent() || renderType == RenderType.translucentNoCrumbling() || renderType == RenderType.translucentMovingBlock());
+						renderType == RenderType.translucent() || renderType == RenderType.translucentMovingBlock());
 			}
 		}
 

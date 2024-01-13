@@ -21,8 +21,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapter;
 import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
@@ -64,7 +64,7 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 
 	@Override
 	protected File getOutputFile() {
-		return PrintHelper.configDir.toPath().resolve("Item Renders").resolve(ForgeRegistries.ITEMS.getKey(stack.getItem()).getNamespace()).resolve(stack.getItem().getName(stack).getString() + " - " + targetSize + "px.png").toFile();
+		return PrintHelper.configDir.toPath().resolve("Item Renders").resolve(RegistryUtil.getId(stack.getItem()).getNamespace()).resolve(stack.getItem().getName(stack).getString() + " - " + targetSize + "px.png").toFile();
 	}
 
 	@Override

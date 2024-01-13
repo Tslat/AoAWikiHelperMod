@@ -3,12 +3,12 @@ package net.tslat.aoawikihelpermod.util.printer.handler.recipe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
@@ -118,7 +118,7 @@ public class InfusionRecipeHandler extends RecipePrintHandler {
 		JsonObject infusionJson = rawRecipe.getAsJsonObject("infusion");
 		String enchantmentName;
 		ResourceLocation enchantmentId = new ResourceLocation(GsonHelper.getAsString(infusionJson, "enchantment"));
-		Enchantment enchant = ForgeRegistries.ENCHANTMENTS.getValue(enchantmentId);
+		Enchantment enchant = BuiltInRegistries.ENCHANTMENT.get(enchantmentId);
 		int enchantLevel = 1;
 
 		if (infusionJson.has("level"))

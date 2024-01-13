@@ -19,11 +19,13 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
@@ -84,6 +86,13 @@ public final class RenderUtil {
 					blockRenderer.getModelRenderer().renderModel(matrix.last(), renderBuffer.getBuffer(renderType), block, blockModel, red, green, blue, 15728880, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, renderType);
 				}
 
+				if (block.getBlock() instanceof EntityBlock entityBlock) {
+					BlockEntity blockEntity = entityBlock.newBlockEntity(pos, block);
+
+					if (blockEntity != null)
+						Minecraft.getInstance().getBlockEntityRenderDispatcher().render(blockEntity, Minecraft.getInstance().getPartialTick(), matrix, renderBuffer);
+				}
+
 				/*if (changeLighting)
 					Lighting.setupFor3DItems();*/
 			}
@@ -125,6 +134,12 @@ public final class RenderUtil {
 						if (builder.building())
 							tesselator.end();
 					}
+				}
+				else if (block.getBlock() instanceof EntityBlock entityBlock) {
+					BlockEntity blockEntity = entityBlock.newBlockEntity(pos, block);
+
+					if (blockEntity != null)
+						Minecraft.getInstance().getBlockEntityRenderDispatcher().render(blockEntity, Minecraft.getInstance().getPartialTick(), matrix, renderBuffer);
 				}
 			}
 		}
