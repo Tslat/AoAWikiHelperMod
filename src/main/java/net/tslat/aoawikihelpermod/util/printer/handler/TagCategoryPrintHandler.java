@@ -30,6 +30,13 @@ public class TagCategoryPrintHandler {
 		this.tagContentsRetriever = tagContentsRetriever;
 	}
 
+	public boolean hasTags() {
+		if (this.namespacedTags != null && this.namespacedTags.isEmpty())
+			return false;
+
+		return this.tags.get().findAny().isPresent();
+	}
+
 	private void prepTags() {
 		if (namespacedTags != null)
 			return;

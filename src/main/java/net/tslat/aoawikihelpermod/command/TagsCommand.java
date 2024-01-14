@@ -28,6 +28,8 @@ public class TagsCommand implements Command<CommandSourceStack> {
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("tags").executes(CMD);
 
+		builder.then(Commands.literal("all")
+				.executes(TagsCommand::printAllTags));
 		builder.then(Commands.argument("tag_type", ResourceLocationArgument.id())
 				.suggests(SUGGESTION_PROVIDER)
 				.executes(TagsCommand::printTags));
@@ -42,6 +44,42 @@ public class TagsCommand implements Command<CommandSourceStack> {
 	@Override
 	public int run(CommandContext<CommandSourceStack> context) {
 		WikiHelperCommand.info(context.getSource(), commandName(), "Print out overview data on object tags.");
+
+		return 1;
+	}
+
+	private static int printAllTags(CommandContext<CommandSourceStack> context) {
+		for (ResourceLocation tagType : TagDataSkimmer.tagTypes()) {
+			TagCategoryPrintHandler tagCategoryPrintHandler = TagDataSkimmer.get(tagType);
+
+			if (!tagCategoryPrintHandler.hasTags())
+				continue;
+
+			File linkFile = null;
+
+			for (String namespace : tagCategoryPrintHandler.getNameSpaces()) {
+				String fileName = "Tags Overview - " + tagType.getPath() + " - " + StringUtil.toTitleCase(namespace);
+
+				try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Tag", "Default Contents")) {
+					printHelper.defaultFullPageTableProperties();
+					printHelper.withProperty("class", "sortable mw-collapsible");
+
+					for (String[] entry : tagCategoryPrintHandler.getCategoryPrintout(namespace)) {
+						printHelper.rowId(entry[0]);
+						printHelper.entry(Arrays.copyOfRange(entry, 1, 3));
+					}
+
+					linkFile = printHelper.getOutputFile();
+				}
+				catch (Exception ex) {
+					WikiHelperCommand.error(context.getSource(), "Tags|" + namespace, ex.getMessage());
+					ex.printStackTrace();
+				}
+			}
+
+			if (linkFile != null)
+				WikiHelperCommand.success(context.getSource(), "Tags", FormattingHelper.generateResultMessage(linkFile.getParentFile(), "Tags Overview - " + tagType.getPath(), null));
+		}
 
 		return 1;
 	}
@@ -72,7 +110,7 @@ public class TagsCommand implements Command<CommandSourceStack> {
 				outputFile = printHelper.getOutputFile();
 			}
 			catch (Exception ex) {
-				WikiHelperCommand.error(cmd.getSource(), "Tags", ex.getMessage());
+				WikiHelperCommand.error(cmd.getSource(), "Tags|" + namespace, ex.getMessage());
 				ex.printStackTrace();
 
 				return 1;
