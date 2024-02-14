@@ -513,7 +513,7 @@ public class ObjectHelper {
 				builder.append("Pop Shots or Flint");
 			}
 			else {
-				for (Item registryItem : AoARegistries.ITEMS.getAllRegisteredObjects()) {
+				for (Item registryItem : AoARegistries.ITEMS) {
 					if (ammoPredicate.test(new ItemStack(registryItem))) {
 						if (!builder.isEmpty())
 							builder.append(System.lineSeparator());

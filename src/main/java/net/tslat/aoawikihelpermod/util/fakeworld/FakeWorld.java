@@ -43,7 +43,7 @@ import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.BlackholeTickAccess;
 import net.minecraft.world.ticks.LevelTickAccess;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
-import net.tslat.aoa3.common.registration.worldgen.AoADimensions;
+import net.tslat.aoa3.util.WorldUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -60,12 +60,12 @@ public class FakeWorld extends Level implements WorldGenLevel {
 	private static final FakeChunkProvider chunkProvider = new FakeChunkProvider();
 	private static final FakeStructureManager structureManager = new FakeStructureManager();
 
-	public static final Supplier<Holder<Biome>> PLAINS_BIOME = Suppliers.memoize(() -> new Holder.Direct<>(AoADimensions.OVERWORLD.getWorld().registryAccess().registry(Registries.BIOME).get().get(Biomes.PLAINS.location())));
+	public static final Supplier<Holder<Biome>> PLAINS_BIOME = Suppliers.memoize(() -> new Holder.Direct<>(WorldUtil.getServer().registryAccess().registry(Registries.BIOME).get().get(Biomes.PLAINS.location())));
 
 	public static void init() {}
 
 	protected FakeWorld() {
-		super(new FakeSpawnInfo(), Level.OVERWORLD, AoADimensions.OVERWORLD.getWorld().registryAccess(), AoADimensions.OVERWORLD.getWorld().dimensionTypeRegistration(), () -> InactiveProfiler.INSTANCE, true, false, 0, 0);
+		super(new FakeSpawnInfo(), Level.OVERWORLD, WorldUtil.getServer().registryAccess(), WorldUtil.getServer().overworld().dimensionTypeRegistration(), () -> InactiveProfiler.INSTANCE, true, false, 0, 0);
 	}
 
 	@Override
@@ -334,6 +334,6 @@ public class FakeWorld extends Level implements WorldGenLevel {
 
 	@Override
 	public ServerLevel getLevel() {
-		return AoADimensions.OVERWORLD.getWorld();
+		return WorldUtil.getServer().overworld();
 	}
 }

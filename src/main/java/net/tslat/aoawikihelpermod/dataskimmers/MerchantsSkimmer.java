@@ -21,6 +21,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.Level;
 import net.tslat.aoa3.advent.AdventOfAscension;
+import net.tslat.aoa3.common.registration.AoARegistries;
+import net.tslat.aoa3.common.registration.entity.variant.UndeadHeraldTrade;
 import net.tslat.aoa3.content.entity.base.AoATrader;
 import net.tslat.aoa3.content.entity.npc.trader.UndeadHeraldEntity;
 import net.tslat.aoa3.util.RegistryUtil;
@@ -94,8 +96,8 @@ public class MerchantsSkimmer {
 					}
 
 					if (trader instanceof UndeadHeraldEntity) {
-						for (ServerLevel tradeWorld : server.getAllLevels()) {
-							MerchantOffer offer = ((UndeadHeraldEntity)trader).getAdditionalBannerTrade(tradeWorld);
+						for (UndeadHeraldTrade trade : AoARegistries.UNDEAD_HERALD_TRADES) {
+							MerchantOffer offer = trade.trade().getOffer(trader, trader.getRandom());
 
 							if (offer != null)
 								mapTradeToIngredients(trader, 1, offer);
