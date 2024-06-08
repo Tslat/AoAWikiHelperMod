@@ -271,8 +271,10 @@ public abstract class RecipePrintHandler {
 			return this.formattedName.equals(other);
 		}
 
-		public void setCustomImageName(String imageName) {
+		public PrintableIngredient setCustomImageName(String imageName) {
 			this.imageName = imageName;
+
+			return this;
 		}
 	}
 }

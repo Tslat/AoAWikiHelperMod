@@ -1,6 +1,7 @@
 package net.tslat.aoawikihelpermod.util.fakeworld;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -9,7 +10,7 @@ import net.minecraft.world.level.biome.Climate;
 import java.util.stream.Stream;
 
 public class FakeBiomeProvider extends BiomeSource {
-	public static final Codec<FakeBiomeProvider> CODEC = Biome.CODEC.fieldOf("biome").xmap(FakeBiomeProvider::new, provider -> provider.biome).stable().codec();
+	public static final MapCodec<FakeBiomeProvider> CODEC = Biome.CODEC.fieldOf("biome").xmap(FakeBiomeProvider::new, provider -> provider.biome).stable();
 	private final Holder<Biome> biome;
 
 	public FakeBiomeProvider(Holder<Biome> biome) {
@@ -19,7 +20,7 @@ public class FakeBiomeProvider extends BiomeSource {
 	}
 
 	@Override
-	protected Codec<? extends BiomeSource> codec() {
+	protected MapCodec<? extends BiomeSource> codec() {
 		return CODEC;
 	}
 

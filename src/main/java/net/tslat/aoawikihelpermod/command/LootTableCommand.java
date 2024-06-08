@@ -55,7 +55,7 @@ public class LootTableCommand implements Command<CommandSourceStack> {
 			return 1;
 		}
 
-		return printTable(cmd, block.getLootTable());
+		return printTable(cmd, block.getLootTable().location());
 	}
 
 	private static int printEntityTable(CommandContext<CommandSourceStack> cmd) {
@@ -68,7 +68,7 @@ public class LootTableCommand implements Command<CommandSourceStack> {
 			return 1;
 		}
 
-		return printTable(cmd, entity.getDefaultLootTable(), dropsFromWorldTable(entity));
+		return printTable(cmd, entity.getDefaultLootTable().location(), dropsFromWorldTable(entity));
 	}
 
 	private static boolean dropsFromWorldTable(EntityType entityType) {

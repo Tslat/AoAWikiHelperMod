@@ -2,7 +2,6 @@ package net.tslat.aoawikihelpermod.dataskimmers;
 
 import com.google.common.collect.HashMultimap;
 import com.google.gson.JsonElement;
-import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -12,11 +11,11 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.tslat.aoa3.content.recipe.InfusionRecipe;
 import net.tslat.aoa3.util.RegistryUtil;
+import net.tslat.aoa3.util.WorldUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.printer.handler.RecipePrintHandler;
 import net.tslat.aoawikihelpermod.util.printer.handler.recipe.*;
@@ -50,6 +49,7 @@ public class RecipesSkimmer extends SimpleJsonResourceReloadListener {
 		RECIPE_HANDLERS.put("minecraft:crafting_special_shulkerboxcoloring", ShulkerColourRecipeHandler::new);
 		RECIPE_HANDLERS.put("minecraft:crafting_special_suspiciousstew", SuspiciousStewRecipeHandler::new);
 		RECIPE_HANDLERS.put("aoa3:upgrade_kit", UpgradeKitRecipeHandler::new);
+		RECIPE_HANDLERS.put("aoa3:imbuing", ImbuingRecipeHandler::new);
 		RECIPE_HANDLERS.put("aoa3:infusion", InfusionRecipeHandler::new);
 		RECIPE_HANDLERS.put("aoa3:trophy", GoldTrophyRecipeHandler::new);
 
@@ -108,7 +108,7 @@ public class RecipesSkimmer extends SimpleJsonResourceReloadListener {
 				Recipe<?> recipe = null;
 
 				try {
-					recipe = RecipeManager.fromJson(id, json.getAsJsonObject(), JsonOps.INSTANCE).map(RecipeHolder::value).orElseThrow();
+					recipe = RecipeManager.fromJson(id, json.getAsJsonObject(), WorldUtil.getServer().registryAccess()).value();
 				}
 				catch (Exception ex) {
 					AoAWikiHelperMod.LOGGER.log(Level.WARN, "Unknown recipe found: " + id + ", using only json format.");

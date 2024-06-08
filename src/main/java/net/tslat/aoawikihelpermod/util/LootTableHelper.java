@@ -1,13 +1,15 @@
 package net.tslat.aoawikihelpermod.util;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.*;
 import net.minecraft.world.level.storage.loot.functions.*;
 import net.minecraft.world.level.storage.loot.predicates.*;
@@ -17,6 +19,7 @@ import net.tslat.aoa3.content.loottable.condition.PlayerHasResource;
 import net.tslat.aoa3.content.loottable.condition.WearingOrHoldingItem;
 import net.tslat.aoa3.content.loottable.function.EnchantSpecific;
 import net.tslat.aoa3.content.loottable.function.GrantSkillXp;
+import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.loottable.condition.*;
 import net.tslat.aoawikihelpermod.util.loottable.function.*;
@@ -153,7 +156,7 @@ public class LootTableHelper {
 		if (entry instanceof TagEntry tagLoot)
 			return getTagLootEntryLine(poolIndex, tagLoot, conditions, tagLoot.functions);
 
-		if (entry instanceof LootTableReference tableLoot)
+		if (entry instanceof NestedLootTable tableLoot)
 			return getTableLootEntryLine(poolIndex, tableLoot, conditions, tableLoot.functions);
 
 		if (entry instanceof EntryGroup groupLoot)
@@ -219,19 +222,19 @@ public class LootTableHelper {
 
 		if (entry.item instanceof PotionItem) {
 			for (LootItemFunction function : entry.functions) {
-				if (function instanceof SetNbtFunction) {
+				if (function instanceof SetComponentsFunction setComponents) {
 					ItemStack potionStack = new ItemStack(entry.item);
 
-					((SetNbtFunction)function).run(potionStack, null);
+					setComponents.run(potionStack, null);
 					entryBuilder.append(potionStack.getHoverName().getString()).append("; image:").append(ObjectHelper.getItemName(entry.item.value())).append(".png;");
 
-					List<MobEffectInstance> effects = PotionUtils.getMobEffects(potionStack);
+					Iterable<MobEffectInstance> effects = potionStack.get(DataComponents.POTION_CONTENTS).getAllEffects();
 
-					if (!effects.isEmpty()) {
+					if (effects.iterator().hasNext()) {
 						entryNotesBuilder.append("<br/>Effects:");
 
 						for (MobEffectInstance effect : effects) {
-							entryNotesBuilder.append("<br/>").append(effect.getEffect().getDisplayName().getString()).append(" ").append(effect.getAmplifier() + 1);
+							entryNotesBuilder.append("<br/>").append(effect.getEffect().value().getDisplayName().getString()).append(" ").append(effect.getAmplifier() + 1);
 							entryNotesBuilder.append(" (").append(FormattingHelper.getTimeFromTicks(effect.getDuration())).append(")");
 						}
 					}
@@ -242,10 +245,10 @@ public class LootTableHelper {
 		}
 		else if (entry.item == AoABlocks.TROPHY.get().asItem()) {
 			for (LootItemFunction function : entry.functions) {
-				if (function instanceof SetNbtFunction) {
+				if (function instanceof SetComponentsFunction setComponents) {
 					ItemStack trophyStack = new ItemStack(entry.item);
 
-					((SetNbtFunction)function).run(trophyStack, null);
+					setComponents.run(trophyStack, null);
 					entryBuilder.append(trophyStack.getHoverName().getString()).append("; image:").append(ObjectHelper.getItemName(entry.item.value())).append(".png;");
 
 					break;
@@ -349,11 +352,11 @@ public class LootTableHelper {
 		return entryBuilder.toString();
 	}
 
-	private static String getTableLootEntryLine(int poolIndex, LootTableReference entry, List<LootItemCondition> conditions, List<LootItemFunction> functions) {
+	private static String getTableLootEntryLine(int poolIndex, NestedLootTable entry, List<LootItemCondition> conditions, List<LootItemFunction> functions) {
 		StringBuilder entryNotesBuilder = new StringBuilder();
 		StringBuilder entryBuilder = new StringBuilder("group:" + poolIndex + "; image:none; item:");
 		String looting = getLootingString(functions);
-		String tableName = entry.name.getPath();
+		String tableName = entry.contents.mapLeft(ResourceKey::location).mapRight(LootTable::getLootTableId).orThrow().getPath();
 
 		if (tableName.contains("\\")) {
 			tableName = StringUtil.toTitleCase(tableName.substring(tableName.indexOf("\\") + 1));

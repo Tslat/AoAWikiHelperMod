@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.*;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -159,7 +161,7 @@ public class FakeChunk extends ChunkAccess {
 			}
 		}
 		else {
-			blockEntity = BlockEntity.loadStatic(pPos, blockState, pTag);
+			blockEntity = BlockEntity.loadStatic(pPos, blockState, pTag, this.level.registryAccess());
 		}
 
 		if (blockEntity != null) {
@@ -279,9 +281,9 @@ public class FakeChunk extends ChunkAccess {
 		return null;
 	}
 
-	@Nullable
+	@org.jetbrains.annotations.Nullable
 	@Override
-	public CompoundTag getBlockEntityNbtForSaving(BlockPos pos) {
+	public CompoundTag getBlockEntityNbtForSaving(BlockPos pPos, HolderLookup.Provider pRegistries) {
 		return null;
 	}
 

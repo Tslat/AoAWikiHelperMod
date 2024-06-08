@@ -197,7 +197,7 @@ public class BlockDataPrintHandler {
 	}
 
 	private List<ResourceLocation> getFluidTags(Level level) {
-		FluidState fluidState = block.getFluidState(block.defaultBlockState());
+		FluidState fluidState = block.defaultBlockState().getFluidState();
 
 		if (fluidState.isEmpty())
 			return List.of();

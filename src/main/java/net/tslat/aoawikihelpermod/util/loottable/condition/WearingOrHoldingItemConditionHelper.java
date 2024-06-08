@@ -2,6 +2,7 @@ package net.tslat.aoawikihelpermod.util.loottable.condition;
 
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentPredicate;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -21,14 +22,15 @@ public class WearingOrHoldingItemConditionHelper extends LootConditionHelper<Wea
 		LootContext.EntityTarget entityTarget = condition.target();
 		Optional<EquipmentSlot> slot = condition.slot();
 
-		String slotParticle = slot.isEmpty() ? "equipment" : switch (slot.get()) {
+		String slotParticle = slot.map(equipmentSlot -> switch (equipmentSlot) {
             case MAINHAND -> "mainhand item";
             case OFFHAND -> "offhand item";
             case FEET -> "boots";
             case LEGS -> "leggings";
             case CHEST -> "chestplate";
             case HEAD -> "helmet";
-        };
+            case BODY -> "body";
+        }).orElse("equipment");
 
 		StringBuilder heldItemParticle;
 
@@ -54,8 +56,8 @@ public class WearingOrHoldingItemConditionHelper extends LootConditionHelper<Wea
 				}
 			}
 		}
-		else if (predicate.tag().isPresent()) {
-			heldItemParticle = new StringBuilder("is anything tagged as " + FormattingHelper.createLinkableTag(predicate.tag().get().location().toString(), Items.STONE));
+		else if (predicate.components() != DataComponentPredicate.EMPTY) {
+			heldItemParticle = new StringBuilder("matches specific item component values");
 		}
 		else {
 			heldItemParticle = new StringBuilder("meets certain conditions");

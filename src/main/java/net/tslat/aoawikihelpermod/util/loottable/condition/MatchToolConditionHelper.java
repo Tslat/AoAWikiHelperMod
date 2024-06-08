@@ -2,6 +2,7 @@ package net.tslat.aoawikihelpermod.util.loottable.condition;
 
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentPredicate;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
@@ -45,8 +46,8 @@ public class MatchToolConditionHelper extends LootConditionHelper<MatchTool> {
 				}
 			}
 		}
-		else if (predicate.tag().isPresent()) {
-			heldItemParticle = new StringBuilder("is anything tagged as " + FormattingHelper.createLinkableTag(predicate.tag().get().location().toString(), Items.STONE));
+		else if (predicate.components() != DataComponentPredicate.EMPTY) {
+			heldItemParticle = new StringBuilder("matches specific item component values");
 		}
 		else {
 			heldItemParticle = new StringBuilder("meets certain conditions");

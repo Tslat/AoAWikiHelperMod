@@ -19,6 +19,7 @@ import net.minecraft.world.TickRateManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
@@ -28,7 +29,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -36,6 +37,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -48,6 +50,7 @@ import net.tslat.aoa3.util.WorldUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -56,7 +59,7 @@ public class FakeWorld extends Level implements WorldGenLevel {
 	public static final Supplier<FakeWorld> INSTANCE = Suppliers.memoize(FakeWorld::new);
 
 	private static final Scoreboard scoreboard = new Scoreboard();
-	private static final RecipeManager recipeManager = new RecipeManager();
+	private static final RecipeManager recipeManager = new RecipeManager(null);
 	private static final FakeChunkProvider chunkProvider = new FakeChunkProvider();
 	private static final FakeStructureManager structureManager = new FakeStructureManager();
 
@@ -88,18 +91,9 @@ public class FakeWorld extends Level implements WorldGenLevel {
 		return null;
 	}
 
-	@Nullable
 	@Override
-	public MapItemSavedData getMapData(String mapName) {
-		return null;
-	}
-
-	@Override
-	public void setMapData(String mapId, MapItemSavedData data) {}
-
-	@Override
-	public int getFreeMapId() {
-		return 0;
+	public MapId getFreeMapId() {
+		return new MapId(0);
 	}
 
 	@Override
@@ -171,15 +165,19 @@ public class FakeWorld extends Level implements WorldGenLevel {
 	public void levelEvent(@Nullable Player player, int type, BlockPos pos, int data) {}
 
 	@Override
-	public void gameEvent(GameEvent event, Vec3 position, GameEvent.Context context) {}
+	public void gameEvent(Holder<GameEvent> pGameEvent, Vec3 pPos, GameEvent.Context pContext) {
 
-	@Override
-	public void gameEvent(@Nullable Entity entity, GameEvent event, BlockPos pos) {}
+	}
 
 	@Nonnull
 	@Override
 	public RegistryAccess registryAccess() {
 		return Minecraft.getInstance().level != null ? Minecraft.getInstance().level.registryAccess() : ServerLifecycleHooks.getCurrentServer().registryAccess();
+	}
+
+	@Override
+	public PotionBrewing potionBrewing() {
+		return null;
 	}
 
 	@Override
@@ -234,6 +232,17 @@ public class FakeWorld extends Level implements WorldGenLevel {
 	@Override
 	public TickRateManager tickRateManager() {
 		return new TickRateManager();
+	}
+
+	@Nullable
+	@Override
+	public MapItemSavedData getMapData(MapId pMapId) {
+		return null;
+	}
+
+	@Override
+	public void setMapData(MapId pMapId, MapItemSavedData pMapData) {
+
 	}
 
 	@Override

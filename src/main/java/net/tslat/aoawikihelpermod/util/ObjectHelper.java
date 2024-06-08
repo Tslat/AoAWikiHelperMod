@@ -1,9 +1,10 @@
 package net.tslat.aoawikihelpermod.util;
 
-import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -23,6 +24,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
@@ -80,26 +82,47 @@ public class ObjectHelper {
 		return BuiltInRegistries.ENTITY_TYPE.stream().filter(filter).collect(Collectors.toList());
 	}
 
-	public static Multimap<Attribute, AttributeModifier> getAttributesForItem(Item item) {
-		return item.getAttributeModifiers(EquipmentSlot.MAINHAND, new ItemStack(item));
+	public static ItemAttributeModifiers getAttributesForItem(Item item) {
+		return item.getAttributeModifiers(item.getDefaultInstance());
 	}
 
-	public static double getAttributeFromItem(Item item, Attribute attribute) {
-		Multimap<Attribute, AttributeModifier> attributes = getAttributesForItem(item);
+	public static boolean itemHasAttribute(Item item, Holder<Attribute> attribute) {
+		ItemAttributeModifiers modifier = getAttributesForItem(item);
 
-		if (!attributes.containsKey(attribute))
-			return 0d;
+		for (ItemAttributeModifiers.Entry entry : modifier.modifiers()) {
+			if (entry.attribute().equals(attribute))
+				return true;
+		}
 
-		return getAttributeValue(attribute, attributes.get(attribute));
+		return false;
 	}
 
-	public static double getAttributeFromEntity(LivingEntity entity, Attribute attribute) {
+	public static double getAttributeValueFromItem(Item item, Holder<Attribute> attribute) {
+		ItemAttributeModifiers attributes = getAttributesForItem(item);
+		double value = 0;
+
+		for (ItemAttributeModifiers.Entry entry : attributes.modifiers()) {
+			if (entry.slot().test(EquipmentSlot.MAINHAND) && entry.attribute().equals(attribute)) {
+				double d1 = entry.modifier().amount();
+
+				value += switch (entry.modifier().operation()) {
+					case AttributeModifier.Operation.ADD_VALUE -> d1;
+					case AttributeModifier.Operation.ADD_MULTIPLIED_BASE -> d1 * 0;
+					case AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL -> d1 * value;
+				};
+			}
+		}
+
+		return value;
+	}
+
+	public static double getAttributeFromEntity(LivingEntity entity, Holder<Attribute> attribute) {
 		AttributeInstance instance = entity.getAttribute(attribute);
 
 		return instance == null ? 0d : instance.getValue();
 	}
 
-	public static double getAttributeValue(Attribute attribute, Collection<AttributeModifier> modifiers) {
+	public static double getAttributeValue(Holder<Attribute> attribute, Collection<AttributeModifier> modifiers) {
 		AttributeInstance instance = new AttributeInstance(attribute, consumer -> {});
 
 		for (AttributeModifier modifier : modifiers) {
@@ -107,7 +130,7 @@ public class ObjectHelper {
 				instance.addTransientModifier(modifier);
 		}
 
-		double value = instance.getValue() - attribute.getDefaultValue(); // Remove due to the way instanceless attributes are calculated
+		double value = instance.getValue() - attribute.value().getDefaultValue(); // Remove due to the way instanceless attributes are calculated
 
 		if (attribute == Attributes.ATTACK_DAMAGE) {
 			value++;
@@ -138,7 +161,7 @@ public class ObjectHelper {
 	}
 
 	public static RecipePrintHandler.PrintableIngredient getIngredientName(JsonObject obj) {
-		if ((obj.has("item") && obj.has("tag")) || (!obj.has("item") && !obj.has("tag")))
+		if (((obj.has("item") || obj.has("id")) && obj.has("tag")) || (!(obj.has("item") || obj.has("id")) && !obj.has("tag")))
 			throw new JsonParseException("Invalidly formatted ingredient, unable to proceed.");
 
 		String ingredientName;
@@ -146,6 +169,9 @@ public class ObjectHelper {
 
 		if (obj.has("item")) {
 			return getFormattedItemDetails(new ResourceLocation(GsonHelper.getAsString(obj, "item")));
+		}
+		else if (obj.has("id")) {
+			return getFormattedItemDetails(new ResourceLocation(GsonHelper.getAsString(obj, "id")));
 		}
 		else if (obj.has("tag")) {
 			ingredientName = GsonHelper.getAsString(obj, "tag");
@@ -176,9 +202,15 @@ public class ObjectHelper {
 			if (obj.has("item")) {
 				return new ResourceLocation(GsonHelper.getAsString(obj, "item"));
 			}
+			else if (obj.has("id")) {
+				return new ResourceLocation(GsonHelper.getAsString(obj, "id"));
+			}
 			else {
 				throw new JsonParseException("Invalidly formatted ingredient, unable to proceed.");
 			}
+		}
+		else if (element.isJsonArray()) {
+			return getIngredientItemId(element.getAsJsonArray().get(0));
 		}
 		else {
 			return new ResourceLocation(element.getAsString());
@@ -486,15 +518,14 @@ public class ObjectHelper {
 
 	@Nullable
 	public static String getItemAmmoType(Item item) {
-		ItemStack stack = new ItemStack(item);
 		StringBuilder builder = new StringBuilder();
 
 		if (item instanceof BaseStaff<?> staff) {
-			for (Map.Entry<Item, Integer> rune : staff.getRunes().entrySet()) {
+			for (Object2IntMap.Entry<Item> rune : staff.runeCost().runeCosts().object2IntEntrySet()) {
 				if (!builder.isEmpty())
 					builder.append(System.lineSeparator());
 
-				builder.append(rune.getValue()).append(" ").append(ObjectHelper.getItemName(rune.getKey()));
+				builder.append(rune.getIntValue()).append(" ").append(ObjectHelper.getItemName(rune.getKey()));
 			}
 		}
 		else if (item instanceof BaseGun gun && !(gun instanceof BaseThrownWeapon)) {

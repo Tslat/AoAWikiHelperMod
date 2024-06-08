@@ -27,6 +27,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
+import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
@@ -108,14 +109,14 @@ public final class RenderUtil {
 					try {
 						FluidState fluidState = block.getFluidState();
 						RenderType renderType = ItemBlockRenderTypes.getRenderLayer(fluidState);
-						PoseStack worldStack = RenderSystem.getModelViewStack();
+						Matrix4fStack worldStack = RenderSystem.getModelViewStack();
 
 						if (renderType == RenderType.translucent())
 							renderType = RenderType.solid(); // TODO figure out why tf translucent isn't working
 
 						renderType.setupRenderState();
-						worldStack.pushPose();
-						worldStack.mulPoseMatrix(matrix.last().pose());
+						worldStack.pushMatrix();
+						worldStack.mul(matrix.last().pose());
 						RenderSystem.applyModelViewMatrix();
 
 						builder.begin(renderType.mode(), renderType.format());
@@ -125,7 +126,7 @@ public final class RenderUtil {
 							tesselator.end();
 
 						renderType.clearRenderState();
-						worldStack.popPose();
+						worldStack.popMatrix();
 						RenderSystem.applyModelViewMatrix();
 					}
 					catch (Exception ex) {

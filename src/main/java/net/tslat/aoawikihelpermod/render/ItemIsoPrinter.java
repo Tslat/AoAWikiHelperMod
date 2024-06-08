@@ -26,6 +26,7 @@ import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapter;
 import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
+import org.joml.Matrix4fStack;
 import org.joml.Vector4f;
 
 import java.io.File;
@@ -197,8 +198,8 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		RenderSystem.setShaderColor(1, 1, 1, 1);
 
-		PoseStack modelViewPose = RenderSystem.getModelViewStack();
-		modelViewPose.pushPose();
+		Matrix4fStack modelViewPose = RenderSystem.getModelViewStack();
+		modelViewPose.pushMatrix();
 		modelViewPose.translate(0, 0, (100f + ItemRenderer.ITEM_COUNT_BLIT_OFFSET));
 		modelViewPose.translate(8, 8, 0);
 		modelViewPose.scale(1, -1, 1);
@@ -219,7 +220,7 @@ public class ItemIsoPrinter extends IsometricPrinterScreen {
 		if (changeLighting)
 			Lighting.setupFor3DItems();
 
-		modelViewPose.popPose();
+		modelViewPose.popMatrix();
 		RenderSystem.applyModelViewMatrix();
 	}
 

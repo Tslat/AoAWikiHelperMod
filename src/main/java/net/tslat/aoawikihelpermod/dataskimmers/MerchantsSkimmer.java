@@ -18,6 +18,7 @@ import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.Level;
 import net.tslat.aoa3.advent.AdventOfAscension;
@@ -33,6 +34,7 @@ import net.tslat.aoawikihelpermod.util.printer.handler.MerchantTradePrintHandler
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class MerchantsSkimmer {
 	public static final HashMap<VillagerProfession, Int2ObjectMap<ArrayList<MerchantTradePrintHandler>>> TRADE_PRINTERS_BY_PROFESSION = new HashMap<>();
@@ -72,7 +74,7 @@ public class MerchantsSkimmer {
 
 		for (EntityType<?> entityType : ObjectHelper.scrapeRegistryForEntities(type -> RegistryUtil.getId(type).getNamespace().equals(AdventOfAscension.MOD_ID))) {
 			try {
-				Entity entity = entityType.create(world, null, null, new BlockPos(0, 100, 0), MobSpawnType.TRIGGERED, false, false);
+				Entity entity = entityType.create(world, null, new BlockPos(0, 100, 0), MobSpawnType.TRIGGERED, false, false);
 
 				if (entity == null)
 					continue;
@@ -150,7 +152,7 @@ public class MerchantsSkimmer {
 	private static void mapTradeToIngredients(ServerLevel world, VillagerProfession profession, int professionLevel, VillagerTrades.ItemListing trade) {
 		if (merchantInstance == null) {
 			merchantInstance = new Villager(EntityType.VILLAGER, world);
-			merchantInstance.finalizeSpawn(world, world.getCurrentDifficultyAt(new BlockPos(0, 0, 0)), MobSpawnType.TRIGGERED, null, null);
+			merchantInstance.finalizeSpawn(world, world.getCurrentDifficultyAt(new BlockPos(0, 0, 0)), MobSpawnType.TRIGGERED, null);
 		}
 
 		merchantInstance.setVillagerData(merchantInstance.getVillagerData().setProfession(profession));
@@ -158,7 +160,7 @@ public class MerchantsSkimmer {
 		MerchantOffer offer;
 
 		if (trade instanceof VillagerTrades.TreasureMapForEmeralds emeraldTrade) {
-            offer = new MerchantOffer(new ItemStack(Items.EMERALD, emeraldTrade.emeraldCost), new ItemStack(Items.COMPASS), new ItemStack(Items.FILLED_MAP), emeraldTrade.maxUses, emeraldTrade.villagerXp, 0.2f);
+            offer = new MerchantOffer(new ItemCost(Items.EMERALD, emeraldTrade.emeraldCost), Optional.of(new ItemCost(Items.COMPASS)), new ItemStack(Items.FILLED_MAP), emeraldTrade.maxUses, emeraldTrade.villagerXp, 0.2f);
 		}
 		else {
 			offer = trade.getOffer(merchantInstance, RandomSource.create());

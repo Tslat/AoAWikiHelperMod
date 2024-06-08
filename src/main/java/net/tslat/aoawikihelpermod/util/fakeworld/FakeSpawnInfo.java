@@ -1,5 +1,6 @@
 package net.tslat.aoawikihelpermod.util.fakeworld;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.storage.WritableLevelData;
@@ -10,30 +11,8 @@ public class FakeSpawnInfo implements WritableLevelData {
 	private static final GameRules gameRules = new GameRules();
 
 	@Override
-	public void setXSpawn(int x) {}
-
-	@Override
-	public void setYSpawn(int y) {}
-
-	@Override
-	public void setZSpawn(int z) {}
-
-	@Override
-	public void setSpawnAngle(float angle) {}
-
-	@Override
-	public int getXSpawn() {
-		return 0;
-	}
-
-	@Override
-	public int getYSpawn() {
-		return 0;
-	}
-
-	@Override
-	public int getZSpawn() {
-		return 0;
+	public BlockPos getSpawnPos() {
+		return null;
 	}
 
 	@Override
@@ -84,5 +63,10 @@ public class FakeSpawnInfo implements WritableLevelData {
 	@Override
 	public boolean isDifficultyLocked() {
 		return false;
+	}
+
+	@Override
+	public void setSpawn(BlockPos spawnPoint, float spawnAngle) {
+
 	}
 }

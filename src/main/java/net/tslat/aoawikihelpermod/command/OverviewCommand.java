@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.world.entity.LivingEntity;
@@ -36,7 +37,6 @@ import net.tslat.aoawikihelpermod.util.printer.TablePrintHelper;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class OverviewCommand implements Command<CommandSourceStack> {
 	private static final OverviewCommand CMD = new OverviewCommand();
@@ -81,7 +81,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Harvest Level", "Efficiency", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Efficiency", "Durability", "Effects")) {
 			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
@@ -89,18 +89,16 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			for (Item item : axes) {
 				AxeItem axe = (AxeItem)item;
 				String itemName = ObjectHelper.getItemName(axe);
-				float damage = (float)ObjectHelper.getAttributeFromItem(axe, Attributes.ATTACK_DAMAGE);
-				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeFromItem(axe, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
+				float damage = (float)ObjectHelper.getAttributeValueFromItem(axe, Attributes.ATTACK_DAMAGE);
+				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(axe, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
 				String efficiency = NumberUtil.roundToNthDecimalPlace(axe.getTier().getSpeed(), 2);
 				String durability = String.valueOf(axe.getTier().getUses());
-				String harvestLevel = String.valueOf(axe.getTier().getLevel());
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(axe, AoATools.LIMONITE_AXE.get());
 
 				printHelper.entry(
 						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						FormattingHelper.healthValue(damage),
 						attackSpeed,
-						harvestLevel,
 						efficiency,
 						durability,
 						tooltip);
@@ -127,11 +125,12 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 
 			for (Item item : blasters) {
 				BaseBlaster blaster = (BaseBlaster)item;
+				ItemStack stack = blaster.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(blaster);
-				String damage = FormattingHelper.healthValue((float)blaster.getDamage());
-				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(blaster, Attributes.ATTACK_SPEED) + 4), 2) + "s";
-				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)blaster.getFiringDelay(), 2) + "/sec";
-				String energyCost = NumberUtil.roundToNthDecimalPlace(blaster.getBaseEnergyCost(), 2);
+				String damage = FormattingHelper.healthValue((float)blaster.getBlasterDamage(stack));
+				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValueFromItem(blaster, Attributes.ATTACK_SPEED) + 4), 2) + "s";
+				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)blaster.getTicksBetweenShots(stack), 2) + "/sec";
+				String energyCost = NumberUtil.roundToNthDecimalPlace(blaster.getBaseEnergyCost(stack), 2);
 				String durability = String.valueOf(blaster.getMaxDamage(new ItemStack(blaster)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(blaster, AoAWeapons.BONE_BLASTER.get());
 
@@ -167,7 +166,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			for (Item item : bows) {
 				BaseBow bow = (BaseBow)item;
 				String itemName = ObjectHelper.getItemName(bow);
-				String damage = FormattingHelper.healthValue((float)bow.getDamage());
+				String damage = FormattingHelper.healthValue(bow.getBowDamage());
 				String drawTime = NumberUtil.roundToNthDecimalPlace(1 / bow.getDrawSpeedMultiplier(), 2) + "s";
 				String durability = String.valueOf(bow.getMaxDamage(new ItemStack(bow)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(bow, AoAWeapons.ALACRITY_BOW.get());
@@ -201,11 +200,12 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 
 			for (Item item : cannons) {
 				BaseCannon cannon = (BaseCannon)item;
+				ItemStack stack = cannon.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(cannon);
-				String damage = FormattingHelper.healthValue((float)cannon.getDamage());
-				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(cannon, Attributes.ATTACK_SPEED) + 4), 2) + "s";
-				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)cannon.getFiringDelay(), 2) + "/sec";
-				String recoil = NumberUtil.roundToNthDecimalPlace(cannon.getRecoilForShot(cannon.getDefaultInstance(), (LivingEntity)cmd.getSource().getEntity()), 2);
+				String damage = FormattingHelper.healthValue(cannon.getGunDamage(stack));
+				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValueFromItem(cannon, Attributes.ATTACK_SPEED) + 4), 2) + "s";
+				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)cannon.getTicksBetweenShots(stack), 2) + "/sec";
+				String recoil = NumberUtil.roundToNthDecimalPlace(cannon.getRecoilForShot(stack, (LivingEntity)cmd.getSource().getEntity()), 2);
 				String durability = String.valueOf(cannon.getMaxDamage(new ItemStack(cannon)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(cannon, AoAWeapons.MINI_CANNON.get());
 
@@ -240,8 +240,9 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 
 			for (Item item : crossbows) {
 				BaseCrossbow crossbow = (BaseCrossbow)item;
+				ItemStack stack = crossbow.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(crossbow);
-				String damage = FormattingHelper.healthValue((float)crossbow.getDamage());
+				String damage = FormattingHelper.healthValue((float)crossbow.getCrossbowDamage(stack));
 				String durability = String.valueOf(crossbow.getMaxDamage(new ItemStack(crossbow)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(crossbow, AoAWeapons.TROLLS_CROSSBOW.get());
 
@@ -273,9 +274,10 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 
 			for (Item item : greatblades) {
 				BaseGreatblade greatblade = (BaseGreatblade)item;
+				ItemStack stack = greatblade.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(greatblade);
-				String damage = FormattingHelper.healthValue((float)greatblade.getDamage());
-				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeFromItem(greatblade, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
+				String damage = FormattingHelper.healthValue(greatblade.getBaseDamage(stack));
+				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(greatblade, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
 				String durability = String.valueOf(greatblade.getMaxDamage(new ItemStack(greatblade)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(greatblade, AoAWeapons.ROYAL_GREATBLADE.get());
 
@@ -308,10 +310,11 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 
 			for (Item item : guns) {
 				BaseGun gun = (BaseGun)item;
+				ItemStack stack = gun.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(item);
-				String damage = FormattingHelper.healthValue((float)gun.getDamage());
-				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(gun, Attributes.ATTACK_SPEED) + 4), 2) + "s";
-				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)gun.getFiringDelay(), 2) + "/sec";
+				String damage = FormattingHelper.healthValue(gun.getGunDamage(stack));
+				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValueFromItem(gun, Attributes.ATTACK_SPEED) + 4), 2) + "s";
+				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)gun.getTicksBetweenShots(stack), 2) + "/sec";
 				String recoil = NumberUtil.roundToNthDecimalPlace(gun.getRecoilForShot(gun.getDefaultInstance(), (LivingEntity)cmd.getSource().getEntity()), 2);
 				String durability = String.valueOf(gun.getMaxDamage(new ItemStack(gun)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(gun, AoAWeapons.SQUAD_GUN.get());
@@ -349,7 +352,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				BaseMaul maul = (BaseMaul)item;
 				String itemName = ObjectHelper.getItemName(maul);
 				String damage = FormattingHelper.healthValue(maul.getAttackDamage());
-				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeFromItem(maul, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
+				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(maul, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
 				String knockback = "+" + NumberUtil.roundToNthDecimalPlace((float)maul.getBaseKnockback(), 2);
 				String durability = String.valueOf(maul.getMaxDamage(new ItemStack(maul)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(maul, AoAWeapons.CORALSTONE_MAUL.get());
@@ -377,7 +380,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Harvest Level", "Efficiency", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Efficiency", "Durability", "Effects")) {
 			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
@@ -385,18 +388,16 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			for (Item item : pickaxes) {
 				PickaxeItem pickaxe = (PickaxeItem)item;
 				String itemName = ObjectHelper.getItemName(pickaxe);
-				float damage = (float)ObjectHelper.getAttributeFromItem(pickaxe, Attributes.ATTACK_DAMAGE);
-				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeFromItem(pickaxe, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
+				float damage = (float)ObjectHelper.getAttributeValueFromItem(pickaxe, Attributes.ATTACK_DAMAGE);
+				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(pickaxe, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
 				String efficiency = NumberUtil.roundToNthDecimalPlace(pickaxe.getTier().getSpeed(), 2);
 				String durability = String.valueOf(pickaxe.getTier().getUses());
-				String harvestLevel = String.valueOf(pickaxe.getTier().getLevel());
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(pickaxe, AoATools.LIMONITE_PICKAXE.get());
 
 				printHelper.entry(
 						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						FormattingHelper.healthValue(damage),
 						attackSpeed,
-						harvestLevel,
 						efficiency,
 						durability,
 						tooltip);
@@ -423,11 +424,12 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 
 			for (Item item : shotguns) {
 				BaseShotgun shotgun = (BaseShotgun)item;
+				ItemStack stack = shotgun.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(shotgun);
-				String damage = FormattingHelper.healthValue((float)shotgun.getDamage()) + " x" + shotgun.getPelletCount();
-				String pellets = String.valueOf(shotgun.getPelletCount());
-				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(shotgun, Attributes.ATTACK_SPEED) + 4), 2) + "s";
-				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)shotgun.getFiringDelay(), 2) + "/sec";
+				String damage = FormattingHelper.healthValue(shotgun.getGunDamage(stack)) + " x" + shotgun.getPelletCount(stack);
+				String pellets = String.valueOf(shotgun.getPelletCount(stack));
+				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValueFromItem(shotgun, Attributes.ATTACK_SPEED) + 4), 2) + "s";
+				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)shotgun.getTicksBetweenShots(stack), 2) + "/sec";
 				String recoil = NumberUtil.roundToNthDecimalPlace(shotgun.getRecoilForShot(shotgun.getDefaultInstance(), (LivingEntity)cmd.getSource().getEntity()), 2);
 				String durability = String.valueOf(shotgun.getMaxDamage(new ItemStack(shotgun)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(shotgun, AoAWeapons.MINI_CANNON.get());
@@ -457,7 +459,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
 
-		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Harvest Level", "Efficiency", "Durability", "Effects")) {
+		try (TablePrintHelper printHelper = TablePrintHelper.open(fileName, "Name", "Damage", "Attack Speed", "Efficiency", "Durability", "Effects")) {
 			printHelper.defaultFullPageTableProperties();
 			printHelper.withProperty("class", "sortable");
 			printHelper.withClipboardOutput(clipboardContent);
@@ -465,18 +467,16 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			for (Item item : shovels) {
 				ShovelItem shovel = (ShovelItem)item;
 				String itemName = ObjectHelper.getItemName(shovel);
-				float damage = (float)ObjectHelper.getAttributeFromItem(shovel, Attributes.ATTACK_DAMAGE);
-				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeFromItem(shovel, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
+				float damage = (float)ObjectHelper.getAttributeValueFromItem(shovel, Attributes.ATTACK_DAMAGE);
+				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(shovel, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
 				String efficiency = NumberUtil.roundToNthDecimalPlace(shovel.getTier().getSpeed(), 2);
 				String durability = String.valueOf(shovel.getTier().getUses());
-				String harvestLevel = String.valueOf(shovel.getTier().getLevel());
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(shovel, AoATools.LIMONITE_SHOVEL.get());
 
 				printHelper.entry(
 						FormattingHelper.createImageBlock(itemName) + " " + FormattingHelper.bold(FormattingHelper.createLinkableText(itemName, false, true)),
 						FormattingHelper.healthValue(damage),
 						attackSpeed,
-						harvestLevel,
 						efficiency,
 						durability,
 						tooltip);
@@ -503,10 +503,11 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 
 			for (Item item : snipers) {
 				BaseSniper sniper = (BaseSniper)item;
+				ItemStack stack = sniper.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(sniper);
-				String damage = FormattingHelper.healthValue((float)sniper.getDamage());
-				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeFromItem(sniper, Attributes.ATTACK_SPEED) + 4), 2) + "s";
-				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)sniper.getFiringDelay(), 2) + "/sec";
+				String damage = FormattingHelper.healthValue(sniper.getGunDamage(stack));
+				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValueFromItem(sniper, Attributes.ATTACK_SPEED) + 4), 2) + "s";
+				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)sniper.getTicksBetweenShots(stack), 2) + "/sec";
 				String recoil = NumberUtil.roundToNthDecimalPlace(sniper.getRecoilForShot(sniper.getDefaultInstance(), (LivingEntity)cmd.getSource().getEntity()) * 0.25f, 2);
 				String durability = String.valueOf(sniper.getMaxDamage(new ItemStack(sniper)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(sniper, AoAWeapons.MINI_CANNON.get());
@@ -548,10 +549,10 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(staff, AoAWeapons.MINI_CANNON.get());
 
 
-				for (Map.Entry<Item, Integer> runeEntry : staff.getRunes().entrySet()) {
+				for (Object2IntMap.Entry<Item> runeEntry : staff.runeCost().runeCosts().object2IntEntrySet()) {
 					String name = ObjectHelper.getItemName(runeEntry.getKey());
 
-					runeArray.add(runeEntry.getValue() + "x " + FormattingHelper.createImageBlock(name) + " " + FormattingHelper.createLinkableText(name, runeEntry.getValue() > 1 , true));
+					runeArray.add(runeEntry.getIntValue() + "x " + FormattingHelper.createImageBlock(name) + " " + FormattingHelper.createLinkableText(name, runeEntry.getIntValue() > 1 , true));
 				}
 
 				printHelper.entry(
@@ -583,8 +584,8 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			for (Item item : swords) {
 				BaseSword sword = (BaseSword)item;
 				String itemName = ObjectHelper.getItemName(item);
-				float damage = (float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_DAMAGE);
-				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
+				float damage = (float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_DAMAGE);
+				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
 				String durability = String.valueOf(sword.getTier().getUses());
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(item, AoAWeapons.LIMONITE_SWORD.get());
 
@@ -618,8 +619,8 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			for (Item item : hoes) {
 				BaseHoe sword = (BaseHoe)item;
 				String itemName = ObjectHelper.getItemName(item);
-				float damage = (float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_DAMAGE);
-				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeFromItem(item, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
+				float damage = (float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_DAMAGE);
+				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
 				String durability = String.valueOf(sword.getTier().getUses());
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(item, AoATools.LIMONITE_HOE.get());
 
@@ -652,9 +653,10 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 
 			for (Item item : thrownWeapons) {
 				BaseThrownWeapon thrownWeapon = (BaseThrownWeapon)item;
+				ItemStack stack = thrownWeapon.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(item);
-				String damage = FormattingHelper.healthValue((float)thrownWeapon.getDamage());
-				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)thrownWeapon.getFiringDelay(), 2) + "/sec";
+				String damage = FormattingHelper.healthValue(thrownWeapon.getGunDamage(stack));
+				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)thrownWeapon.getTicksBetweenShots(stack), 2) + "/sec";
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(thrownWeapon, AoAWeapons.SQUAD_GUN.get());
 
 				printHelper.entry(

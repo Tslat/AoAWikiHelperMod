@@ -3,6 +3,7 @@ package net.tslat.aoawikihelpermod.util;
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
@@ -16,6 +17,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TieredItem;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.event.EventHooks;
@@ -25,6 +27,7 @@ import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
 import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
 import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
 import net.tslat.aoa3.util.NumberUtil;
+import net.tslat.aoa3.util.ObjectUtil;
 import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
@@ -141,6 +144,24 @@ public class WikiTemplateHelper {
 		return template.getPrintout();
 	}
 
+	public static String makeImbuingTemplate(RecipePrintHandler.RecipeIngredientsHandler ingredientsHandler, RecipePrintHandler.PrintableIngredient powerSource) {
+		Template template = new Template("Imbuing");
+
+		if (powerSource.imageName != null) {
+			template.entry("inputimage", powerSource.imageName)
+					.entry("input", powerSource.imageName.substring(0, powerSource.imageName.lastIndexOf(".")));
+		}
+		else {
+			template.entry("input", powerSource.formattedName);
+		}
+
+		ingredientsHandler.addIngredientsToWikiTemplate(template);
+		template.entry("output", "Air")
+				.entry("shapeless", "1");
+
+		return template.getPrintout();
+	}
+
 	public static Template makeBlockInfoboxTemplate(Block block, Level level) {
 		Template template = new Template("BlockInfo");
 		ItemStack stack = block.asItem().getDefaultInstance();
@@ -163,7 +184,7 @@ public class WikiTemplateHelper {
 
 	public static Template makeItemInfoboxTemplate(Item item) {
 		Template template = new Template("ItemInfo");
-		Multimap<Attribute, AttributeModifier> attributes = ObjectHelper.getAttributesForItem(item);
+		List<ItemAttributeModifiers.Entry> attributes = ObjectHelper.getAttributesForItem(item).modifiers();
 		ItemStack stack = item.getDefaultInstance();
 		FoodProperties foodProperties = stack.getFoodProperties(null);
 
@@ -171,30 +192,30 @@ public class WikiTemplateHelper {
 				.entry("image", ObjectHelper.getItemName(item) + ".png")
 				.entry("id", RegistryUtil.getId(item).toString())
 				.optionalEntry("ammo", ObjectHelper.getItemAmmoType(item))
-				.optionalEntry("damage", !attributes.containsKey(Attributes.ATTACK_DAMAGE) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_DAMAGE, attributes.values()), 2))
-				.optionalEntry("attackspeed", !attributes.containsKey(Attributes.ATTACK_SPEED) || !attributes.containsKey(Attributes.ATTACK_DAMAGE) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_SPEED, attributes.values()) + 4, 2) + "/sec")
-				.optionalEntry("unholstertime", !attributes.containsKey(Attributes.ATTACK_SPEED) || attributes.containsKey(Attributes.ATTACK_DAMAGE) ? null : NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_SPEED, attributes.values()) + 4), 2) + "s")
-				.optionalEntry("knockback", !attributes.containsKey(Attributes.ATTACK_KNOCKBACK) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ATTACK_KNOCKBACK, attributes.values()), 2))
-				.optionalEntry("armor", !attributes.containsKey(Attributes.ARMOR) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ARMOR, attributes.values()), 2))
-				.optionalEntry("armortoughness", !attributes.containsKey(Attributes.ARMOR_TOUGHNESS) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValue(Attributes.ARMOR_TOUGHNESS, attributes.values()), 2))
+				.optionalEntry("damage", !ObjectHelper.itemHasAttribute(item, Attributes.ATTACK_DAMAGE) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_DAMAGE), 2))
+				.optionalEntry("attackspeed", !ObjectHelper.itemHasAttribute(item, Attributes.ATTACK_SPEED) || !ObjectHelper.itemHasAttribute(item, Attributes.ATTACK_DAMAGE) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_SPEED) + 4, 2) + "/sec")
+				.optionalEntry("unholstertime", !ObjectHelper.itemHasAttribute(item, Attributes.ATTACK_SPEED) || ObjectHelper.itemHasAttribute(item, Attributes.ATTACK_DAMAGE) ? null : NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_SPEED) + 4), 2) + "s")
+				.optionalEntry("knockback", !ObjectHelper.itemHasAttribute(item, Attributes.ATTACK_KNOCKBACK) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_KNOCKBACK), 2))
+				.optionalEntry("armor", !ObjectHelper.itemHasAttribute(item, Attributes.ARMOR) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ARMOR), 2))
+				.optionalEntry("armortoughness", !ObjectHelper.itemHasAttribute(item, Attributes.ARMOR_TOUGHNESS) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ARMOR_TOUGHNESS), 2))
 				.entry("stackable", stack.isStackable() ? "Yes (" + stack.getMaxStackSize() + ")" : "No")
 				.optionalEntry("durability", stack.isStackable() ? null : String.valueOf(stack.getMaxDamage()))
-				.optionalEntry("hunger", foodProperties == null ? null : NumberUtil.roundToNthDecimalPlace(foodProperties.getNutrition(), 1))
-				.optionalEntry("saturation", foodProperties == null ? null : "Up to " + foodProperties.getSaturationModifier() * foodProperties.getNutrition() + " (" + NumberUtil.roundToNthDecimalPlace(foodProperties.getSaturationModifier(), 2) + ")");
+				.optionalEntry("hunger", foodProperties == null ? null : NumberUtil.roundToNthDecimalPlace(foodProperties.nutrition(), 1))
+				.optionalEntry("saturation", foodProperties == null ? null : "Up to " + foodProperties.saturation() * foodProperties.nutrition() + " (" + NumberUtil.roundToNthDecimalPlace(foodProperties.saturation(), 2) + ")");
 
 		if (item instanceof TieredItem tieredItem) {
 			Tier tier = tieredItem.getTier();
 
 			template.entry("efficiency", NumberUtil.roundToNthDecimalPlace(tier.getSpeed(), 2))
-					.optionalEntry("harvestlevel", tier.getTag() == null ? null : tier.getTag().location().toString());
+					.optionalEntry("noharvest", tier.getIncorrectBlocksForDrops() == null ? null : tier.getIncorrectBlocksForDrops().location().toString());
 		}
 
 		if (item instanceof BaseGun gun && !(gun instanceof BaseThrownWeapon)) {
-			template.entry("firerate", NumberUtil.roundToNthDecimalPlace(20f / gun.getFiringDelay(), 2) + "/sec")
+			template.entry("firerate", NumberUtil.roundToNthDecimalPlace(20f / gun.getTicksBetweenShots(stack), 2) + "/sec")
 					.entry("firetype", gun.isFullAutomatic() ? "Fully-Automatic" : "Semi-Automatic");
 		}
 		else if (item instanceof BaseBlaster blaster) {
-			template.entry("firerate", NumberUtil.roundToNthDecimalPlace(20f / blaster.getFiringDelay(), 2) + "/sec")
+			template.entry("firerate", NumberUtil.roundToNthDecimalPlace(20f / blaster.getTicksBetweenShots(stack), 2) + "/sec")
 					.entry("firetype", "Fully-Automatic");
 		}
 		else if (item instanceof BaseBow bow) {
@@ -212,7 +233,7 @@ public class WikiTemplateHelper {
 		LivingEntity livingInstance = instance instanceof LivingEntity livingEntity ? livingEntity : null;
 
 		if (instance instanceof Mob mob)
-			EventHooks.onFinalizeSpawn(mob, level, new DifficultyInstance(Difficulty.HARD, 0, 0, 0), MobSpawnType.NATURAL, null, null);
+			EventHooks.finalizeMobSpawn(mob, level, new DifficultyInstance(Difficulty.HARD, 0, 0, 0), MobSpawnType.NATURAL, null);
 
 		String meleeStrength = getRoundedAttributeValue(livingInstance, Attributes.ATTACK_DAMAGE);
 
@@ -223,8 +244,8 @@ public class WikiTemplateHelper {
 				.optionalEntry("health", getRoundedAttributeValue(livingInstance, Attributes.MAX_HEALTH))
 				.entry("specialhealth", "")
 				.entry("size", "'''Width''': " + entity.getWidth() + " blocks <br> '''Height''': " + entity.getHeight() + " blocks")
-				.optionalEntry("damage", meleeStrength != null ? meleeStrength : getRoundedAttributeValue(livingInstance, AoAAttributes.RANGED_ATTACK_DAMAGE.get()))
-				.optionalEntry("specialdamage", meleeStrength != null ? getRoundedAttributeValue(livingInstance, AoAAttributes.RANGED_ATTACK_DAMAGE.get()) : null)
+				.optionalEntry("damage", meleeStrength != null ? meleeStrength : getRoundedAttributeValue(livingInstance, AoAAttributes.RANGED_ATTACK_DAMAGE))
+				.optionalEntry("specialdamage", meleeStrength != null ? getRoundedAttributeValue(livingInstance, AoAAttributes.RANGED_ATTACK_DAMAGE) : null)
 				.optionalEntry("armor", getRoundedAttributeValue(livingInstance, Attributes.ARMOR))
 				.optionalEntry("armortoughness", getRoundedAttributeValue(livingInstance, Attributes.ARMOR_TOUGHNESS))
 				.entry("environment", "")
@@ -239,7 +260,7 @@ public class WikiTemplateHelper {
 	}
 
 	@Nullable
-	private static String getRoundedAttributeValue(@Nullable LivingEntity entity, Attribute attribute) {
+	private static String getRoundedAttributeValue(@Nullable LivingEntity entity, Holder<Attribute> attribute) {
 		if (entity == null)
 			return null;
 

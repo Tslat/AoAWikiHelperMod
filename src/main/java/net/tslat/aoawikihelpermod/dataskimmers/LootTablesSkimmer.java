@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -48,6 +49,7 @@ public class LootTablesSkimmer extends SimpleJsonResourceReloadListener {
 					table = LootTable.CODEC.decode(JsonOps.INSTANCE, json)
 							.resultOrPartial(err -> AoAWikiHelperMod.LOGGER.log(Level.ERROR, err))
 							.map(Pair::getFirst)
+							.map(Holder::value)
 							.orElse(null);
 				}
 				else {
@@ -69,9 +71,8 @@ public class LootTablesSkimmer extends SimpleJsonResourceReloadListener {
 	private void populateLootByTable(ResourceLocation tableId, LootTable table, JsonObject rawTable) {
 		for (LootPool pool : table.pools) {
 			for (LootPoolEntryContainer entry : pool.entries) {
-				if (entry instanceof LootItem) {
-					TABLES_BY_LOOT.put(RegistryUtil.getId(((LootItem)entry).item.value()), tableId);
-				}
+				if (entry instanceof LootItem itemEntry)
+					TABLES_BY_LOOT.put(RegistryUtil.getId(itemEntry.item.value()), tableId);
 			}
 		}
 	}

@@ -8,6 +8,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.registries.datamaps.builtin.NeoForgeDataMaps;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.TagUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -123,7 +124,7 @@ public class ItemDataPrintHandler {
 		if (fuelPrintout != null)
 			return fuelPrintout.isEmpty() ? null : repairIngredientPrintout;
 
-		int burnTime = CommonHooks.getBurnTime(item.getDefaultInstance(), null);
+		int burnTime = item.getBurnTime(item.getDefaultInstance(), null);
 
 		if (burnTime <= 0) {
 			fuelPrintout = "";
