@@ -30,7 +30,7 @@ import java.io.File;
 
 public class LootTableCommand implements Command<CommandSourceStack> {
 	private static final LootTableCommand CMD = new LootTableCommand();
-	private static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "loot_tables"), (context, builder) -> SharedSuggestionProvider.suggestResource(LootTablesSkimmer.TABLE_PRINTERS.keySet().stream(), builder));
+	private static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = SuggestionProviders.register(ResourceLocation.fromNamespaceAndPath(AoAWikiHelperMod.MOD_ID, "loot_tables"), (context, builder) -> SharedSuggestionProvider.suggestResource(LootTablesSkimmer.TABLE_PRINTERS.keySet().stream(), builder));
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("loottable").executes(CMD);

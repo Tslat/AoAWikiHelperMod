@@ -5,7 +5,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPredicate;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.tslat.aoa3.content.loottable.condition.WearingOrHoldingItem;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -65,9 +64,9 @@ public class WearingOrHoldingItemConditionHelper extends LootConditionHelper<Wea
 
 		return switch (entityTarget) {
 			case THIS -> "if the target entity's " + slotParticle + " " + heldItemParticle;
-			case KILLER -> "if the attacking entity's " + slotParticle + " " + heldItemParticle;
-			case DIRECT_KILLER -> "if the directly killing entity's " + slotParticle + " " + heldItemParticle;
-			case KILLER_PLAYER -> "if the killer is a player, and if their " + slotParticle + " " + heldItemParticle;
+			case ATTACKER -> "if the attacking entity's " + slotParticle + " " + heldItemParticle;
+			case DIRECT_ATTACKER -> "if the directly killing entity's " + slotParticle + " " + heldItemParticle;
+			case ATTACKING_PLAYER -> "if the killer is a player, and if their " + slotParticle + " " + heldItemParticle;
 		};
 	}
 }

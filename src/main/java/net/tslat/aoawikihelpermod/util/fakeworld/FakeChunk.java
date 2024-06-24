@@ -258,7 +258,7 @@ public class FakeChunk extends ChunkAccess {
 	}
 
 	@Override
-	public ChunkStatus getStatus() {
+	public ChunkStatus getPersistedStatus() {
 		return ChunkStatus.FULL;
 	}
 

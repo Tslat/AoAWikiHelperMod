@@ -23,7 +23,7 @@ import java.io.File;
 
 public class RecipeCommand implements Command<CommandSourceStack> {
 	private static final RecipeCommand CMD = new RecipeCommand();
-	private static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "raw_recipes"), (context, builder) -> SharedSuggestionProvider.suggestResource(RecipesSkimmer.RECIPE_PRINTERS.keySet().stream(), builder));
+	private static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = SuggestionProviders.register(ResourceLocation.fromNamespaceAndPath(AoAWikiHelperMod.MOD_ID, "raw_recipes"), (context, builder) -> SharedSuggestionProvider.suggestResource(RecipesSkimmer.RECIPE_PRINTERS.keySet().stream(), builder));
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("recipe").executes(CMD);

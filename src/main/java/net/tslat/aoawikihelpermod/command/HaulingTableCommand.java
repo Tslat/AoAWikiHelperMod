@@ -23,7 +23,7 @@ import java.io.File;
 
 public class HaulingTableCommand implements Command<CommandSourceStack> {
 	private static final HaulingTableCommand CMD = new HaulingTableCommand();
-	private static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "hauling_tables"), (context, builder) -> SharedSuggestionProvider.suggestResource(HaulingFishTableSkimmer.TABLE_PRINTERS.keySet().stream(), builder));
+	private static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = SuggestionProviders.register(ResourceLocation.fromNamespaceAndPath(AoAWikiHelperMod.MOD_ID, "hauling_tables"), (context, builder) -> SharedSuggestionProvider.suggestResource(HaulingFishTableSkimmer.TABLE_PRINTERS.keySet().stream(), builder));
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("haulingtable").executes(CMD);

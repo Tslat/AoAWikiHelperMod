@@ -29,7 +29,7 @@ public class StructureIsoPrinter extends IsometricPrinterScreen {
 		super(imageSize, rotation, commandSource, commandName, fileConsumer);
 
 		if (templateId.getPath().startsWith("structures/"))
-			templateId = new ResourceLocation(templateId.getNamespace(), templateId.getPath().replaceFirst("structures/", ""));
+			templateId = templateId.withPath(templateId.getPath().replaceFirst("structures/", ""));
 
 		this.defaultRefScale = 0.25f;
 		this.templateId = templateId;

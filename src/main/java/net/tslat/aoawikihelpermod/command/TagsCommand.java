@@ -23,7 +23,7 @@ import java.util.Arrays;
 
 public class TagsCommand implements Command<CommandSourceStack> {
 	private static final TagsCommand CMD = new TagsCommand();
-	private static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "tag_types"), (context, builder) -> SharedSuggestionProvider.suggestResource(TagDataSkimmer.tagTypes().stream(), builder));
+	private static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = SuggestionProviders.register(ResourceLocation.fromNamespaceAndPath(AoAWikiHelperMod.MOD_ID, "tag_types"), (context, builder) -> SharedSuggestionProvider.suggestResource(TagDataSkimmer.tagTypes().stream(), builder));
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("tags").executes(CMD);

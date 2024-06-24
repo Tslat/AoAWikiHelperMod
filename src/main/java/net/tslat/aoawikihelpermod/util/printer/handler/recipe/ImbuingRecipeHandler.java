@@ -3,14 +3,16 @@ package net.tslat.aoawikihelpermod.util.printer.handler.recipe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.tslat.aoa3.content.recipe.ImbuingRecipe;
+import net.tslat.aoa3.util.EnchantmentUtil;
 import net.tslat.aoa3.util.StringUtil;
+import net.tslat.aoa3.util.WorldUtil;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.WikiTemplateHelper;
 import net.tslat.aoawikihelpermod.util.printer.handler.RecipePrintHandler;
@@ -56,7 +58,7 @@ public class ImbuingRecipeHandler extends RecipePrintHandler {
 		ArrayList<ResourceLocation> ingredients = new ArrayList<>(2);
 
 		for (JsonElement foci : this.rawRecipe.getAsJsonArray("aspect_foci")) {
-			ingredients.add(new ResourceLocation(foci.getAsJsonPrimitive().getAsString() + "_focus"));
+			ingredients.add(ResourceLocation.read(foci.getAsJsonPrimitive().getAsString() + "_focus").getOrThrow());
 		}
 
 		return ingredients.isEmpty() ? Collections.emptyList() : ingredients;
@@ -95,8 +97,8 @@ public class ImbuingRecipeHandler extends RecipePrintHandler {
 		}
 
 		String enchantmentName;
-		ResourceLocation enchantmentId = new ResourceLocation(GsonHelper.getAsString(rawRecipe, "enchantment"));
-		Enchantment enchant = BuiltInRegistries.ENCHANTMENT.get(enchantmentId);
+		ResourceLocation enchantmentId = ResourceLocation.read(GsonHelper.getAsString(rawRecipe, "enchantment")).getOrThrow();
+		Holder<Enchantment> enchant = EnchantmentUtil.toHolder(WorldUtil.getServer().overworld(), enchantmentId);
 		PrintableIngredient powerSource = ObjectHelper.getIngredientName(rawRecipe.getAsJsonObject("power_source"));
 		int enchantLevel = 1;
 
@@ -114,8 +116,8 @@ public class ImbuingRecipeHandler extends RecipePrintHandler {
 		RecipeIngredientsHandler ingredientsHandler = new RecipeIngredientsHandler(foci.size() + 1);
 
 		for (JsonElement ele : foci) {
-			ResourceLocation id = new ResourceLocation(ele.getAsString());
-			ingredientsHandler.addIngredient(ObjectHelper.getFormattedItemDetails(new ResourceLocation(id.getNamespace(), id.getPath() + "_focus"))/*.setCustomImageName(ObjectHelper.getItemName(BuiltInRegistries.ITEM.get(new ResourceLocation(id.getNamespace(), id.getPath() + "_focus"))) + ".png")*/, -1);
+			ResourceLocation id = ResourceLocation.read(ele.getAsString()).getOrThrow();
+			ingredientsHandler.addIngredient(ObjectHelper.getFormattedItemDetails(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), id.getPath() + "_focus"))/*.setCustomImageName(ObjectHelper.getItemName(BuiltInRegistries.ITEM.get(new ResourceLocation(id.getNamespace(), id.getPath() + "_focus"))) + ".png")*/, -1);
 		}
 
 		printData[0] = enchantmentName;

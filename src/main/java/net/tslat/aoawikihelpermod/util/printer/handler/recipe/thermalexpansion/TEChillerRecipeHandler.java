@@ -85,7 +85,7 @@ public class TEChillerRecipeHandler extends RecipePrintHandler {
 		String targetName = targetItem == null ? "" : ObjectHelper.getItemName(targetItem);
 		JsonObject input = GsonHelper.getAsJsonObject(this.rawRecipe, "fluid");
 		String inputAmount = GsonHelper.getAsInt(input, "amount", 1000) + "mb";
-		String inputFluid = StringUtil.toTitleCase(new ResourceLocation(GsonHelper.getAsString(input, "fluid")).getPath());
+		String inputFluid = StringUtil.toTitleCase(ResourceLocation.read(GsonHelper.getAsString(input, "fluid")).getOrThrow().getPath());
 		int energy = GsonHelper.getAsInt(this.rawRecipe, "energy", 4000);
 		List<PrintableIngredient> result;
 

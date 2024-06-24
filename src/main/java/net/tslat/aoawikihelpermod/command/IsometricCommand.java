@@ -41,7 +41,7 @@ import java.util.Optional;
 
 public class IsometricCommand implements Command<CommandSourceStack> {
 	private static final IsometricCommand CMD = new IsometricCommand();
-	public static final SuggestionProvider<CommandSourceStack> ENTITY_ID_SUGGESTIONS = SuggestionProviders.register(new ResourceLocation("all_entities"), (context, suggestionBuilder) -> SharedSuggestionProvider.suggestResource(BuiltInRegistries.ENTITY_TYPE.stream(), suggestionBuilder, EntityType::getKey, (entityType) -> Component.translatable(Util.makeDescriptionId("entity", EntityType.getKey(entityType)))));
+	public static final SuggestionProvider<CommandSourceStack> ENTITY_ID_SUGGESTIONS = SuggestionProviders.register(ResourceLocation.withDefaultNamespace("all_entities"), (context, suggestionBuilder) -> SharedSuggestionProvider.suggestResource(BuiltInRegistries.ENTITY_TYPE.stream(), suggestionBuilder, EntityType::getKey, (entityType) -> Component.translatable(Util.makeDescriptionId("entity", EntityType.getKey(entityType)))));
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext buildContext) {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("iso").requires(source -> source.getEntity() instanceof Player).executes(CMD);
@@ -85,21 +85,21 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 						.then(Commands.argument("leggings", ItemArgument.item(buildContext))
 								.then(Commands.argument("chestplate", ItemArgument.item(buildContext))
 										.then(Commands.argument("helmet", ItemArgument.item(buildContext))
-												.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), 300, false, 0))
+												.executes(context -> printEntityIso(context, ResourceLocation.withDefaultNamespace("armor_stand"), armourNbtFromArguments(context), 300, false, 0))
 												.then(Commands.argument("animated", BoolArgumentType.bool())
 														.then(Commands.argument("record_length", IntegerArgumentType.integer(10, 1200))
-																.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), 300, BoolArgumentType.getBool(context, "animated"), 0))
+																.executes(context -> printEntityIso(context, ResourceLocation.withDefaultNamespace("armor_stand"), armourNbtFromArguments(context), 300, BoolArgumentType.getBool(context, "animated"), 0))
 																.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
-																		.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), 300, BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))
+																		.executes(context -> printEntityIso(context, ResourceLocation.withDefaultNamespace("armor_stand"), armourNbtFromArguments(context), 300, BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))
 												.then(Commands.argument("image_size", IntegerArgumentType.integer(0, 1000))
-														.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), false, 0))
+														.executes(context -> printEntityIso(context, ResourceLocation.withDefaultNamespace("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), false, 0))
 														.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
-																.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), false, FloatArgumentType.getFloat(context, "rotation_adjust"))))
+																.executes(context -> printEntityIso(context, ResourceLocation.withDefaultNamespace("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), false, FloatArgumentType.getFloat(context, "rotation_adjust"))))
 														.then(Commands.argument("animated", BoolArgumentType.bool())
 																.then(Commands.argument("record_length", IntegerArgumentType.integer(10, 1200))
-																		.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), 0))
+																		.executes(context -> printEntityIso(context, ResourceLocation.withDefaultNamespace("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), 0))
 																		.then(Commands.argument("rotation_adjust", FloatArgumentType.floatArg(0, 360))
-																				.executes(context -> printEntityIso(context, new ResourceLocation("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))))))));
+																				.executes(context -> printEntityIso(context, ResourceLocation.withDefaultNamespace("armor_stand"), armourNbtFromArguments(context), IntegerArgumentType.getInteger(context, "image_size"), BoolArgumentType.getBool(context, "animated"), FloatArgumentType.getFloat(context, "rotation_adjust"))))))))))));
 		builder.then(Commands.literal("block")
 				.then(Commands.argument("block_id", BlockStateArgument.block(buildContext))
 						.executes(context -> printBlockIso(context, 300, false, false, 0, 0))

@@ -45,7 +45,7 @@ public class HaulingTablePrintHandler {
 
 			if (entry.isJsonPrimitive()) {
 				type = "item";
-				name = ObjectHelper.getItemName(BuiltInRegistries.ITEM.get(new ResourceLocation(entry.getAsString()))); // TODO remove
+				name = ObjectHelper.getItemName(BuiltInRegistries.ITEM.get(ResourceLocation.read(entry.getAsString()).getOrThrow())); // TODO remove
 			}
 			else if (entry.isJsonObject()) {
 				JsonObject obj = entry.getAsJsonObject();
@@ -60,13 +60,13 @@ public class HaulingTablePrintHandler {
 					entryNotes.append("This entry will only roll ").append(LootTableHelper.getConditionDescription(new PlayerHasLevel(AoASkills.HAULING.get(), obj.get("level").getAsInt())));
 
 				if (obj.has("item")) {
-					ResourceLocation id = new ResourceLocation(obj.get("item").getAsString());
+					ResourceLocation id = ResourceLocation.read(obj.get("item").getAsString()).getOrThrow();
 
 					type = "item";
 					name = ObjectHelper.getItemName(BuiltInRegistries.ITEM.get(id));
 				}
 				else {
-					name = ObjectHelper.getEntityName(BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(obj.get("entity").getAsString())));
+					name = ObjectHelper.getEntityName(BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.read(obj.get("entity").getAsString()).getOrThrow()));
 				}
 			}
 
@@ -142,7 +142,7 @@ public class HaulingTablePrintHandler {
 				JsonArray biomeArray = rawTable.getAsJsonArray("biomes");
 
 				if (biomeArray.size() == 1) {
-					notesBuilder.append("This table applies to the ").append(ObjectHelper.getBiomeName(ResourceKey.create(Registries.BIOME, new ResourceLocation(biomeArray.get(0).getAsString())))).append(" biome");
+					notesBuilder.append("This table applies to the ").append(ObjectHelper.getBiomeName(ResourceKey.create(Registries.BIOME, ResourceLocation.read(biomeArray.get(0).getAsString()).getOrThrow()))).append(" biome");
 				}
 				else {
 					notesBuilder.append("This table to applies to the following biomes:\n");
@@ -151,7 +151,7 @@ public class HaulingTablePrintHandler {
 						if (i > 0)
 							notesBuilder.append("\n");
 
-						notesBuilder.append("* ").append(ObjectHelper.getBiomeName(ResourceKey.create(Registries.BIOME, new ResourceLocation(biomeArray.get(i).getAsString()))));
+						notesBuilder.append("* ").append(ObjectHelper.getBiomeName(ResourceKey.create(Registries.BIOME, ResourceLocation.read(biomeArray.get(i).getAsString()).getOrThrow())));
 					}
 				}
 			}

@@ -47,7 +47,7 @@ public class LootTableHelper {
 		CONDITION_DESCRIPTORS.put(PlayerHasLevel.class, new PlayerHasLevelConditionHelper());
 		CONDITION_DESCRIPTORS.put(PlayerHasResource.class, new PlayerHasResourceConditionHelper());
 		CONDITION_DESCRIPTORS.put(LootItemRandomChanceCondition.class, new RandomChanceConditionHelper());
-		CONDITION_DESCRIPTORS.put(LootItemRandomChanceWithLootingCondition.class, new RandomChanceWithLootingConditionHelper());
+		CONDITION_DESCRIPTORS.put(LootItemRandomChanceWithEnchantedBonusCondition.class, new RandomChanceWithLootingConditionHelper());
 		CONDITION_DESCRIPTORS.put(BonusLevelTableCondition.class, new TableBonusConditionHelper());
 		CONDITION_DESCRIPTORS.put(WeatherCheck.class, new WeatherCheckConditionHelper());
 
@@ -122,7 +122,7 @@ public class LootTableHelper {
 		int index = 0;
 
 		for (LootItemFunction function : functionsArray) {
-			if (function instanceof SetItemCountFunction || function instanceof LootingEnchantFunction)
+			if (function instanceof SetItemCountFunction || function instanceof EnchantedCountIncreaseFunction)
 				continue;
 
 			String functionDescription = getFunctionDescription(function);
@@ -420,7 +420,7 @@ public class LootTableHelper {
 
 	private static String getLootingString(List<LootItemFunction> functions) {
 		for (LootItemFunction function : functions) {
-			if (function instanceof LootingEnchantFunction bonus)
+			if (function instanceof EnchantedCountIncreaseFunction bonus)
 				return FormattingHelper.getStringFromRange(bonus.value);
 		}
 

@@ -127,10 +127,10 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 				BaseBlaster blaster = (BaseBlaster)item;
 				ItemStack stack = blaster.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(blaster);
-				String damage = FormattingHelper.healthValue((float)blaster.getBlasterDamage(stack));
+				String damage = FormattingHelper.healthValue(blaster.getBlasterDamage(stack));
 				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValueFromItem(blaster, Attributes.ATTACK_SPEED) + 4), 2) + "s";
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)blaster.getTicksBetweenShots(stack), 2) + "/sec";
-				String energyCost = NumberUtil.roundToNthDecimalPlace(blaster.getBaseEnergyCost(stack), 2);
+				String energyCost = NumberUtil.roundToNthDecimalPlace(blaster.getSpiritCost(stack, cmd.getSource().getPlayer(), true), 2);
 				String durability = String.valueOf(blaster.getMaxDamage(new ItemStack(blaster)));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(blaster, AoAWeapons.BONE_BLASTER.get());
 

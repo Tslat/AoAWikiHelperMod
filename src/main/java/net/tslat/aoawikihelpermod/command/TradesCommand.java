@@ -27,8 +27,8 @@ import java.util.ArrayList;
 
 public class TradesCommand implements Command<CommandSourceStack> {
 	private static final TradesCommand CMD = new TradesCommand();
-	private static final SuggestionProvider<CommandSourceStack> PROFESSIONS_SUGGESTIONS_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "merchant_trades"), (context, builder) -> SharedSuggestionProvider.suggestResource(MerchantsSkimmer.TRADE_PRINTERS_BY_PROFESSION.keySet().stream().map(BuiltInRegistries.VILLAGER_PROFESSION::getKey), builder));
-	private static final SuggestionProvider<CommandSourceStack> AOA_TRADERS_SUGGESTIONS_PROVIDER = SuggestionProviders.register(new ResourceLocation(AoAWikiHelperMod.MOD_ID, "aoa_traders"), (context, builder) -> SharedSuggestionProvider.suggestResource(MerchantsSkimmer.TRADE_PRINTERS_BY_AOA_TRADER.keySet().stream(), builder));
+	private static final SuggestionProvider<CommandSourceStack> PROFESSIONS_SUGGESTIONS_PROVIDER = SuggestionProviders.register(ResourceLocation.fromNamespaceAndPath(AoAWikiHelperMod.MOD_ID, "merchant_trades"), (context, builder) -> SharedSuggestionProvider.suggestResource(MerchantsSkimmer.TRADE_PRINTERS_BY_PROFESSION.keySet().stream().map(BuiltInRegistries.VILLAGER_PROFESSION::getKey), builder));
+	private static final SuggestionProvider<CommandSourceStack> AOA_TRADERS_SUGGESTIONS_PROVIDER = SuggestionProviders.register(ResourceLocation.fromNamespaceAndPath(AoAWikiHelperMod.MOD_ID, "aoa_traders"), (context, builder) -> SharedSuggestionProvider.suggestResource(MerchantsSkimmer.TRADE_PRINTERS_BY_AOA_TRADER.keySet().stream(), builder));
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("trades").executes(CMD);

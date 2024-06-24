@@ -2,6 +2,7 @@ package net.tslat.aoawikihelpermod.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Axis;
@@ -91,7 +92,7 @@ public final class RenderUtil {
 					BlockEntity blockEntity = entityBlock.newBlockEntity(pos, block);
 
 					if (blockEntity != null)
-						Minecraft.getInstance().getBlockEntityRenderDispatcher().render(blockEntity, Minecraft.getInstance().getPartialTick(), matrix, renderBuffer);
+						Minecraft.getInstance().getBlockEntityRenderDispatcher().render(blockEntity, Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false), matrix, renderBuffer);
 				}
 
 				/*if (changeLighting)
@@ -103,8 +104,7 @@ public final class RenderUtil {
 			}
 			case INVISIBLE -> {
 				if (block.getBlock() instanceof LiquidBlock liquidBlock) {
-					Tesselator tesselator = Tesselator.getInstance();
-					BufferBuilder builder = tesselator.getBuilder();
+					BufferBuilder buffer = null;
 
 					try {
 						FluidState fluidState = block.getFluidState();
@@ -114,16 +114,15 @@ public final class RenderUtil {
 						if (renderType == RenderType.translucent())
 							renderType = RenderType.solid(); // TODO figure out why tf translucent isn't working
 
+						buffer = Tesselator.getInstance().begin(renderType.mode(), renderType.format());
+
 						renderType.setupRenderState();
 						worldStack.pushMatrix();
 						worldStack.mul(matrix.last().pose());
 						RenderSystem.applyModelViewMatrix();
 
-						builder.begin(renderType.mode(), renderType.format());
-						blockRenderer.renderLiquid(pos, FakeWorld.INSTANCE.get(), builder, block, fluidState);
-
-						if (builder.building())
-							tesselator.end();
+						blockRenderer.renderLiquid(pos, FakeWorld.INSTANCE.get(), buffer, block, fluidState);
+						BufferUploader.drawWithShader(buffer.buildOrThrow());
 
 						renderType.clearRenderState();
 						worldStack.popMatrix();
@@ -131,16 +130,17 @@ public final class RenderUtil {
 					}
 					catch (Exception ex) {
 						ex.printStackTrace();
-
-						if (builder.building())
-							tesselator.end();
+					}
+					finally {
+						if (buffer != null)
+							BufferUploader.drawWithShader(buffer.buildOrThrow());
 					}
 				}
 				else if (block.getBlock() instanceof EntityBlock entityBlock) {
 					BlockEntity blockEntity = entityBlock.newBlockEntity(pos, block);
 
 					if (blockEntity != null)
-						Minecraft.getInstance().getBlockEntityRenderDispatcher().render(blockEntity, Minecraft.getInstance().getPartialTick(), matrix, renderBuffer);
+						Minecraft.getInstance().getBlockEntityRenderDispatcher().render(blockEntity, Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false), matrix, renderBuffer);
 				}
 			}
 		}

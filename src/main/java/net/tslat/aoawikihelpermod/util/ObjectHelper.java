@@ -83,7 +83,7 @@ public class ObjectHelper {
 	}
 
 	public static ItemAttributeModifiers getAttributesForItem(Item item) {
-		return item.getAttributeModifiers(item.getDefaultInstance());
+		return item.getDefaultAttributeModifiers(item.getDefaultInstance());
 	}
 
 	public static boolean itemHasAttribute(Item item, Holder<Attribute> attribute) {
@@ -126,7 +126,7 @@ public class ObjectHelper {
 		AttributeInstance instance = new AttributeInstance(attribute, consumer -> {});
 
 		for (AttributeModifier modifier : modifiers) {
-			if (!instance.hasModifier(modifier))
+			if (!instance.hasModifier(modifier.id()))
 				instance.addTransientModifier(modifier);
 		}
 
@@ -168,10 +168,10 @@ public class ObjectHelper {
 		String ownerId;
 
 		if (obj.has("item")) {
-			return getFormattedItemDetails(new ResourceLocation(GsonHelper.getAsString(obj, "item")));
+			return getFormattedItemDetails(ResourceLocation.read(GsonHelper.getAsString(obj, "item")).getOrThrow());
 		}
 		else if (obj.has("id")) {
-			return getFormattedItemDetails(new ResourceLocation(GsonHelper.getAsString(obj, "id")));
+			return getFormattedItemDetails(ResourceLocation.read(GsonHelper.getAsString(obj, "id")).getOrThrow());
 		}
 		else if (obj.has("tag")) {
 			ingredientName = GsonHelper.getAsString(obj, "tag");
@@ -182,7 +182,7 @@ public class ObjectHelper {
 			ownerId = ingredientName.split(":")[0];
 			RecipePrintHandler.PrintableIngredient ingredient = new RecipePrintHandler.PrintableIngredient(ownerId, ingredientName);
 
-			ingredient.setCustomImageName(getSampleElementForTag(new ResourceLocation(ingredientName)) + ".png");
+			ingredient.setCustomImageName(getSampleElementForTag(ResourceLocation.read(ingredientName).getOrThrow()) + ".png");
 
 			return ingredient;
 		}
@@ -200,10 +200,10 @@ public class ObjectHelper {
 				return null;
 
 			if (obj.has("item")) {
-				return new ResourceLocation(GsonHelper.getAsString(obj, "item"));
+				return ResourceLocation.read(GsonHelper.getAsString(obj, "item")).getOrThrow();
 			}
 			else if (obj.has("id")) {
-				return new ResourceLocation(GsonHelper.getAsString(obj, "id"));
+				return ResourceLocation.read(GsonHelper.getAsString(obj, "id")).getOrThrow();
 			}
 			else {
 				throw new JsonParseException("Invalidly formatted ingredient, unable to proceed.");
@@ -213,7 +213,7 @@ public class ObjectHelper {
 			return getIngredientItemId(element.getAsJsonArray().get(0));
 		}
 		else {
-			return new ResourceLocation(element.getAsString());
+			return ResourceLocation.read(element.getAsString()).getOrThrow();
 		}
 	}
 
@@ -286,11 +286,11 @@ public class ObjectHelper {
 		return StringUtil.toTitleCase(BuiltInRegistries.FLUID.getKey(fluid).getPath());
 	}
 
-	public static String getEnchantmentName(Enchantment enchant, int level) {
+	public static String getEnchantmentName(Holder<Enchantment> enchant, int level) {
 		if (level <= 0)
-			return Component.translatable(enchant.getDescriptionId()).getString();
+			return enchant.value().description().getString();
 
-		return enchant.getFullname(level).getString();
+		return Enchantment.getFullname(enchant, level).getString();
 	}
 
 	public static RecipePrintHandler.PrintableIngredient getFormattedItemDetails(ResourceLocation id) {
@@ -312,7 +312,7 @@ public class ObjectHelper {
 			ingredient = getIngredientName(obj);
 		}
 		else {
-			ingredient = getFormattedItemDetails(new ResourceLocation(element.getAsString()));
+			ingredient = getFormattedItemDetails(ResourceLocation.read(element.getAsString()).getOrThrow());
 		}
 
 		ingredient.count = count;
@@ -418,8 +418,8 @@ public class ObjectHelper {
 		else if (entry instanceof Biome) {
 			namingFunction = biome -> ObjectHelper.getBiomeName(ServerLifecycleHooks.getCurrentServer().registryAccess().registry(Registries.BIOME).get().getKey((Biome)biome));
 		}
-		else if (entry instanceof Enchantment) {
-			namingFunction = enchant -> ObjectHelper.getEnchantmentName((Enchantment)enchant, 0);
+		else if (entry instanceof Holder holder && holder.value() instanceof Enchantment) {
+			namingFunction = enchant -> ObjectHelper.getEnchantmentName(holder, 0);
 		}
 		else if (entry instanceof Fluid) {
 			namingFunction = fluid -> ObjectHelper.getFluidName((Fluid)fluid);

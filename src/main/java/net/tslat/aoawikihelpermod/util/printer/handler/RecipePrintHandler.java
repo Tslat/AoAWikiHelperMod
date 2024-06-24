@@ -171,7 +171,7 @@ public abstract class RecipePrintHandler {
 						return addIngredient(ele.getAsJsonObject());
 					}
 					else if (ele.isJsonPrimitive()) {
-						PrintableIngredient ingredient = ObjectHelper.getFormattedItemDetails(new ResourceLocation(ele.getAsString()));
+						PrintableIngredient ingredient = ObjectHelper.getFormattedItemDetails(ResourceLocation.read(ele.getAsString()).getOrThrow());
 
 						addIngredient(ingredient, -1);
 
@@ -181,7 +181,7 @@ public abstract class RecipePrintHandler {
 			}
 
 			if (element.isJsonPrimitive()) {
-				PrintableIngredient ingredient = ObjectHelper.getFormattedItemDetails(new ResourceLocation(element.getAsString()));
+				PrintableIngredient ingredient = ObjectHelper.getFormattedItemDetails(ResourceLocation.read(element.getAsString()).getOrThrow());
 
 				addIngredient(ingredient, -1);
 

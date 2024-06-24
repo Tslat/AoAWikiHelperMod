@@ -131,7 +131,7 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 		public SuggestionProvider<CommandSourceStack> getProvider() {
 			if (provider != null) return this.provider;
 			this.provider = SuggestionProviders.register(
-					new ResourceLocation(AoAWikiHelperMod.MOD_ID, "item_" + categoryName),
+					ResourceLocation.fromNamespaceAndPath(AoAWikiHelperMod.MOD_ID, "item_" + categoryName),
 					(context, suggestionBuilder) -> SharedSuggestionProvider.suggestResource(
 							BuiltInRegistries.ITEM.keySet().stream().filter(isIdOfType()),
 							suggestionBuilder,

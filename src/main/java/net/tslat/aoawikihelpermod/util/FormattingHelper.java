@@ -8,6 +8,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.storage.loot.providers.number.*;
 import net.tslat.aoa3.util.NumberUtil;
@@ -16,6 +17,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 public class FormattingHelper {
 	public static String bold(String text) {
@@ -173,6 +175,35 @@ public class FormattingHelper {
 		}
 
 		return "1";
+	}
+
+	public static String getStringFromEnchantmentRange(LevelBasedValue range) {
+		if (range instanceof LevelBasedValue.Constant constant)
+			return NumberUtil.roundToNthDecimalPlace(constant.value(), 2);
+
+		if (range instanceof LevelBasedValue.Linear linear)
+			return NumberUtil.roundTo2Decimals(linear.base()) + " + " + NumberUtil.roundTo2Decimals(linear.perLevelAboveFirst()) + " for each additional level";
+
+		if (range instanceof LevelBasedValue.Clamped clamped)
+			return getStringFromEnchantmentRange(clamped.value()) + ", clamped between " + NumberUtil.roundTo2Decimals(clamped.min()) + " and " + NumberUtil.roundTo2Decimals(clamped.max());
+
+		if (range instanceof LevelBasedValue.Lookup lookup) {
+			StringJoiner joiner = new StringJoiner(", ");
+
+			for (Float value : lookup.values()) {
+				joiner.add(NumberUtil.roundTo2Decimals(value));
+			}
+
+			return "Level:Value: " + joiner + ", otherwise" + getStringFromEnchantmentRange(lookup.fallback());
+		}
+
+		if (range instanceof LevelBasedValue.Fraction fraction)
+			return "(" + getStringFromEnchantmentRange(fraction.numerator()) + ")/(" + getStringFromEnchantmentRange(fraction.denominator()) + ")";
+
+		if (range instanceof LevelBasedValue.LevelsSquared squared)
+			return "level*level" + (squared.added() != 0 ? " + " + NumberUtil.roundTo2Decimals(squared.added()) : "");
+
+		return "?";
 	}
 
 	public static String getTimeFromTicks(int ticks) {

@@ -110,7 +110,7 @@ public class StructuresCommand implements Command<CommandSourceStack> {
 
 			for (StructureTemplate.StructureEntityInfo entity : template.entityInfoList) {
 				if (entity.nbt.contains("id")) {
-					ResourceLocation entityId = new ResourceLocation(entity.nbt.getString("id"));
+					ResourceLocation entityId = ResourceLocation.read(entity.nbt.getString("id")).getOrThrow();
 
 					if (entities.add(entityId)) {
 						String entityName = StringUtil.toTitleCase(entityId.getPath());

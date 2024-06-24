@@ -27,7 +27,7 @@ public class StructureTemplateSkimmer extends SimplePreparableReloadListener<Map
 
 		for (ResourceLocation file : resourceManager.listResources("structures", fileName -> fileName.getPath().endsWith(".nbt")).keySet()) {
 			String filePath = file.getPath();
-			ResourceLocation resourcePath = new ResourceLocation(file.getNamespace(), filePath.substring(11, filePath.length() - 4));
+			ResourceLocation resourcePath = file.withPath(filePath.substring(11, filePath.length() - 4));
 
 			collection.put(resourcePath, Suppliers.memoize(() -> WorldUtil.getServer().getStructureManager().get(resourcePath).get()));
 		}

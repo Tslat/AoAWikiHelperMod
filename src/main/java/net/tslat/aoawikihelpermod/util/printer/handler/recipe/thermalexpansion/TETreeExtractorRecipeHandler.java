@@ -82,7 +82,7 @@ public class TETreeExtractorRecipeHandler extends RecipePrintHandler {
 				trunk = ObjectHelper.getIngredientName(element.getAsJsonObject());
 			}
 			else {
-				trunk = ObjectHelper.getFormattedItemDetails(new ResourceLocation(this.rawRecipe.get("trunk").getAsString()));
+				trunk = ObjectHelper.getFormattedItemDetails(ResourceLocation.read(this.rawRecipe.get("trunk").getAsString()).getOrThrow());
 			}
 		}
 
@@ -93,7 +93,7 @@ public class TETreeExtractorRecipeHandler extends RecipePrintHandler {
 				leaves = ObjectHelper.getIngredientName(element.getAsJsonObject());
 			}
 			else {
-				leaves = ObjectHelper.getFormattedItemDetails(new ResourceLocation(this.rawRecipe.get("leaves").getAsString()));
+				leaves = ObjectHelper.getFormattedItemDetails(ResourceLocation.read(this.rawRecipe.get("leaves").getAsString()).getOrThrow());
 			}
 		}
 
@@ -103,10 +103,10 @@ public class TETreeExtractorRecipeHandler extends RecipePrintHandler {
 			if (resultObj.has("amount"))
 				output = resultObj.get("amount").getAsInt() + " ";
 
-			output = output + ObjectHelper.getFormattedItemDetails(new ResourceLocation(resultObj.get("fluid").getAsString())).formattedName;
+			output = output + ObjectHelper.getFormattedItemDetails(ResourceLocation.read(resultObj.get("fluid").getAsString()).getOrThrow()).formattedName;
 		}
 		else {
-			output = 1000 + ObjectHelper.getFormattedItemDetails(new ResourceLocation(result.getAsString())).formattedName;
+			output = 1000 + ObjectHelper.getFormattedItemDetails(ResourceLocation.read(result.getAsString()).getOrThrow()).formattedName;
 		}
 
 		String[] printData = new String[3];

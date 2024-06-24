@@ -45,16 +45,16 @@ public class HaulingFishTableSkimmer extends SimpleJsonResourceReloadListener {
 
 		for (JsonElement element : entityList) {
 			if (element.isJsonPrimitive()) {
-				TABLES_BY_LOOT.put(new ResourceLocation(element.getAsString()), tableId); // TODO remove
+				TABLES_BY_LOOT.put(ResourceLocation.read(element.getAsString()).getOrThrow(), tableId); // TODO remove
 			}
 			else if (element.isJsonObject()) {
 				JsonObject obj = element.getAsJsonObject();
 
 				if (obj.has("item")) {
-					TABLES_BY_LOOT.put(new ResourceLocation(obj.get("item").getAsString()), tableId);
+					TABLES_BY_LOOT.put(ResourceLocation.read(obj.get("item").getAsString()).getOrThrow(), tableId);
 				}
 				else {
-					ResourceLocation id = new ResourceLocation(obj.get("entity").getAsString());
+					ResourceLocation id = ResourceLocation.read(obj.get("entity").getAsString()).getOrThrow();
 
 					if (ObjectHelper.isItem(id))
 						TABLES_BY_LOOT.put(id, tableId);

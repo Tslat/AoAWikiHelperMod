@@ -128,7 +128,7 @@ public class BlocksCommand implements Command<CommandSourceStack> {
 		public SuggestionProvider<CommandSourceStack> getProvider() {
 			if(provider != null)return this.provider;
 			this.provider = SuggestionProviders.register(
-					new ResourceLocation(AoAWikiHelperMod.MOD_ID, "blocks"),
+					ResourceLocation.fromNamespaceAndPath(AoAWikiHelperMod.MOD_ID, "blocks"),
 					(context, suggestionBuilder) -> SharedSuggestionProvider.suggestResource(
 							BuiltInRegistries.BLOCK.keySet(),
 							suggestionBuilder,

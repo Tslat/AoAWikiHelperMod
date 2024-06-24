@@ -1,6 +1,5 @@
 package net.tslat.aoawikihelpermod.util;
 
-import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.Holder;
@@ -9,7 +8,6 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.food.FoodProperties;
@@ -27,7 +25,6 @@ import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
 import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
 import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
 import net.tslat.aoa3.util.NumberUtil;
-import net.tslat.aoa3.util.ObjectUtil;
 import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
@@ -251,7 +248,7 @@ public class WikiTemplateHelper {
 				.entry("environment", "")
 				.optionalEntry("hostility", instance instanceof Enemy ? "Hostile" : instance instanceof NeutralMob ? "Neutral" : "Passive")
 				.optionalEntry("classification", StringUtil.toTitleCase(entity.getCategory().getName()))
-				.optionalEntry("xp", livingInstance == null ? null : String.valueOf(livingInstance.getExperienceReward()))
+				.optionalEntry("xp", livingInstance == null ? null : String.valueOf(livingInstance.getExperienceReward(level, level.players().getFirst())))
 				.optionalEntry("knockbackresist", getRoundedAttributeValue(livingInstance, Attributes.KNOCKBACK_RESISTANCE))
 				.entry("id", RegistryUtil.getId(entity).toString())
 				.entry("versionadded", "");

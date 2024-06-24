@@ -20,7 +20,7 @@ public class EnchantSpecificFunctionHelper extends LootFunctionHelper<EnchantSpe
 		ArrayList<String> enchantNames = new ArrayList<>();
 
 		for (Object2IntMap.Entry<Holder<Enchantment>> enchant : enchants.entrySet()) {
-			enchantNames.add(ObjectHelper.getEnchantmentName(enchant.getKey().value(), enchant.getIntValue()));
+			enchantNames.add(ObjectHelper.getEnchantmentName(enchant.getKey(), enchant.getIntValue()));
 		}
 
 		return "will be enchanted with:<br/>" + FormattingHelper.listToString(enchantNames, false);

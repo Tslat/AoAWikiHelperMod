@@ -1,8 +1,8 @@
 package net.tslat.aoawikihelpermod.render;
 
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.commands.CommandSourceStack;
@@ -82,7 +82,7 @@ public class EntityIsoPrinter extends IsometricPrinterScreen {
 
 		withAlignedIsometricProjection(matrix, () -> {
 			EntityRenderDispatcher renderManager = this.minecraft.getEntityRenderDispatcher();
-			MultiBufferSource.BufferSource renderBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+			MultiBufferSource.BufferSource renderBuffer = MultiBufferSource.immediate(new ByteBufferBuilder(786432));
 
 			RenderUtil.setupFakeGuiLighting();
 			renderManager.setRenderShadow(false);
