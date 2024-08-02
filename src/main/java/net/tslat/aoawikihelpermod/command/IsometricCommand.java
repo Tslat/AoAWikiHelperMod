@@ -334,11 +334,11 @@ public class IsometricCommand implements Command<CommandSourceStack> {
 		final ItemStack chestplate = ItemArgument.getItem(context, "chestplate").createItemStack(1, false);
 		final ItemStack helmet = ItemArgument.getItem(context, "helmet").createItemStack(1, false);
 
-		for (ItemStack stack : new ItemStack[] {boots, leggings, chestplate, helmet}) {
+		for (ItemStack stack : new ItemStack[] {helmet, chestplate, leggings, boots}) {
 			final CompoundTag piece = new CompoundTag();
 
 			piece.putString("id", RegistryUtil.getId(stack.getItem()).toString());
-			piece.putInt("Count", 1);
+			piece.putInt("count", 1);
 
 			armorItems.add(piece);
 		}
