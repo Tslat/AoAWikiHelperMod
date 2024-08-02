@@ -1,5 +1,5 @@
 plugins {
-    id 'net.neoforged.gradle.userdev' version '7.0.145'
+    id 'net.neoforged.gradle.userdev' version '7.0.157'
 }
 
 version = "${wikihelper_version}"
@@ -51,7 +51,7 @@ dependencies {
     implementation "net.neoforged:neoforge:$project.neoforge_version"
 
     //implementation "curse.maven:advent-of-ascension-nevermine-311054:$project.aoa_version"
-    implementation "libs:AoA3-1.21:3.7.8"
+    implementation "libs:AoA3-1.21:3.7.13"
     compileOnly "software.bernie.geckolib:geckolib-neoforge-${project.minecraft_version}:${project.geckolib_version}"
 }
 

@@ -50,7 +50,6 @@ import net.tslat.aoa3.util.WorldUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -179,6 +178,22 @@ public class FakeWorld extends Level implements WorldGenLevel {
 	public PotionBrewing potionBrewing() {
 		return null;
 	}
+
+	@Override
+	public void setDayTimeFraction(float dayTimeFraction) {}
+
+	@Override
+	public float getDayTimeFraction() {
+		return 0.5f;
+	}
+
+	@Override
+	public float getDayTimePerTick() {
+		return 0;
+	}
+
+	@Override
+	public void setDayTimePerTick(float dayTimePerTick) {}
 
 	@Override
 	public FeatureFlagSet enabledFeatures() {
