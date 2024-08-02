@@ -139,8 +139,8 @@ public class FormattingHelper {
 	}
 
 	public static String getStringFromRange(NumberProvider range) {
-		if (range instanceof ConstantValue)
-			return NumberUtil.roundToNthDecimalPlace(((ConstantValue)range).value(), 2);
+		if (range instanceof ConstantValue constant)
+			return NumberUtil.roundToNthDecimalPlace(constant.value(), 2);
 
 		if (range instanceof BinomialDistributionGenerator)
 			return "0+";
