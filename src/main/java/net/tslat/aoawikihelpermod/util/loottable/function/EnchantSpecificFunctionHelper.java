@@ -10,7 +10,6 @@ import net.tslat.aoawikihelpermod.util.ObjectHelper;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Map;
 
 public class EnchantSpecificFunctionHelper extends LootFunctionHelper<EnchantSpecific> {
 	@Nonnull
