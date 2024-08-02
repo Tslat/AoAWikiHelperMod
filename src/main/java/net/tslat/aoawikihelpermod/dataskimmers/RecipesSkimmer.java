@@ -19,8 +19,6 @@ import net.tslat.aoa3.util.WorldUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.printer.handler.RecipePrintHandler;
 import net.tslat.aoawikihelpermod.util.printer.handler.recipe.*;
-import net.tslat.aoawikihelpermod.util.printer.handler.recipe.immersivenegineering.IEClocheRecipeHandler;
-import net.tslat.aoawikihelpermod.util.printer.handler.recipe.thermalexpansion.*;
 import org.apache.logging.log4j.Level;
 
 import java.util.HashMap;
@@ -52,14 +50,6 @@ public class RecipesSkimmer extends SimpleJsonResourceReloadListener {
 		RECIPE_HANDLERS.put("aoa3:imbuing", ImbuingRecipeHandler::new);
 		RECIPE_HANDLERS.put("aoa3:infusion", InfusionRecipeHandler::new);
 		RECIPE_HANDLERS.put("aoa3:trophy", GoldTrophyRecipeHandler::new);
-
-		RECIPE_HANDLERS.put("thermal:tree_extractor", TETreeExtractorRecipeHandler::new);
-		RECIPE_HANDLERS.put("thermal:sawmill", TESawmillRecipeHandler::new);
-		RECIPE_HANDLERS.put("thermal:pulverizer", TEPulverizerRecipeHandler::new);
-		RECIPE_HANDLERS.put("thermal:chiller", TEChillerRecipeHandler::new);
-		RECIPE_HANDLERS.put("thermal:insolator", TEInsolatorRecipeHandler::new);
-
-		RECIPE_HANDLERS.put("immersiveengineering:cloche", IEClocheRecipeHandler::new);
 	}
 
 	public static Set<ResourceLocation> getRecipesByOutput(ResourceLocation outputId) {
@@ -81,7 +71,7 @@ public class RecipesSkimmer extends SimpleJsonResourceReloadListener {
 	}
 
 	public RecipesSkimmer() {
-		super(AoAWikiHelperMod.GSON, "recipes");
+		super(AoAWikiHelperMod.GSON, "recipe");
 	}
 
 	public static void registerRecipeHandler(String recipeType, RecipePrintHandler.Factory handlerFactory) {

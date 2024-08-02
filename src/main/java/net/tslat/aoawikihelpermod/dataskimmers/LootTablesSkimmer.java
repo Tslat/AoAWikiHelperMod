@@ -27,7 +27,7 @@ public class LootTablesSkimmer extends SimpleJsonResourceReloadListener {
 	public static final HashMultimap<ResourceLocation, ResourceLocation> TABLES_BY_LOOT = HashMultimap.create();
 
 	public LootTablesSkimmer() {
-		super(AoAWikiHelperMod.GSON, "loot_tables");
+		super(AoAWikiHelperMod.GSON, "loot_table");
 	}
 
 	@Override
