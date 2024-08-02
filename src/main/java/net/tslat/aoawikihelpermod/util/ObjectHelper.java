@@ -161,13 +161,16 @@ public class ObjectHelper {
 	}
 
 	public static RecipePrintHandler.PrintableIngredient getIngredientName(JsonObject obj) {
-		if (((obj.has("item") || obj.has("id")) && obj.has("tag")) || (!(obj.has("item") || obj.has("id")) && !obj.has("tag")))
+		if (!obj.has("type") && (((obj.has("item") || obj.has("id")) && obj.has("tag")) || (!(obj.has("item") || obj.has("id")) && !obj.has("tag"))))
 			throw new JsonParseException("Invalidly formatted ingredient, unable to proceed.");
 
 		String ingredientName;
 		String ownerId;
 
-		if (obj.has("item")) {
+		if (obj.has("type")) {
+			return new RecipePrintHandler.PrintableIngredient("?", "?");
+		}
+		else if (obj.has("item")) {
 			return getFormattedItemDetails(ResourceLocation.read(GsonHelper.getAsString(obj, "item")).getOrThrow());
 		}
 		else if (obj.has("id")) {
@@ -196,7 +199,7 @@ public class ObjectHelper {
 		if (element.isJsonObject()) {
 			JsonObject obj = element.getAsJsonObject();
 
-			if (obj.has("tag"))
+			if (obj.has("tag") || obj.has("type"))
 				return null;
 
 			if (obj.has("item")) {
