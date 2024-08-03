@@ -38,11 +38,11 @@ public class TagCategoryPrintHandler {
 	}
 
 	private void prepTags() {
-		if (namespacedTags != null)
+		if (this.namespacedTags != null)
 			return;
 
-		namespacedTags = HashMultimap.create();
-		tags.get().forEachOrdered(tagKey -> namespacedTags.put(tagKey.location().getNamespace(), tagKey));
+		this.namespacedTags = HashMultimap.create();
+		this.tags.get().forEachOrdered(tagKey -> this.namespacedTags.put(tagKey.location().getNamespace(), tagKey));
 	}
 
 	@Nullable

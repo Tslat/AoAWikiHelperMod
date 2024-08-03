@@ -6,12 +6,14 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.storage.loot.providers.number.*;
 import net.tslat.aoa3.util.NumberUtil;
+import net.tslat.aoa3.util.StringUtil;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -52,18 +54,18 @@ public class FormattingHelper {
 		return createLinkableText(ObjectHelper.getItemName(object.asItem()), pluralise, shouldLink);
 	}
 
-	public static String createLinkableTag(String tag, Object sampleObjectFromTagTypeRegistry) {
-		Registry registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
-		ResourceLocation registryId = registryForObject.getKey(sampleObjectFromTagTypeRegistry);
+	public static String createLinkableTag(String tag, ResourceKey<? extends Registry<?>> registry) {
+		ResourceLocation registryId = registry.location();
+		String objectType = StringUtil.toTitleCase(registryId.getPath());
 
-		return tooltip(tag, "Any " + registryId.getPath().replaceAll("_", "") + " tagged as " + tag) + " ([[Tags#" + registryId + ":" + tag + "|Tag]])";
+		return tooltip(tag, "Any " + objectType + " tagged as " + tag) + " ([[Tags/" + objectType + "#" + registryId + ":" + tag + "|Tag]])";
 	}
 
-	public static String createTagIngredientDescription(String tag, Object sampleObjectFromTagTypeRegistry) {
-		Registry registryForObject = ObjectHelper.getRegistryForObject(sampleObjectFromTagTypeRegistry);
-		ResourceLocation registryId = registryForObject.getKey(sampleObjectFromTagTypeRegistry);
+	public static String createTagIngredientDescription(String tag, ResourceKey<? extends Registry<?>> registry) {
+		ResourceLocation registryId = registry.location();
+		String objectType = StringUtil.toTitleCase(registryId.getPath());
 
-		return "Any " + registryId.getPath().replaceAll("_", "") + " tagged as " + "[[Tags#" + registryId + ":" + tag + "|" + tag + "]]";
+		return "Any " + objectType + " tagged as " + "[[Tags/" + objectType + "#" + registryId + ":" + tag + "|" + tag + "]]";
 	}
 
 	public static String createLinkableText(String text, boolean pluralise) {

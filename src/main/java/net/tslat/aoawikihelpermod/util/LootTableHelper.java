@@ -3,6 +3,7 @@ package net.tslat.aoawikihelpermod.util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
@@ -318,7 +319,7 @@ public class LootTableHelper {
 		if (!looting.isEmpty())
 			entryBuilder.append(" looting:").append(looting).append(";");
 
-		entryNotesBuilder.append("Randomly selects item from anything tagged as ").append(FormattingHelper.createLinkableTag(entry.tag.location().toString(), Items.STONE));
+		entryNotesBuilder.append("Randomly selects item from anything tagged as ").append(FormattingHelper.createLinkableTag(entry.tag.location().toString(), Registries.ITEM));
 
 		if (entry.quality != 0) {
 			if (!entryNotesBuilder.isEmpty())

@@ -1,10 +1,10 @@
 package net.tslat.aoawikihelpermod.util.printer.handler.recipe;
 
 import com.google.gson.JsonObject;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import net.minecraft.world.level.block.Blocks;
@@ -77,7 +77,7 @@ public class SmokingRecipeHandler extends RecipePrintHandler {
 		int cookingTime = GsonHelper.getAsInt(rawRecipe, "cookingtime", 100);
 
 		String[] printData = new String[] {
-				(input.formattedName.contains(":") ? FormattingHelper.createTagIngredientDescription(input.formattedName, Items.STICK) : FormattingHelper.createLinkableText(input.formattedName, false, !input.matches(targetName))) +
+				(input.formattedName.contains(":") ? FormattingHelper.createTagIngredientDescription(input.formattedName, Registries.ITEM) : FormattingHelper.createLinkableText(input.formattedName, false, !input.matches(targetName))) +
 						" can be processed in a " +
 						FormattingHelper.createLinkableItem(Blocks.SMOKER, false, true) +
 						" to produce " +
