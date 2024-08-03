@@ -2,7 +2,10 @@ package net.tslat.aoawikihelpermod.dataskimmers;
 
 import com.google.common.collect.HashMultimap;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -11,11 +14,9 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeManager;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.tslat.aoa3.content.recipe.InfusionRecipe;
 import net.tslat.aoa3.util.RegistryUtil;
-import net.tslat.aoa3.util.WorldUtil;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.printer.handler.RecipePrintHandler;
 import net.tslat.aoawikihelpermod.util.printer.handler.recipe.*;
@@ -46,10 +47,14 @@ public class RecipesSkimmer extends SimpleJsonResourceReloadListener {
 		RECIPE_HANDLERS.put("minecraft:crafting_special_firework_rocket", FireworkRecipeHandler::new);
 		RECIPE_HANDLERS.put("minecraft:crafting_special_shulkerboxcoloring", ShulkerColourRecipeHandler::new);
 		RECIPE_HANDLERS.put("minecraft:crafting_special_suspiciousstew", SuspiciousStewRecipeHandler::new);
+		RECIPE_HANDLERS.put("minecraft:crafting_special_mapextending", MapExtendingRecipeHandler::new);
 		RECIPE_HANDLERS.put("aoa3:upgrade_kit", UpgradeKitRecipeHandler::new);
+		RECIPE_HANDLERS.put("aoa3:whitewashing", WhitewashingRecipeHandler::new);
 		RECIPE_HANDLERS.put("aoa3:imbuing", ImbuingRecipeHandler::new);
 		RECIPE_HANDLERS.put("aoa3:infusion", InfusionRecipeHandler::new);
-		RECIPE_HANDLERS.put("aoa3:trophy", GoldTrophyRecipeHandler::new);
+		RECIPE_HANDLERS.put("aoa3:gold_trophy", GoldTrophyRecipeHandler::new);
+		RECIPE_HANDLERS.put("aoa3:ashfern_cooking", AshfernCookingRecipeHandler::new);
+		RECIPE_HANDLERS.put("aoa3:tool_interaction", ToolInteractionRecipeHandler::new);
 	}
 
 	public static Set<ResourceLocation> getRecipesByOutput(ResourceLocation outputId) {
@@ -86,6 +91,7 @@ public class RecipesSkimmer extends SimpleJsonResourceReloadListener {
 		RECIPE_PRINTERS.clear();
 		RECIPES_BY_INGREDIENT.clear();
 		RECIPES_BY_OUTPUT.clear();
+		RegistryOps<JsonElement> registryops = this.makeConditionalOps();
 
 		for (Map.Entry<ResourceLocation, JsonElement> entry : jsonMap.entrySet()) {
 			ResourceLocation id = entry.getKey();
@@ -98,7 +104,7 @@ public class RecipesSkimmer extends SimpleJsonResourceReloadListener {
 				Recipe<?> recipe = null;
 
 				try {
-					recipe = RecipeManager.fromJson(id, json.getAsJsonObject(), WorldUtil.getServer().registryAccess()).value();
+					recipe = Recipe.CONDITIONAL_CODEC.parse(registryops, entry.getValue()).getOrThrow(JsonParseException::new).get().carrier();
 				}
 				catch (Exception ex) {
 					AoAWikiHelperMod.LOGGER.log(Level.WARN, "Unknown recipe found: " + id + ", using only json format.");
@@ -123,11 +129,20 @@ public class RecipesSkimmer extends SimpleJsonResourceReloadListener {
 
 					@Override
 					public void run() {
-						if (this.recipe != null) {
-							populateIngredientsByRecipe(this.recipeId, this.recipe);
+						final Set<ResourceLocation> byIngredient = new ObjectOpenHashSet<>();
+						final Set<ResourceLocation> byOutput = new ObjectOpenHashSet<>();
+
+						if (this.recipe != null)
+							populateIngredientsByRecipe(byIngredient, byOutput, this.recipeId, this.recipe);
+
+						populateIngredientsByHandler(byIngredient, byOutput, this.recipeId, this.printHandler);
+
+						for (ResourceLocation ingredient : byIngredient) {
+							RECIPES_BY_INGREDIENT.put(ingredient, id);
 						}
-						else {
-							populateIngredientsByHandler(this.recipeId, this.printHandler);
+
+						for (ResourceLocation output : byOutput) {
+							RECIPES_BY_OUTPUT.put(output, id);
 						}
 					}
 				});
@@ -140,30 +155,25 @@ public class RecipesSkimmer extends SimpleJsonResourceReloadListener {
 		}
 	}
 
-	private void populateIngredientsByRecipe(ResourceLocation id, Recipe<?> recipe) {
+	private void populateIngredientsByRecipe(Set<ResourceLocation> byIngredient, Set<ResourceLocation> byOutput, ResourceLocation id, Recipe<?> recipe) {
 		for (Ingredient ingredient : recipe.getIngredients()) {
 			for (ItemStack stack : ingredient.getItems()) {
-				RECIPES_BY_INGREDIENT.put(RegistryUtil.getId(stack.getItem()), id);
+				byIngredient.add(RegistryUtil.getId(stack.getItem()));
 			}
 
 			if (recipe instanceof InfusionRecipe infusionRecipe) {
 				for (ItemStack stack : infusionRecipe.getInput().getItems()) {
-					RECIPES_BY_INGREDIENT.put(RegistryUtil.getId(stack.getItem()), id);
+					byIngredient.add(RegistryUtil.getId(stack.getItem()));
 				}
 			}
 		}
 
-		RECIPES_BY_OUTPUT.put(RegistryUtil.getId(recipe.getResultItem(ServerLifecycleHooks.getCurrentServer().registryAccess()).getItem()), id);
+		byOutput.add(RegistryUtil.getId(recipe.getResultItem(ServerLifecycleHooks.getCurrentServer().registryAccess()).getItem()));
 	}
 
-	private void populateIngredientsByHandler(ResourceLocation id, RecipePrintHandler recipePrintHandler) {
-		for (ResourceLocation ingredient : recipePrintHandler.getIngredientsForLookup()) {
-			RECIPES_BY_INGREDIENT.put(ingredient, id);
-		}
-
-		for (ResourceLocation output : recipePrintHandler.getOutputsForLookup()) {
-			RECIPES_BY_OUTPUT.put(output, id);
-		}
+	private void populateIngredientsByHandler(Set<ResourceLocation> byIngredient, Set<ResourceLocation> byOutput, ResourceLocation id, RecipePrintHandler recipePrintHandler) {
+        byIngredient.addAll(recipePrintHandler.getIngredientsForLookup());
+        byOutput.addAll(recipePrintHandler.getOutputsForLookup());
 	}
 
 	@Override

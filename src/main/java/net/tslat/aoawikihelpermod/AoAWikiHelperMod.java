@@ -7,13 +7,11 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
-import net.tslat.aoa3.advent.AdventOfAscension;
 import net.tslat.aoa3.advent.Logging;
 import net.tslat.aoa3.util.ObjectUtil;
 import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
@@ -30,9 +28,11 @@ import java.io.IOException;
 
 import static net.tslat.aoawikihelpermod.AoAWikiHelperMod.MOD_ID;
 
+// TODO: Populate ingredients for lookup from tag contents
+// TODO: ItemSubPredicate parsing RE: MatchToolConditionHelper
 @Mod(MOD_ID)
 public class AoAWikiHelperMod {
-	public static final String VERSION = "2.16.2";
+	public static final String VERSION = "2.17";
 	public static final String MOD_ID = "aoawikihelpermod";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 

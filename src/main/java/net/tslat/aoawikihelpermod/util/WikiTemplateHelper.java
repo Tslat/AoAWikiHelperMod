@@ -102,6 +102,7 @@ public class WikiTemplateHelper {
 
 		ingredientsHandler.addIngredientsToWikiTemplate(template);
 		template.entry("output", output.formattedName)
+				.optionalEntry("outputimage", output.imageName)
 				.optionalEntry("amount", output.count <= 1 ? null : String.valueOf(output.count))
 				.optionalEntry("shapeless", shapeless ? null : "1");
 

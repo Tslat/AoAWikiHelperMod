@@ -94,6 +94,12 @@ public class TagsCommand implements Command<CommandSourceStack> {
 			return 1;
 		}
 
+		if (!tagCategoryPrintHandler.hasTags()) {
+			WikiHelperCommand.error(cmd.getSource(), "Tags", "Registry type: " + tagType + " has no tags");
+
+			return 1;
+		}
+
 		for (String namespace : tagCategoryPrintHandler.getNameSpaces()) {
 			File outputFile;
 			String fileName = "Tags Overview - " + tagType.getPath() + " - " + StringUtil.toTitleCase(namespace);

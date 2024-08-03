@@ -27,6 +27,9 @@ public class PrintHelper implements AutoCloseable {
 		this.outputFile = new File(configDir, formatFileName(fileName));
 
 		try {
+			if (!configDir.exists())
+				configDir.mkdirs();
+
 			if (this.outputFile.exists())
 				this.outputFile.delete();
 

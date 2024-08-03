@@ -1,6 +1,7 @@
 package net.tslat.aoawikihelpermod.util.loottable.function;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -9,14 +10,14 @@ import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
+import java.util.List;
 
 public class EnchantSpecificFunctionHelper extends LootFunctionHelper<EnchantSpecific> {
 	@Nonnull
 	@Override
 	public String getDescription(EnchantSpecific function) {
 		ItemEnchantments enchants = function.getEnchantments();
-		ArrayList<String> enchantNames = new ArrayList<>();
+		List<String> enchantNames = new ObjectArrayList<>();
 
 		for (Object2IntMap.Entry<Holder<Enchantment>> enchant : enchants.entrySet()) {
 			enchantNames.add(ObjectHelper.getEnchantmentName(enchant.getKey(), enchant.getIntValue()));

@@ -177,21 +177,19 @@ public class ObjectHelper {
 			return getFormattedItemDetails(ResourceLocation.read(GsonHelper.getAsString(obj, "id")).getOrThrow());
 		}
 		else if (obj.has("tag")) {
-			ingredientName = GsonHelper.getAsString(obj, "tag");
-
-			if (!ingredientName.contains(":"))
-				ingredientName = "minecraft:" + ingredientName;
-
-			ownerId = ingredientName.split(":")[0];
-			RecipePrintHandler.PrintableIngredient ingredient = new RecipePrintHandler.PrintableIngredient(ownerId, ingredientName);
-
-			ingredient.setCustomImageName(getSampleElementForTag(ResourceLocation.read(ingredientName).getOrThrow()) + ".png");
-
-			return ingredient;
+			return getIngredientForTag(GsonHelper.getAsString(obj, "tag"));
 		}
 		else {
 			throw new JsonParseException("Invalidly formatted ingredient, unable to proceed.");
 		}
+	}
+
+	public static RecipePrintHandler.PrintableIngredient getIngredientForTag(String tag) {
+		if (!tag.contains(":"))
+			tag = "minecraft:" + tag;
+
+		return new RecipePrintHandler.PrintableIngredient(tag.split(":")[0], tag)
+				.setCustomImageName(getSampleElementForTag(ResourceLocation.read(tag).getOrThrow()) + ".png");
 	}
 
 	@Nullable

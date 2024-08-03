@@ -1,8 +1,10 @@
 package net.tslat.aoawikihelpermod.render;
 
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.commands.CommandSourceStack;
@@ -17,6 +19,7 @@ import net.tslat.aoawikihelpermod.command.WikiHelperCommand;
 import net.tslat.aoawikihelpermod.render.typeadapter.IsoRenderAdapter;
 import net.tslat.aoawikihelpermod.util.fakeworld.FakeWorld;
 import net.tslat.aoawikihelpermod.util.printer.PrintHelper;
+import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -84,12 +87,12 @@ public class EntityIsoPrinter extends IsometricPrinterScreen {
 			EntityRenderDispatcher renderManager = this.minecraft.getEntityRenderDispatcher();
 			MultiBufferSource.BufferSource renderBuffer = MultiBufferSource.immediate(new ByteBufferBuilder(786432));
 
-			RenderUtil.setupFakeGuiLighting();
+			RenderSystem.setShaderLights(new Vector3f(0, 1f, -1).normalize(), new Vector3f(0, -0.5f, 2).normalize());
 			renderManager.setRenderShadow(false);
 
 			try {
 				if (!customRenderEntity(matrix, renderBuffer))
-					renderManager.render(this.cachedEntity, 0, 0, 0, 0, 1, matrix, renderBuffer, 15728880);
+					renderManager.render(this.cachedEntity, 0, 0, 0, 0, 1, matrix, renderBuffer, LightTexture.FULL_BRIGHT);
 			}
 			catch (Exception ex) {
 				WikiHelperCommand.error(this.commandSource, this.commandName, "Encountered an error while rendering the entity. Likely a non-standard entity of some sort. Check the log for more details.");

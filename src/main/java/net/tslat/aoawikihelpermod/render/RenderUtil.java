@@ -7,7 +7,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Axis;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -53,12 +52,7 @@ public final class RenderUtil {
 	}
 
 	public static void setupFakeGuiLighting() {
-		RenderSystem.setupGui3DDiffuseLighting(
-				Util.make(
-						new Vector3f(0.5f, 1f, 0.5f), Vector3f::normalize),
-				Util.make(
-						new Vector3f(0.6f, -1.5f, -3.5f), Vector3f::normalize
-				));
+		RenderSystem.setupGui3DDiffuseLighting(new Vector3f(0.5f, 1f, 0.5f).normalize(), new Vector3f(0.6f, -1.5f, -3.5f).normalize());
 	}
 
 	public static void renderStandardisedBlock(BlockRenderDispatcher blockRenderer, PoseStack matrix, MultiBufferSource renderBuffer, BlockState block, @Nullable BlockPos pos) {

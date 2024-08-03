@@ -12,9 +12,11 @@ import java.util.HashMap;
 import java.util.Set;
 
 public class TagDataSkimmer {
-	private static final HashMap<ResourceLocation, TagCategoryPrintHandler> DATA_BY_TAG_CATEGORY = new HashMap<>(4);
+	private static final HashMap<ResourceLocation, TagCategoryPrintHandler> DATA_BY_TAG_CATEGORY = new HashMap<>(130);
 
 	public static void init(MinecraftServer server) {
+		DATA_BY_TAG_CATEGORY.clear();
+
 		ObjectHelper.getAllRegistries().forEach(registryEntry -> {
 			final ResourceLocation registryId = registryEntry.key().location();
 

@@ -140,7 +140,7 @@ public abstract class RecipePrintHandler {
 		}
 
 		public String getFormattedOutput(@Nullable Item targetItem) {
-			return FormattingHelper.createLinkableText(output.formattedName, false, (targetItem == null || !output.matches(ObjectHelper.getItemName(targetItem))));
+			return FormattingHelper.createLinkableText(this.output.formattedName, false, !this.output.skipLink && (targetItem == null || !this.output.matches(ObjectHelper.getItemName(targetItem))));
 		}
 
 		public String getFormattedIngredient(PrintableIngredient ing, @Nullable Item targetItem) {
@@ -157,6 +157,10 @@ public abstract class RecipePrintHandler {
 		public void addOutput(ItemStack stack) {
 			this.output = ObjectHelper.getFormattedItemDetails(RegistryUtil.getId(stack.getItem()));
 			this.output.count = stack.getCount();
+		}
+
+		public void addOutput(PrintableIngredient output) {
+			this.output = output;
 		}
 
 		public String addIngredient(JsonElement element) {
@@ -244,6 +248,7 @@ public abstract class RecipePrintHandler {
 		@Nullable
 		public String imageName = null;
 		public int count;
+		public boolean skipLink = false;
 
 		public PrintableIngredient(String ownerId, String formattedName, int count) {
 			this.ownerId = ownerId;
@@ -253,6 +258,12 @@ public abstract class RecipePrintHandler {
 
 		public PrintableIngredient(String ownerId, String formattedName) {
 			this(ownerId, formattedName, 1);
+		}
+
+		public PrintableIngredient(String customText) {
+			this("", customText);
+
+			skipLink();
 		}
 
 		public void increment() {
@@ -269,6 +280,12 @@ public abstract class RecipePrintHandler {
 
 		public boolean matches(String other) {
 			return this.formattedName.equals(other);
+		}
+
+		public PrintableIngredient skipLink() {
+			this.skipLink = true;
+
+			return this;
 		}
 
 		public PrintableIngredient setCustomImageName(String imageName) {

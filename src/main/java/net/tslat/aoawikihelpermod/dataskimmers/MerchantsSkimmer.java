@@ -27,7 +27,6 @@ import net.tslat.aoa3.common.registration.entity.variant.UndeadHeraldTrade;
 import net.tslat.aoa3.content.entity.base.AoATrader;
 import net.tslat.aoa3.content.entity.npc.trader.UndeadHeraldEntity;
 import net.tslat.aoa3.util.RegistryUtil;
-import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
 import net.tslat.aoawikihelpermod.util.printer.handler.MerchantTradePrintHandler;
 
@@ -109,9 +108,7 @@ public class MerchantsSkimmer {
 
 				entity.discard();
 			}
-			catch (Exception ex) {
-				AoAWikiHelperMod.LOGGER.log(org.apache.logging.log4j.Level.ERROR, "Unable to instantiate entity, skipping", ex);
-			}
+			catch (Exception ignored) {}
 		}
 	}
 
