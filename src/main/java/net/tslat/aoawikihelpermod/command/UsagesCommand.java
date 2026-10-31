@@ -12,7 +12,7 @@ import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.tslat.aoa3.library.object.MutableSupplier;
+import net.tslat.aoa3.library.object.extension.MutableSupplier;
 import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoawikihelpermod.dataskimmers.BlockDataSkimmer;
 import net.tslat.aoawikihelpermod.dataskimmers.ItemDataSkimmer;

@@ -21,7 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.tslat.aoa3.library.object.MutableSupplier;
+import net.tslat.aoa3.library.object.extension.MutableSupplier;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoawikihelpermod.dataskimmers.StructureTemplateSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;

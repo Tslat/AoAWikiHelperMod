@@ -16,20 +16,20 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
-import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
-import net.tslat.aoa3.content.item.weapon.cannon.BaseCannon;
-import net.tslat.aoa3.content.item.weapon.crossbow.BaseCrossbow;
-import net.tslat.aoa3.content.item.weapon.greatblade.BaseGreatblade;
-import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
-import net.tslat.aoa3.content.item.weapon.maul.BaseMaul;
-import net.tslat.aoa3.content.item.weapon.shotgun.BaseShotgun;
-import net.tslat.aoa3.content.item.weapon.sniper.BaseSniper;
-import net.tslat.aoa3.content.item.weapon.staff.BaseStaff;
-import net.tslat.aoa3.content.item.weapon.sword.BaseSword;
-import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
-import net.tslat.aoa3.content.item.weapon.vulcane.BaseVulcane;
-import net.tslat.aoa3.library.object.MutableSupplier;
+import net.tslat.aoa3.content.item.weapon.blaster.AoABlaster;
+import net.tslat.aoa3.content.item.weapon.bow.AoABow;
+import net.tslat.aoa3.content.item.weapon.cannon.AoACannon;
+import net.tslat.aoa3.content.item.weapon.crossbow.AoACrossbow;
+import net.tslat.aoa3.content.item.weapon.greatblade.AoAGreatblade;
+import net.tslat.aoa3.content.item.weapon.gun.AoAGun;
+import net.tslat.aoa3.content.item.weapon.maul.AoAMaul;
+import net.tslat.aoa3.content.item.weapon.shotgun.AoAShotgun;
+import net.tslat.aoa3.content.item.weapon.sniper.AoASniper;
+import net.tslat.aoa3.content.item.weapon.staff.AoAStaff;
+import net.tslat.aoa3.content.item.weapon.sword.AoASword;
+import net.tslat.aoa3.content.item.weapon.thrown.AoAThrowableWeapon;
+import net.tslat.aoa3.content.item.weapon.vulcane.AoAVulcane;
+import net.tslat.aoa3.library.object.extension.MutableSupplier;
 import net.tslat.aoawikihelpermod.AoAWikiHelperMod;
 import net.tslat.aoawikihelpermod.dataskimmers.ItemDataSkimmer;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
@@ -146,18 +146,18 @@ public class ItemsCommand implements Command<CommandSourceStack> {
 	// Because we filter ForgeRegistry this will only contain AoA (or other mod) items
 	public static final ItemCategoryProvider ITEM_PROVIDER = new ItemCategoryProvider("item", Item.class);
 	public static final List<ItemCategoryProvider> ITEM_CATEGORY_PROVIDERS = List.of(
-			new ItemCategoryProvider("blaster", BaseBlaster.class),
-			new ItemCategoryProvider("bow", BaseBow.class),
-			new ItemCategoryProvider("cannon", BaseCannon.class),
-			new ItemCategoryProvider("crossbow", BaseCrossbow.class),
-			new ItemCategoryProvider("greatblade", BaseGreatblade.class),
-			new ItemCategoryProvider("gun", BaseGun.class),
-			new ItemCategoryProvider("maul", BaseMaul.class),
-			new ItemCategoryProvider("shotgun", BaseShotgun.class),
-			new ItemCategoryProvider("sniper", BaseSniper.class),
-			new ItemCategoryProvider("staff", BaseStaff.class),
-			new ItemCategoryProvider("sword", BaseSword.class),
-			new ItemCategoryProvider("thrown", BaseThrownWeapon.class),
-			new ItemCategoryProvider("vulcane", BaseVulcane.class)
+			new ItemCategoryProvider("blaster", AoABlaster.class),
+			new ItemCategoryProvider("bow", AoABow.class),
+			new ItemCategoryProvider("cannon", AoACannon.class),
+			new ItemCategoryProvider("crossbow", AoACrossbow.class),
+			new ItemCategoryProvider("greatblade", AoAGreatblade.class),
+			new ItemCategoryProvider("gun", AoAGun.class),
+			new ItemCategoryProvider("maul", AoAMaul.class),
+			new ItemCategoryProvider("shotgun", AoAShotgun.class),
+			new ItemCategoryProvider("sniper", AoASniper.class),
+			new ItemCategoryProvider("staff", AoAStaff.class),
+			new ItemCategoryProvider("sword", AoASword.class),
+			new ItemCategoryProvider("thrown", AoAThrowableWeapon.class),
+			new ItemCategoryProvider("vulcane", AoAVulcane.class)
 	);
 }

@@ -20,10 +20,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.event.EventHooks;
 import net.tslat.aoa3.common.registration.AoAAttributes;
-import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
-import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
-import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
-import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
+import net.tslat.aoa3.content.item.weapon.blaster.AoABlaster;
+import net.tslat.aoa3.content.item.weapon.bow.AoABow;
+import net.tslat.aoa3.content.item.weapon.gun.AoAGun;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoa3.util.StringUtil;
@@ -190,9 +189,9 @@ public class WikiTemplateHelper {
 				.entry("image", ObjectHelper.getItemName(item) + ".png")
 				.entry("id", RegistryUtil.getId(item).toString())
 				.optionalEntry("ammo", ObjectHelper.getItemAmmoType(item))
-				.optionalEntry("damage", !ObjectHelper.itemHasAttribute(item, Attributes.ATTACK_DAMAGE) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_DAMAGE), 2))
+				.optionalEntry("damage", ObjectHelper.getItemDamage(item))
 				.optionalEntry("attackspeed", !ObjectHelper.itemHasAttribute(item, Attributes.ATTACK_SPEED) || !ObjectHelper.itemHasAttribute(item, Attributes.ATTACK_DAMAGE) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_SPEED) + 4, 2) + "/sec")
-				.optionalEntry("unholstertime", !ObjectHelper.itemHasAttribute(item, Attributes.ATTACK_SPEED) || ObjectHelper.itemHasAttribute(item, Attributes.ATTACK_DAMAGE) ? null : NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_SPEED) + 4), 2) + "s")
+				.optionalEntry("unholstertime", ObjectHelper.getUnholsterTime(item))
 				.optionalEntry("knockback", !ObjectHelper.itemHasAttribute(item, Attributes.ATTACK_KNOCKBACK) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_KNOCKBACK), 2))
 				.optionalEntry("armor", !ObjectHelper.itemHasAttribute(item, Attributes.ARMOR) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ARMOR), 2))
 				.optionalEntry("armortoughness", !ObjectHelper.itemHasAttribute(item, Attributes.ARMOR_TOUGHNESS) ? null : NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ARMOR_TOUGHNESS), 2))
@@ -208,16 +207,16 @@ public class WikiTemplateHelper {
 					.optionalEntry("noharvest", tier.getIncorrectBlocksForDrops() == null ? null : tier.getIncorrectBlocksForDrops().location().toString());
 		}
 
-		if (item instanceof BaseGun gun && !(gun instanceof BaseThrownWeapon)) {
+		if (item instanceof AoAGun gun) {
 			template.entry("firerate", NumberUtil.roundToNthDecimalPlace(20f / gun.getTicksBetweenShots(stack), 2) + "/sec")
-					.entry("firetype", gun.isFullAutomatic() ? "Fully-Automatic" : "Semi-Automatic");
+					.entry("firetype", gun.isFullAutomatic(stack) ? "Fully-Automatic" : "Semi-Automatic");
 		}
-		else if (item instanceof BaseBlaster blaster) {
+		else if (item instanceof AoABlaster blaster) {
 			template.entry("firerate", NumberUtil.roundToNthDecimalPlace(20f / blaster.getTicksBetweenShots(stack), 2) + "/sec")
 					.entry("firetype", "Fully-Automatic");
 		}
-		else if (item instanceof BaseBow bow) {
-			template.entry("drawspeed", NumberUtil.roundToNthDecimalPlace(1f / bow.getDrawSpeedMultiplier(), 2) + "/s");
+		else if (item instanceof AoABow bow) {
+			template.entry("drawspeed", NumberUtil.roundToNthDecimalPlace(1f / bow.getDrawSpeedMultiplier(stack), 2) + "/s");
 		}
 
 		template.entry("raritycolor", StringUtil.toTitleCase(stack.getRarity().name()));
