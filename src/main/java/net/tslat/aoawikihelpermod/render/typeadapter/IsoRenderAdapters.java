@@ -5,7 +5,7 @@ import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.animal.Pufferfish;
 import net.minecraft.world.level.block.*;
 import net.tslat.aoa3.content.entity.base.AbstractLavaFishEntity;
-import net.tslat.aoa3.content.entity.projectile.gun.BaseBullet;
+import net.tslat.aoa3.content.entity.projectile.base.PhysicalWeaponProjectile;
 import net.tslat.aoawikihelpermod.render.IsometricPrinterScreen;
 import net.tslat.aoawikihelpermod.render.typeadapter.block.DoorBlockRenderAdapter;
 import net.tslat.aoawikihelpermod.render.typeadapter.block.DoublePlantBlockRenderAdapter;
@@ -31,7 +31,7 @@ public final class IsoRenderAdapters {
 		IsometricPrinterScreen.registerBlockAdapter(new DoorBlockRenderAdapter());
 		IsometricPrinterScreen.registerBlockAdapter(new MultiBlockCropRenderAdapter());
 		IsometricPrinterScreen.registerEntityAdapter(new SimpleScaleRenderAdapter<>(entity ->
-				entity instanceof BaseBullet,
+				entity instanceof PhysicalWeaponProjectile,
 				5f));
 		IsometricPrinterScreen.registerEntityAdapter(new SimpleScaleAndRotateRenderAdapter<>(entity ->
 				entity instanceof Pufferfish,

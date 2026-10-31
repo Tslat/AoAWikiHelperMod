@@ -4,7 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,19 +16,19 @@ import net.tslat.aoa3.content.item.tool.axe.BaseAxe;
 import net.tslat.aoa3.content.item.tool.hoe.BaseHoe;
 import net.tslat.aoa3.content.item.tool.pickaxe.BasePickaxe;
 import net.tslat.aoa3.content.item.tool.shovel.BaseShovel;
-import net.tslat.aoa3.content.item.weapon.blaster.BaseBlaster;
-import net.tslat.aoa3.content.item.weapon.bow.BaseBow;
-import net.tslat.aoa3.content.item.weapon.cannon.BaseCannon;
-import net.tslat.aoa3.content.item.weapon.crossbow.BaseCrossbow;
-import net.tslat.aoa3.content.item.weapon.greatblade.BaseGreatblade;
-import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
-import net.tslat.aoa3.content.item.weapon.maul.BaseMaul;
-import net.tslat.aoa3.content.item.weapon.shotgun.BaseShotgun;
-import net.tslat.aoa3.content.item.weapon.sniper.BaseSniper;
-import net.tslat.aoa3.content.item.weapon.staff.BaseStaff;
-import net.tslat.aoa3.content.item.weapon.sword.BaseSword;
-import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
-import net.tslat.aoa3.library.object.MutableSupplier;
+import net.tslat.aoa3.content.item.weapon.blaster.AoABlaster;
+import net.tslat.aoa3.content.item.weapon.bow.AoABow;
+import net.tslat.aoa3.content.item.weapon.cannon.AoACannon;
+import net.tslat.aoa3.content.item.weapon.crossbow.AoACrossbow;
+import net.tslat.aoa3.content.item.weapon.greatblade.AoAGreatblade;
+import net.tslat.aoa3.content.item.weapon.gun.AoAGun;
+import net.tslat.aoa3.content.item.weapon.maul.AoAMaul;
+import net.tslat.aoa3.content.item.weapon.shotgun.AoAShotgun;
+import net.tslat.aoa3.content.item.weapon.sniper.AoASniper;
+import net.tslat.aoa3.content.item.weapon.staff.AoAStaff;
+import net.tslat.aoa3.content.item.weapon.sword.AoASword;
+import net.tslat.aoa3.content.item.weapon.thrown.AoAThrowableWeapon;
+import net.tslat.aoa3.library.object.extension.MutableSupplier;
 import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoawikihelpermod.util.FormattingHelper;
 import net.tslat.aoawikihelpermod.util.ObjectHelper;
@@ -113,7 +113,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printBlasters(CommandContext<CommandSourceStack> cmd) {
-		List<Item> blasters = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseBlaster);
+		List<Item> blasters = ObjectHelper.scrapeRegistryForItems(item -> item instanceof AoABlaster);
 		String fileName = "Overview - Blasters";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -124,7 +124,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			printHelper.withClipboardOutput(clipboardContent);
 
 			for (Item item : blasters) {
-				BaseBlaster blaster = (BaseBlaster)item;
+				AoABlaster blaster = (AoABlaster)item;
 				ItemStack stack = blaster.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(blaster);
 				String damage = FormattingHelper.healthValue(blaster.getBlasterDamage(stack));
@@ -153,7 +153,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printBows(CommandContext<CommandSourceStack> cmd) {
-		List<Item> bows = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseBow);
+		List<Item> bows = ObjectHelper.scrapeRegistryForItems(item -> item instanceof AoABow);
 		String fileName = "Overview - Bows";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -164,11 +164,12 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			printHelper.withClipboardOutput(clipboardContent);
 
 			for (Item item : bows) {
-				BaseBow bow = (BaseBow)item;
+				AoABow bow = (AoABow)item;
+				ItemStack stack = new ItemStack(bow);
 				String itemName = ObjectHelper.getItemName(bow);
-				String damage = FormattingHelper.healthValue(bow.getBowDamage());
-				String drawTime = NumberUtil.roundToNthDecimalPlace(1 / bow.getDrawSpeedMultiplier(), 2) + "s";
-				String durability = String.valueOf(bow.getMaxDamage(new ItemStack(bow)));
+				String damage = FormattingHelper.healthValue(bow.getBowDamage(stack));
+				String drawTime = NumberUtil.roundToNthDecimalPlace(1 / bow.getDrawSpeedMultiplier(stack), 2) + "s";
+				String durability = String.valueOf(bow.getMaxDamage(stack));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(bow, AoAWeapons.ALACRITY_BOW.get());
 
 				printHelper.entry(
@@ -188,7 +189,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printCannons(CommandContext<CommandSourceStack> cmd) {
-		List<Item> cannons = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseCannon);
+		List<Item> cannons = ObjectHelper.scrapeRegistryForItems(item -> item instanceof AoACannon);
 		String fileName = "Overview - Cannons";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -199,11 +200,11 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			printHelper.withClipboardOutput(clipboardContent);
 
 			for (Item item : cannons) {
-				BaseCannon cannon = (BaseCannon)item;
+				AoACannon cannon = (AoACannon)item;
 				ItemStack stack = cannon.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(cannon);
 				String damage = FormattingHelper.healthValue(cannon.getGunDamage(stack));
-				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValueFromItem(cannon, Attributes.ATTACK_SPEED) + 4), 2) + "s";
+				String unholsterTime = ObjectHelper.getUnholsterTime(cannon);
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)cannon.getTicksBetweenShots(stack), 2) + "/sec";
 				String recoil = NumberUtil.roundToNthDecimalPlace(cannon.getRecoilForShot(stack, (LivingEntity)cmd.getSource().getEntity()), 2);
 				String durability = String.valueOf(cannon.getMaxDamage(new ItemStack(cannon)));
@@ -228,7 +229,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printCrossbows(CommandContext<CommandSourceStack> cmd) {
-		List<Item> crossbows = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseCrossbow);
+		List<Item> crossbows = ObjectHelper.scrapeRegistryForItems(item -> item instanceof AoACrossbow);
 		String fileName = "Overview - Crossbows";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -239,7 +240,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			printHelper.withClipboardOutput(clipboardContent);
 
 			for (Item item : crossbows) {
-				BaseCrossbow crossbow = (BaseCrossbow)item;
+				AoACrossbow crossbow = (AoACrossbow)item;
 				ItemStack stack = crossbow.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(crossbow);
 				String damage = FormattingHelper.healthValue((float)crossbow.getCrossbowDamage(stack));
@@ -262,7 +263,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printGreatblades(CommandContext<CommandSourceStack> cmd) {
-		List<Item> greatblades = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseGreatblade);
+		List<Item> greatblades = ObjectHelper.scrapeRegistryForItems(item -> item instanceof AoAGreatblade);
 		String fileName = "Overview - Greatblades";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -273,7 +274,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			printHelper.withClipboardOutput(clipboardContent);
 
 			for (Item item : greatblades) {
-				BaseGreatblade greatblade = (BaseGreatblade)item;
+				AoAGreatblade greatblade = (AoAGreatblade)item;
 				ItemStack stack = greatblade.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(greatblade);
 				String damage = FormattingHelper.healthValue(greatblade.getBaseDamage(stack));
@@ -298,7 +299,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printGuns(CommandContext<CommandSourceStack> cmd) {
-		List<Item> guns = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseGun && !(item instanceof BaseCannon) && !(item instanceof BaseSniper) && !(item instanceof BaseShotgun) && !(item instanceof BaseThrownWeapon));
+		List<Item> guns = ObjectHelper.scrapeRegistryForItems(item -> item instanceof AoAGun && !(item instanceof AoACannon) && !(item instanceof AoASniper) && !(item instanceof AoAShotgun));
 		String fileName = "Overview - Guns";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -309,11 +310,11 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			printHelper.withClipboardOutput(clipboardContent);
 
 			for (Item item : guns) {
-				BaseGun gun = (BaseGun)item;
+				AoAGun gun = (AoAGun)item;
 				ItemStack stack = gun.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(item);
 				String damage = FormattingHelper.healthValue(gun.getGunDamage(stack));
-				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValueFromItem(gun, Attributes.ATTACK_SPEED) + 4), 2) + "s";
+				String unholsterTime = ObjectHelper.getUnholsterTime(gun);
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)gun.getTicksBetweenShots(stack), 2) + "/sec";
 				String recoil = NumberUtil.roundToNthDecimalPlace(gun.getRecoilForShot(gun.getDefaultInstance(), (LivingEntity)cmd.getSource().getEntity()), 2);
 				String durability = String.valueOf(gun.getMaxDamage(new ItemStack(gun)));
@@ -338,7 +339,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printMauls(CommandContext<CommandSourceStack> cmd) {
-		List<Item> mauls = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseMaul);
+		List<Item> mauls = ObjectHelper.scrapeRegistryForItems(item -> item instanceof AoAMaul);
 		String fileName = "Overview - Mauls";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -349,12 +350,13 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			printHelper.withClipboardOutput(clipboardContent);
 
 			for (Item item : mauls) {
-				BaseMaul maul = (BaseMaul)item;
+				AoAMaul maul = (AoAMaul)item;
+				ItemStack stack = new ItemStack(maul);
 				String itemName = ObjectHelper.getItemName(maul);
-				String damage = FormattingHelper.healthValue(maul.getAttackDamage());
+				String damage = FormattingHelper.healthValue((float)ObjectHelper.getAttributeValueFromItem(maul, Attributes.ATTACK_DAMAGE));
 				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(maul, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
-				String knockback = "+" + NumberUtil.roundToNthDecimalPlace((float)maul.getBaseKnockback(), 2);
-				String durability = String.valueOf(maul.getMaxDamage(new ItemStack(maul)));
+				String knockback = "+" + NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(maul, Attributes.ATTACK_KNOCKBACK), 2);
+				String durability = String.valueOf(maul.getMaxDamage(stack));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(maul, AoAWeapons.CORALSTONE_MAUL.get());
 
 				printHelper.entry(
@@ -412,7 +414,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printShotguns(CommandContext<CommandSourceStack> cmd) {
-		List<Item> shotguns = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseShotgun);
+		List<Item> shotguns = ObjectHelper.scrapeRegistryForItems(item -> item instanceof AoAShotgun);
 		String fileName = "Overview - Shotguns";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -423,12 +425,12 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			printHelper.withClipboardOutput(clipboardContent);
 
 			for (Item item : shotguns) {
-				BaseShotgun shotgun = (BaseShotgun)item;
+				AoAShotgun shotgun = (AoAShotgun)item;
 				ItemStack stack = shotgun.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(shotgun);
 				String damage = FormattingHelper.healthValue(shotgun.getGunDamage(stack)) + " x" + shotgun.getPelletCount(stack);
 				String pellets = String.valueOf(shotgun.getPelletCount(stack));
-				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValueFromItem(shotgun, Attributes.ATTACK_SPEED) + 4), 2) + "s";
+				String unholsterTime = ObjectHelper.getUnholsterTime(shotgun);
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)shotgun.getTicksBetweenShots(stack), 2) + "/sec";
 				String recoil = NumberUtil.roundToNthDecimalPlace(shotgun.getRecoilForShot(shotgun.getDefaultInstance(), (LivingEntity)cmd.getSource().getEntity()), 2);
 				String durability = String.valueOf(shotgun.getMaxDamage(new ItemStack(shotgun)));
@@ -491,7 +493,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printSnipers(CommandContext<CommandSourceStack> cmd) {
-		List<Item> snipers = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseSniper);
+		List<Item> snipers = ObjectHelper.scrapeRegistryForItems(item -> item instanceof AoASniper);
 		String fileName = "Overview - Snipers";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -502,11 +504,11 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			printHelper.withClipboardOutput(clipboardContent);
 
 			for (Item item : snipers) {
-				BaseSniper sniper = (BaseSniper)item;
+				AoASniper sniper = (AoASniper)item;
 				ItemStack stack = sniper.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(sniper);
 				String damage = FormattingHelper.healthValue(sniper.getGunDamage(stack));
-				String unholsterTime = NumberUtil.roundToNthDecimalPlace(1 / ((float)ObjectHelper.getAttributeValueFromItem(sniper, Attributes.ATTACK_SPEED) + 4), 2) + "s";
+				String unholsterTime = ObjectHelper.getUnholsterTime(sniper);
 				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)sniper.getTicksBetweenShots(stack), 2) + "/sec";
 				String recoil = NumberUtil.roundToNthDecimalPlace(sniper.getRecoilForShot(sniper.getDefaultInstance(), (LivingEntity)cmd.getSource().getEntity()) * 0.25f, 2);
 				String durability = String.valueOf(sniper.getMaxDamage(new ItemStack(sniper)));
@@ -531,7 +533,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printStaves(CommandContext<CommandSourceStack> cmd) {
-		List<Item> staves = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseStaff);
+		List<Item> staves = ObjectHelper.scrapeRegistryForItems(item -> item instanceof AoAStaff);
 		String fileName = "Overview - Staves";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -542,14 +544,15 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			printHelper.withClipboardOutput(clipboardContent);
 
 			for (Item item : staves) {
-				BaseStaff<?> staff = (BaseStaff<?>)item;
+				AoAStaff<?> staff = (AoAStaff<?>)item;
+				ItemStack stack = new ItemStack(staff);
 				String itemName = ObjectHelper.getItemName(staff);
 				ArrayList<String> runeArray = new ArrayList<String>();
-				String durability = String.valueOf(staff.getMaxDamage(new ItemStack(staff)));
+				String durability = String.valueOf(staff.getMaxDamage(stack));
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(staff, AoAWeapons.MINI_CANNON.get());
 
 
-				for (Object2IntMap.Entry<Item> runeEntry : staff.runeCost().runeCosts().object2IntEntrySet()) {
+				for (Reference2IntMap.Entry<Item> runeEntry : staff.getRuneCost(stack).reference2IntEntrySet()) {
 					String name = ObjectHelper.getItemName(runeEntry.getKey());
 
 					runeArray.add(runeEntry.getIntValue() + "x " + FormattingHelper.createImageBlock(name) + " " + FormattingHelper.createLinkableText(name, runeEntry.getIntValue() > 1 , true));
@@ -571,7 +574,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printSwords(CommandContext<CommandSourceStack> cmd) {
-		List<Item> swords = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseSword);
+		List<Item> swords = ObjectHelper.scrapeRegistryForItems(item -> item instanceof AoASword);
 		String fileName = "Overview - Swords";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -582,7 +585,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			printHelper.withClipboardOutput(clipboardContent);
 
 			for (Item item : swords) {
-				BaseSword sword = (BaseSword)item;
+				AoASword sword = (AoASword)item;
 				String itemName = ObjectHelper.getItemName(item);
 				float damage = (float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_DAMAGE);
 				String attackSpeed = NumberUtil.roundToNthDecimalPlace((float)ObjectHelper.getAttributeValueFromItem(item, Attributes.ATTACK_SPEED) + 4, 2) + "/sec";
@@ -641,7 +644,7 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 	}
 
 	private static int printThrownWeapons(CommandContext<CommandSourceStack> cmd) {
-		List<Item> thrownWeapons = ObjectHelper.scrapeRegistryForItems(item -> item instanceof BaseThrownWeapon);
+		List<Item> thrownWeapons = ObjectHelper.scrapeRegistryForItems(item -> item instanceof AoAThrowableWeapon);
 		String fileName = "Overview - Thrown Weapons";
 		File outputFile;
 		MutableSupplier<String> clipboardContent = new MutableSupplier<String>(null);
@@ -652,11 +655,11 @@ public class OverviewCommand implements Command<CommandSourceStack> {
 			printHelper.withClipboardOutput(clipboardContent);
 
 			for (Item item : thrownWeapons) {
-				BaseThrownWeapon thrownWeapon = (BaseThrownWeapon)item;
+				AoAThrowableWeapon thrownWeapon = (AoAThrowableWeapon)item;
 				ItemStack stack = thrownWeapon.getDefaultInstance();
 				String itemName = ObjectHelper.getItemName(item);
-				String damage = FormattingHelper.healthValue(thrownWeapon.getGunDamage(stack));
-				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)thrownWeapon.getTicksBetweenShots(stack), 2) + "/sec";
+				String damage = FormattingHelper.healthValue(thrownWeapon.getImpactDamage(stack));
+				String fireRate = NumberUtil.roundToNthDecimalPlace(20 / (float)thrownWeapon.getTicksBetweenThrows(stack), 2) + "/sec";
 				String tooltip = ObjectHelper.attemptToExtractItemSpecificEffects(thrownWeapon, AoAWeapons.SQUAD_GUN.get());
 
 				printHelper.entry(

@@ -3,14 +3,17 @@ package net.tslat.aoawikihelpermod.util;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -36,11 +39,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.tslat.aoa3.common.registration.AoARegistries;
+import net.tslat.aoa3.content.item.weapon.blaster.AoABlaster;
+import net.tslat.aoa3.content.item.weapon.bow.AoABow;
 import net.tslat.aoa3.content.item.weapon.bow.Slingshot;
-import net.tslat.aoa3.content.item.weapon.gun.BaseGun;
-import net.tslat.aoa3.content.item.weapon.staff.BaseStaff;
-import net.tslat.aoa3.content.item.weapon.thrown.BaseThrownWeapon;
+import net.tslat.aoa3.content.item.weapon.gun.AoAGun;
+import net.tslat.aoa3.content.item.weapon.staff.AoAStaff;
+import net.tslat.aoa3.content.item.weapon.thrown.AoAThrowableWeapon;
 import net.tslat.aoa3.util.LocaleUtil;
+import net.tslat.aoa3.util.NumberUtil;
 import net.tslat.aoa3.util.RegistryUtil;
 import net.tslat.aoa3.util.StringUtil;
 import net.tslat.aoa3.util.TagUtil;
@@ -83,7 +89,7 @@ public class ObjectHelper {
 	}
 
 	public static ItemAttributeModifiers getAttributesForItem(Item item) {
-		return item.getDefaultAttributeModifiers(item.getDefaultInstance());
+		return item.getDefaultInstance().getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
 	}
 
 	public static boolean itemHasAttribute(Item item, Holder<Attribute> attribute) {
@@ -114,6 +120,39 @@ public class ObjectHelper {
 		}
 
 		return value;
+	}
+
+	@Nullable
+	public static String getItemDamage(Item item) {
+		ItemStack stack = item.getDefaultInstance();
+
+		if (item instanceof AoAGun gun)
+			return NumberUtil.roundToNthDecimalPlace(gun.getGunDamage(stack), 2);
+
+		if (item instanceof AoABlaster blaster)
+			return NumberUtil.roundToNthDecimalPlace(blaster.getBlasterDamage(stack), 2);
+
+		if (item instanceof AoABow bow)
+			return NumberUtil.roundToNthDecimalPlace(bow.getBowDamage(stack), 2);
+
+		if (item instanceof AoAStaff<?> staff)
+			return NumberUtil.roundToNthDecimalPlace(staff.getMagicDamage(stack), 2);
+
+		if (item instanceof AoAThrowableWeapon throwableWeapon)
+			return NumberUtil.roundToNthDecimalPlace(throwableWeapon.getImpactDamage(stack), 2);
+
+		return itemHasAttribute(item, Attributes.ATTACK_DAMAGE) ? NumberUtil.roundToNthDecimalPlace((float)getAttributeValueFromItem(item, Attributes.ATTACK_DAMAGE), 2) : null;
+	}
+
+	@Nullable
+	public static String getUnholsterTime(Item item) {
+		if (item instanceof AoAGun gun)
+			return NumberUtil.roundToNthDecimalPlace(1 / (4 * (1 - (float)gun.getUnholsterTimeModifier(item.getDefaultInstance()))), 2) + "s";
+
+		if (!itemHasAttribute(item, Attributes.ATTACK_SPEED) || itemHasAttribute(item, Attributes.ATTACK_DAMAGE))
+			return null;
+
+		return NumberUtil.roundToNthDecimalPlace(1 / ((float)getAttributeValueFromItem(item, Attributes.ATTACK_SPEED) + 4), 2) + "s";
 	}
 
 	public static double getAttributeFromEntity(LivingEntity entity, Holder<Attribute> attribute) {
@@ -321,6 +360,17 @@ public class ObjectHelper {
 		return ingredient;
 	}
 
+	private static boolean isStatTooltipLine(Component component) {
+		TextColor colour = component.getStyle().getColor();
+
+		if (colour == null)
+			return false;
+
+		int rgb = colour.getValue();
+
+		return rgb == 0xAA0000 || rgb == 0xAAAAAA || rgb == 0xFF55FF;
+	}
+
 	public static String attemptToExtractItemSpecificEffects(Item item, @Nullable Item controlItem) {
 		MutableComponent dummyComponent = Component.literal("");
 
@@ -343,6 +393,9 @@ public class ObjectHelper {
 			String line = text.getString();
 
 			if (line.isEmpty())
+				continue;
+
+			if (isStatTooltipLine(text))
 				continue;
 
 			for (Pattern pattern : TOOLTIP_BLACKLIST) {
@@ -521,16 +574,23 @@ public class ObjectHelper {
 	public static String getItemAmmoType(Item item) {
 		StringBuilder builder = new StringBuilder();
 
-		if (item instanceof BaseStaff<?> staff) {
-			for (Object2IntMap.Entry<Item> rune : staff.runeCost().runeCosts().object2IntEntrySet()) {
+		if (item instanceof AoAStaff<?> staff) {
+			for (Reference2IntMap.Entry<Item> rune : staff.getRuneCost(item.getDefaultInstance()).reference2IntEntrySet()) {
 				if (!builder.isEmpty())
 					builder.append(System.lineSeparator());
 
 				builder.append(rune.getIntValue()).append(" ").append(ObjectHelper.getItemName(rune.getKey()));
 			}
 		}
-		else if (item instanceof BaseGun gun && !(gun instanceof BaseThrownWeapon)) {
-			builder.append(ObjectHelper.getItemName(gun.getAmmoItem()));
+		else if (item instanceof AoAGun gun) {
+			gun.getGunStats(item.getDefaultInstance()).ammo().ifPresent(ammo -> {
+				if (ammo instanceof HolderSet.Named<Item> named) {
+					builder.append(StringUtil.lazyPluralise(StringUtil.toTitleCase(named.unwrapKey().map(key -> key.location().getPath()).orElse(""))));
+				}
+				else if (ammo.size() > 0) {
+					builder.append(ObjectHelper.getItemName(ammo.get(0).value()));
+				}
+			});
 		}
 		else if (item instanceof ProjectileWeaponItem weapon) {
 			Predicate<ItemStack> ammoPredicate = weapon.getAllSupportedProjectiles();
